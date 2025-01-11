@@ -70,7 +70,25 @@ class MapingController extends Controller
         $locationId = supersetting('crm_location_id');
         $contact_fileds = CRM::getContactFields($locationId, true);
 
+        // $customer_data = $this->getMappingFieldsByTable('customersCollection', 'customersFields');
+        // $dealership_data = $this->getMappingFieldsByTable('dealershipCollection', 'customersFields');
+        // $vehicle_data = $this->getMappingFieldsByTable('inventoryCollection', 'customersFields');
+
         return view('admin.mapings.fromGhl.form', get_defined_vars());
+    }
+
+    public function getMappingFieldsByTable($table, $key)
+    {
+        $data = Cache::remember($key, 60 * 60, function () use ($table) {
+            $table = MappingTable::where('title', $table)->first();
+            $data = [];
+            if ($table) {
+                $columns = json_decode($table->columns, true) ?? [];
+                $data = $this->processColumns($columns);
+            }
+            return $data;
+        });
+        return $data;
     }
 
 
