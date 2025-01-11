@@ -14,6 +14,7 @@
         .show_values {
             cursor: pointer;
         }
+        
     </style>
 @endpush
 @section('content')
