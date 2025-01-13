@@ -24,6 +24,7 @@
 
     let contactId = '{{ $contact_id }}'
     let locationId = '{{ $location_id }}'
+
     $(document).ready(function() {
         $.ajax({
             type: 'GET',
@@ -33,6 +34,11 @@
             },
             url: '{{ route('deals.get.customers') }}',
             success: function(response) {
+                if(response.error)
+            {
+                toastr.error(response.error);
+                return ;
+            }
                 $('.cus_name').text(response.customer_name);
                 if(response.customer_name)
             {
@@ -43,20 +49,45 @@
         });
     })
 
-    $(document).on('change', '.customer', function() {
-        let id = $(this).val();
 
+
+    $(document).on('click', '.create_deal_btn', function() {
+        let id = $('.vehicle_field').val();
+        if(!id)
+    {
+        toastr.error('Please select vehicle first');
+        return ;
+    }
         $.ajax({
             type: 'GET',
             data: {
-                id: id
+                vehicle_id: id,
+                contactId: contactId,
+                locationId: locationId,
             },
-            url: '{{ route('deals.get.deals') }}',
+            url: '{{ route('deals.create.setting') }}',
             success: function(response) {
                 console.log(response);
             }
         });
 
     })
+
+
+    // $(document).on('change', '.customer', function() {
+    //     let id = $(this).val();
+
+    //     $.ajax({
+    //         type: 'GET',
+    //         data: {
+    //             id: id
+    //         },
+    //         url: '{{ route('deals.get.deals') }}',
+    //         success: function(response) {
+    //             console.log(response);
+    //         }
+    //     });
+
+    // })
     // -
 </script>

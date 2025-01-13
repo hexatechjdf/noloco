@@ -4,11 +4,23 @@ namespace App\Services\Api;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use App\Services\Api\InventoryService;
 use App\Models\Setting;
+use App\Helper\CRM;
 use Illuminate\Support\Facades\Http;
 
 class DealService
 {
+
+    protected $inventoryService;
+
+    // Constructor to inject the services
+    public function __construct(InventoryService $inventoryService)
+    {
+        $this->inventoryService = $inventoryService;
+    }
+
     public function getCustomerQuery($dealershipSubAccountId, $highlevelClientId)
     {
         $query = <<<GRAPHQL
@@ -133,6 +145,67 @@ class DealService
         //     $mutation
         // );
         return $mutation;
+    }
+
+
+    public function getCustomerInfo($request)
+    {
+       $conId = $request->contactId;
+       $locId = $request->locationId;
+       $keyy = 'customer_'.$conId.$locId;
+    //    Cache::forget($keyy);
+   try{
+       $data = Cache::remember($keyy, 60 * 60, function () use ($conId,$locId) {
+           $query = $this->getCustomerQuery($conId, $locId);
+           $data = $this->inventoryService->submitRequest($query, 1);
+           return $data;
+       });
+       return $data;
+   } catch (\Exception $e) {
+       throw $e;
+   }
+
+    }
+
+    public function getDealership($request, $conId,)
+    {
+        $customer_id = null;
+        // $conId = 'geAOl3NEW1iIKIWheJcj';
+        $dealer_id = null;
+        $filters = [
+            "filters" => [
+                "column" => "subAccountId",
+                "value" => $conId,
+                "order" => "equals",
+            ],
+        ];
+        $request->merge(['filters' => $filters]);
+        $keyy = 'dealerhip_'.$conId;
+        try{
+            $data = Cache::remember($keyy, 60 * 60, function () use ($conId,$request) {
+            $query = $this->inventoryService->setQuery($request, null, null, 'dealershipCollection');
+            return  $this->inventoryService->submitRequest($query, 1);
+            });
+            $res = $data['data']['dealershipCollection'];
+            if (isset($res['edges']) && count($res['edges']) > 0) {
+                $dealer_id = $res['edges'][0]['node']['id'];
+            }
+
+            return [$dealer_id,$res['edges'][0]['node']];
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+    }
+
+    public function getContact($locationId,$contact_id)
+    {
+        try {
+            $response = CRM::crmV2Loc('1', $locationId, 'contacts/' . $contact_id, 'get');
+            return $response->contact;
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
 }

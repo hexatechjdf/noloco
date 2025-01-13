@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Location;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Services\Api\InventoryService;
 use App\Services\Api\DealService;
 
@@ -67,16 +68,13 @@ class DealsController extends Controller
     public function getCustomers(Request $request)
     {
         $customers = [];
-        $conId = $request->contactId;
-        $locId = $request->locationId;
         $customer_name = "";
         $customer_id = 7;
         $dealership_id = null;
         $dealership_name = "";
         $deals = [];
         try {
-            $query = $this->dealService->getCustomerQuery($conId, $locId);
-            $data = $this->inventoryService->submitRequest($query, 1);
+            $data = $this->dealService->getCustomerInfo($request);
             $res = $data['data']['customersCollection'];
             if (isset($res['edges'])) {
                 $node = @$res['edges'][0]['node'];
@@ -86,9 +84,11 @@ class DealsController extends Controller
                     $dealership_id = $node['dealership']['id'];
                     $dealership_name = $node['dealership']['name'];
                 }
-                $deals = $this->getDeals(7);
+                $deals = $this->getDeals($customer_id);
             }
         } catch (\Exception $e) {
+            dd($e);
+            return response()->json(['error' => 'There is something wrong with location id or contact id']);
         }
         $view = view('locations.deals.components.listView', get_defined_vars())->render();
 
@@ -146,5 +146,27 @@ class DealsController extends Controller
         }
 
         return [];
+    }
+
+    public function create(Request $request)
+    {
+        $filters = [
+            "filters" => [
+                "column" => "id",
+                "value" => $request->id,
+                "order" => "equals",
+            ],
+        ];
+        $customer = $this->dealService->getCustomerInfo($request);
+        list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->contactId);
+        $contact = $this->dealService->getContact($request->locationId,$request->contactId);
+        try {
+            $query = $this->inventoryService->setQuery($request, null, null, 'inventoryCollection');
+            $data = $this->inventoryService->submitRequest($query);}
+            catch(\Exception $e){
+
+            }
+        dd($data);
+
     }
 }

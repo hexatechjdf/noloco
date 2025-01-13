@@ -79,7 +79,7 @@ class MapingController extends Controller
 
     public function getFieldsByTable($table_name, $key)
     {
-        Cache::forget($key);
+        // Cache::forget($key);
         $data = Cache::remember($key, 60 * 60, function () use ($table_name) {
             $table = MappingTable::where('title', $table_name)->first();
             $data = [];

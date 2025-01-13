@@ -72,6 +72,7 @@ Route::group(['as' => 'deals.', 'prefix' => 'deals'], function () {
     Route::get('/inventories/search', [DealsController::class, 'searchInventory'])->name('inventories.search');
     Route::get('/get/customers', [DealsController::class, 'getCustomers'])->name('get.customers');
     Route::get('/get/deals', [DealsController::class, 'getDeals'])->name('get.deals');
+    Route::get('/create/setting', [DealsController::class, 'create'])->name('create.setting');
 });
 
 Route::group(['as' => 'coborrower.', 'prefix' => 'coborrower'], function () {

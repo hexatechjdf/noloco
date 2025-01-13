@@ -28,7 +28,7 @@
                         <div class="" id="inventoriesProcessArea">
                             <div class="py-2 ">
                                 <label>Vehicles</label>
-                                <select class="form-select custom_select select2 form-control" name="vehicle">
+                                <select class="form-select custom_select select2 vehicle_field form-control" name="vehicle">
                                 </select>
                             </div>
                         <button class="btn btn-primary create_deal_btn hide">Create New deal</button>

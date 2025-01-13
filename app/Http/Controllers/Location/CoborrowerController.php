@@ -31,50 +31,14 @@ class CoborrowerController extends Controller
         return view('locations.coborrowers.index', get_defined_vars());
     }
 
-    public function getDealership($request, $conId)
-    {
-        $customer_id = null;
-        $conId = 'GOsZwMqjkYVyCJGEufIQ';
-        $dealer_id = null;
-        $filters = [
-            "filters" => [
-                "column" => "subAccountId",
-                "value" => $conId,
-                "order" => "equals",
-            ],
-        ];
-        $request->merge(['filters' => $filters]);
-        $query = $this->inventoryService->setQuery($request, null, null, 'dealershipCollection');
-        $data = $this->inventoryService->submitRequest($query, 1);
-        $res = $data['data']['dealershipCollection'];
-        if (isset($res['edges']) && count($res['edges']) > 0) {
-            $dealer_id = $res['edges'][0]['node']['id'];
-            if ($dealer_id) {
-                $customer_id = $this->createCustomer($conId, $dealer_id, $request);
-            }
-        }
-
-        return [$customer_id, $dealer_id];
-    }
-
-
-    public function getContact($request)
-    {
-        $contact_id = $request->id;
-        try {
-            $response = CRM::crmV2Loc('1', $request->locationId, 'contacts/' . $contact_id, 'get');
-            return $response->contact;
-        } catch (\Exception $e) {
-        }
-    }
 
     public function createCustomer($conId, $dealer_id, $request)
     {
         $filteredData = json_decode(supersetting('customerMapping'), true) ?? [];
-        $contact = $this->getContact($request);
-        $data = (array) $contact;
-        $data['phone'] = '+923244531747';
-        $contact = (object) $data;
+        $contact = $this->dealService->getContact($request->locationId,$request->id);
+        // $data = (array) $contact;
+        // $data['phone'] = '+923244531747';
+        // $contact = (object) $data;
 
         $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData, $contact) {
             $value = $filteredData[$keyf];
@@ -148,16 +112,19 @@ class CoborrowerController extends Controller
         $customer_id = null;
 
         try {
-            $query = $this->dealService->getCustomerQuery($conId, $locId);
-            $data = $this->inventoryService->submitRequest($query, 1);
+            $data = $this->dealService->getCustomerInfo($request);
             $res = $data['data']['customersCollection'];
             if (isset($res['edges']) && count($res['edges']) > 0) {
                 $customer_id = $res['edges'][0]['node']['id'];
             } else {
-                $customer_id = 10;
-                // list($customer_id, $dealer_id) =  $this->getDealership($request,$conId);
+                // $customer_id = 10;
+                list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$conId);
+                if ($dealer_id) {
+                    $customer_id = $this->createCustomer($conId, $dealer_id, $request);
+                }
             }
         } catch (\Exception $e) {
+            // dd($e);
         }
         return response()->json(['customer_id' => $customer_id]);
     }
@@ -168,7 +135,7 @@ class CoborrowerController extends Controller
             $query = $this->dealService->updateDealQuery($request->customer_id, $request->dealId);
             $data = $this->inventoryService->submitRequest($query, 1);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'There is something wrong']);
+            return response()->json(['error' => 'There is something wrong with deal id']);
         }
         return response()->json(['success' => 'Successfully Updated']);
     }
