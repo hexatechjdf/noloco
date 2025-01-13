@@ -200,6 +200,8 @@ class DealService
 
     public function getContact($locationId,$contact_id)
     {
+         $contact_id = "Aiml0qxtPRr1fiK5mOf3";
+        // dd($locationId,$contact_id);
         try {
             $response = CRM::crmV2Loc('1', $locationId, 'contacts/' . $contact_id, 'get');
             return $response->contact;

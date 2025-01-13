@@ -150,23 +150,75 @@ class DealsController extends Controller
 
     public function create(Request $request)
     {
+
+        $availableObjects = [];
+        try {
+        $availableObjects['customer'] = $this->getDataFromObject($this->dealService->getCustomerInfo($request),'customersCollection');
+        list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->contactId);
+        $availableObjects['dealership'] = $dealership;
+        $availableObjects['contact'] = $this->dealService->getContact($request->locationId,$request->contactId);
         $filters = [
             "filters" => [
                 "column" => "id",
-                "value" => $request->id,
+                "value" => $request->vehicle_id,
                 "order" => "equals",
             ],
         ];
-        $customer = $this->dealService->getCustomerInfo($request);
-        list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->contactId);
-        $contact = $this->dealService->getContact($request->locationId,$request->contactId);
-        try {
-            $query = $this->inventoryService->setQuery($request, null, null, 'inventoryCollection');
-            $data = $this->inventoryService->submitRequest($query);}
+        $request->merge(['filters' => $filters]);
+            $query = $this->inventoryService->setQuery($request);
+            $data = $this->inventoryService->submitRequest($query);
+            $availableObjects['vehicle'] = $this->getDataFromObject($data,'inventoryCollection');
+            dd($availableObjects);
+            $array = $this->setQueryData($availableObjects);
+        }
             catch(\Exception $e){
-
+           dd($e);
             }
-        dd($data);
 
+    }
+
+    public function getDataFromObject($data,$table_name)
+    {
+       return   $res = @$data['data'][$table_name]['edges'][0]['node'] ?? [];
+    }
+
+    public function setQueryData($availableObjects)
+    {
+        $filteredData = json_decode(supersetting('dealsMapping'), true) ?? [];
+         $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData,$availableObjects) {
+            $value = $filteredData[$keyf];
+            $updatedData = preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($keyf, &$result,$availableObjects) {
+                $key = $matches[1];
+                return $key;
+            }, $value);
+
+            $result[$keyf] = $this->getObjectData($updatedData,$availableObjects);
+            // $result[$keyf] = $updatedData;
+            return $result;
+        }, []);
+        return $replacedData;
+    }
+    public function getObjectData($string,$availableObjects)
+    {
+        $parts = explode('.', $string);
+        $objectName = array_shift($parts);
+
+        if (!isset($availableObjects[$objectName])) {
+            return null;
+        }
+
+        $currentObject = $availableObjects[$objectName];
+
+        foreach ($parts as $key) {
+            if (is_array($currentObject) && array_key_exists($key, $currentObject)) {
+                $currentObject = $currentObject[$key];
+            }
+            elseif (is_object($currentObject) && property_exists($currentObject, $key)) {
+                $currentObject = $currentObject->$key;
+            } else {
+                return null;
+            }
+        }
+        return $currentObject;
     }
 }

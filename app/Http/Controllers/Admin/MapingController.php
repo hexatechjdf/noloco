@@ -142,36 +142,7 @@ class MapingController extends Controller
         ];
     }
 
-    public function getObjectData($string)
-    {
-        $availableObjects = [];
-        // Step 1: Extract the object name (first word before dot)
-        $parts = explode('.', $string);
-        $objectName = array_shift($parts); // This will give you "contact" from "contact.name.id.uuid"
 
-        // Step 2: Check if the object exists in the provided array
-        if (!isset($availableObjects[$objectName])) {
-            return null; // Return null if the object doesn't exist
-        }
-
-        // Step 3: Get the object
-        $currentObject = $availableObjects[$objectName];
-
-        // Step 4: Build the dynamic access path
-        foreach ($parts as $key) {
-            // Check if $currentObject is an array and the key exists
-            if (is_array($currentObject) && array_key_exists($key, $currentObject)) {
-                $currentObject = $currentObject[$key];
-            }
-            // Check if $currentObject is an object and the property exists
-            elseif (is_object($currentObject) && property_exists($currentObject, $key)) {
-                $currentObject = $currentObject->$key;
-            } else {
-                return null; // Key does not exist
-            }
-        }
-        return $currentObject;
-    }
     public function ghlToNolocoFormSubmit(Request $request)
     {
         $data = $request->mapping;

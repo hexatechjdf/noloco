@@ -11,6 +11,7 @@ class InventoryService
 {
     public function setQuery($request, $id = null, $filters = null, $table_name = null)
     {
+        $table_name = $table_name ?? 'inventoryCollection';
         $after = $request->after;
         $before = $request->before;
         $query = $this->getQuery($table_name);
@@ -200,6 +201,7 @@ class InventoryService
 
     public function setFilters($request, $id = null, $is_optional = false)
     {
+        // dd($request->all());
         $whereClause = '';
         $filterParts = [];
         $filterFields = [];
