@@ -118,7 +118,7 @@ class CoborrowerController extends Controller
                 $customer_id = $res['edges'][0]['node']['id'];
             } else {
                 // $customer_id = 10;
-                list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$conId);
+                list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$locId);
                 if ($dealer_id) {
                     $customer_id = $this->createCustomer($conId, $dealer_id, $request);
                 }

@@ -167,7 +167,7 @@ class DealService
 
     }
 
-    public function getDealership($request, $conId,)
+    public function getDealership($request, $conId)
     {
         $customer_id = null;
         // $conId = 'geAOl3NEW1iIKIWheJcj';
