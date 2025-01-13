@@ -33,7 +33,7 @@
                                 <li><a class="dropdown-item {{ Route::is('admin.mappings.customer.form') ? 'active' : '' }}"
                                         href="{{ route('admin.mappings.customer.form') }}">Customer</a></li>
                                 <li><a class="dropdown-item {{ Route::is('admin.mappings.ghl.form') ? 'active' : '' }}"
-                                        href="{{ route('admin.mappings.ghl.form') }}">From GHL</a></li>
+                                        href="{{ route('admin.mappings.ghl.form') }}">Deals</a></li>
 
                             </ul>
                         </li>

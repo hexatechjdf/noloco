@@ -117,7 +117,6 @@
                                     Agency</a></p>
                         </div>
                     </div>
-                    <!--end card-body-->
                 </div>
                 <div class="card mt-2">
                     <div class="card-header">
@@ -139,7 +138,6 @@
                             </div>
                         </form>
                     </div>
-                    <!--end card-body-->
                 </div>
             </div>
 
@@ -172,6 +170,36 @@
                             <div class="row">
                                 <div class="col-md-12 m-2">
                                     <button id="form_submit" class="btn btn-primary">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-12 mt-2">
+                <form class="submitForm" action="{{ route('admin.setting.save') }}" method="POST">
+                    @csrf
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="h4">{{ __('file.noloco') }} Side Setting</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Deals Management Link</label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('deals.setting') }}?locationId={{ braceParser('[[location.id]]') }}&contactId={{ braceParser('[[user.contact_id]]') }}"
+                                            name="">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Coborrower Management Link</label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('coborrower.setting') }}?locationId={{ braceParser('[[location.id]]') }}&dealId={{ braceParser('[[deal.id]]') }}">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -287,7 +315,6 @@
                             </table>
                         </div>
                     </div>
-                    <!--end card-body-->
                 </div>
             </div>
 

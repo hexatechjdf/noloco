@@ -150,8 +150,7 @@
     }
 
     function initMappingPicker(picker, jsonData = {}, headerIncluded = false, is_default = null) {
-        function valuePicker(parent, jsonData = {}, parentPicker = '', headerIncluded = false,userSelection = false) {
-            alert(13);
+        function valuePicker(parent, jsonData = {}, parentPicker = '', headerIncluded = false, userSelection = false) {
             let allListClass = 'allList';
             let listItemClass = 'list-group-item';
             let jsonListClass = 'jsonList';
@@ -160,8 +159,7 @@
             if (is_default) {
                 jsonData = jsonDataa;
             }
-            if(userSelection)
-            {
+            if (userSelection) {
                 jsonData = getcorrectJsonData(userSelection);
             }
             if (typeof jsonData == 'string') {
@@ -274,7 +272,7 @@
                     const itemId = path.join('.') + '.' + key;
                     let isObj = typeof value == 'object';
                     let dataId = !isObj ? value : "";
-                    dataId = userSelection ? dataId.replace(/{{/g, '{{' + userSelection +'.') : dataId;
+                    dataId = userSelection ? dataId.replace(/{{/g, '{{' + userSelection + '.') : dataId;
                     listHTML += `<li class="${listItemClass}" data-id="${dataId}" data-next="${isObj ? itemId : "-"}">
                             <span class="fw-bold" >${key}</span>
                             ${isObj ?
@@ -333,69 +331,64 @@
             t.setAttribute('parent', picker);
             t.addEventListener('focus', function(e) {
                 let target = e.currentTarget;
-                if($(this).hasClass('options'))
-            {
-                const options = ["contact", "dealership", "vehicle", "customer"];
-    let userSelection = null;
+                if ($(this).hasClass('options')) {
+                    const options = ["contact", "dealership", "vehicle", "customer"];
+                    let userSelection = null;
 
-    // Create a modal (you can use a simple prompt, but a modal would be better for UI)
-    const modalHTML = `
-        <div id="selectionModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background: #fff; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); z-index: 1000;">
-            <h3>Please choose an option:</h3>
-            ${options.map(option => `<button class="optionButton" data-option="${option}">${option}</button>`).join('')}
-            <button id="closeModal" style="margin-top: 10px;">Close</button>
-        </div>
-    `;
+                    const modalHTML = `
+                    <div id="selectionModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background: #fff; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); z-index: 1000;">
+                        <h3>Please choose an option:</h3>
+                        ${options.map(option => `<button class="optionButton" data-option="${option}">${option}</button>`).join('')}
+                        <button id="closeModal" style="margin-top: 10px;">Close</button>
+                    </div>`;
+                    document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-    // Append the modal to the body
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+                    const optionButtons = document.querySelectorAll('.optionButton');
+                    optionButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            userSelection = this.getAttribute(
+                                'data-option'); // Get selected option
+                            document.getElementById('selectionModal')
+                                .remove(); // Close the modal
 
-    // Add event listeners to buttons
-    const optionButtons = document.querySelectorAll('.optionButton');
-    optionButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            userSelection = this.getAttribute('data-option');  // Get selected option
-            document.getElementById('selectionModal').remove(); // Close the modal
+                            // Now run the valuePicker function with the selected option
+                            if (userSelection) {
+                                let mapping = target.getAttribute('data-mapping') ??
+                                    jsonData;
+                                valuePicker(target, mapping, target.getAttribute(
+                                        'parent') ?? "", headerIncluded,
+                                    userSelection);
+                            }
+                        });
+                    });
 
-            // Now run the valuePicker function with the selected option
-            if (userSelection) {
-                let mapping = target.getAttribute('data-mapping') ?? jsonData;
-                valuePicker(target, mapping, target.getAttribute('parent') ?? "", headerIncluded,userSelection);
-            }
-        });
-    });
+                    // Close the modal if the close button is clicked
+                    document.getElementById('closeModal').addEventListener('click', function() {
+                        document.getElementById('selectionModal').remove();
+                    });
+                } else {
+                    let mapping = target.getAttribute('data-mapping') ?? jsonData;
+                    valuePicker(target, mapping, target.getAttribute('parent') ?? "", headerIncluded);
+                }
+                // Create the modal with options
 
-    // Close the modal if the close button is clicked
-    document.getElementById('closeModal').addEventListener('click', function() {
-        document.getElementById('selectionModal').remove();
-    });
-            }else{
-                let mapping = target.getAttribute('data-mapping') ?? jsonData;
-                valuePicker(target, mapping, target.getAttribute('parent') ?? "", headerIncluded);
-            }
-    // Create the modal with options
-
-});
+            });
 
         })
     }
 
-    function getcorrectJsonData(userSelection){
-        if(userSelection == 'contact')
-    {
-        return contact
-    }
-        if(userSelection == 'vehicle')
-    {
-        return vehicle
-    }
-        if(userSelection == 'customer')
-    {
-        return customer
-    }
-        if(userSelection == 'dealership')
-    {
-        return dealership
-    }
+    function getcorrectJsonData(userSelection) {
+        if (userSelection == 'contact') {
+            return contact
+        }
+        if (userSelection == 'vehicle') {
+            return vehicle
+        }
+        if (userSelection == 'customer') {
+            return customer
+        }
+        if (userSelection == 'dealership') {
+            return dealership
+        }
     }
 </script>

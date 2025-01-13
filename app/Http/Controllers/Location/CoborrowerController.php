@@ -31,7 +31,7 @@ class CoborrowerController extends Controller
         return view('locations.coborrowers.index', get_defined_vars());
     }
 
-    public function getDealership($request,$conId)
+    public function getDealership($request, $conId)
     {
         $customer_id = null;
         $conId = 'GOsZwMqjkYVyCJGEufIQ';
@@ -45,15 +45,13 @@ class CoborrowerController extends Controller
         ];
         $request->merge(['filters' => $filters]);
         $query = $this->inventoryService->setQuery($request, null, null, 'dealershipCollection');
-        $data = $this->inventoryService->submitRequest($query,1);
+        $data = $this->inventoryService->submitRequest($query, 1);
         $res = $data['data']['dealershipCollection'];
-        if(isset($res['edges']) && count($res['edges']) > 0)
-        {
-          $dealer_id = $res['edges'][0]['node']['id'];
-          if($dealer_id)
-          {
-            $customer_id = $this->createCustomer($conId,$dealer_id,$request);
-          }
+        if (isset($res['edges']) && count($res['edges']) > 0) {
+            $dealer_id = $res['edges'][0]['node']['id'];
+            if ($dealer_id) {
+                $customer_id = $this->createCustomer($conId, $dealer_id, $request);
+            }
         }
 
         return [$customer_id, $dealer_id];
@@ -70,7 +68,7 @@ class CoborrowerController extends Controller
         }
     }
 
-    public function createCustomer($conId,$dealer_id,$request)
+    public function createCustomer($conId, $dealer_id, $request)
     {
         $filteredData = json_decode(supersetting('customerMapping'), true) ?? [];
         $contact = $this->getContact($request);
@@ -118,7 +116,7 @@ class CoborrowerController extends Controller
 
         $graphqlPayload = $this->arrayToGraphQL($payload);
 
-        $query = $this->dealService->setCustomerCreateQuery($graphqlPayload,$dealer_id);
+        $query = $this->dealService->setCustomerCreateQuery($graphqlPayload, $dealer_id);
         $data = $this->inventoryService->submitRequest($query, 1);
         $customer_id = @$data['data']['createCustomers']['id'];
 
@@ -153,11 +151,9 @@ class CoborrowerController extends Controller
             $query = $this->dealService->getCustomerQuery($conId, $locId);
             $data = $this->inventoryService->submitRequest($query, 1);
             $res = $data['data']['customersCollection'];
-            if(isset($res['edges']) && count($res['edges']) > 0)
-            {
-                $customer_id =  $res['edges'][0]['node']['id'];
-            }
-            else{
+            if (isset($res['edges']) && count($res['edges']) > 0) {
+                $customer_id = $res['edges'][0]['node']['id'];
+            } else {
                 $customer_id = 10;
                 // list($customer_id, $dealer_id) =  $this->getDealership($request,$conId);
             }
@@ -169,7 +165,7 @@ class CoborrowerController extends Controller
     public function setDeal(Request $request)
     {
         try {
-            $query = $this->dealService->updateDealQuery($request->customer_id,$request->dealId);
+            $query = $this->dealService->updateDealQuery($request->customer_id, $request->dealId);
             $data = $this->inventoryService->submitRequest($query, 1);
         } catch (\Exception $e) {
             return response()->json(['error' => 'There is something wrong']);
@@ -239,25 +235,25 @@ class CoborrowerController extends Controller
         $type = '';
         $detail = '';
         $load_more = false;
-            $query = '';
-            $limit = 100;
-            if ($request->term) {
-                $query = '&query=' . $request->term;
+        $query = '';
+        $limit = 100;
+        if ($request->term) {
+            $query = '&query=' . $request->term;
+        }
+
+        $query = 'contacts/?locationId=' . $locationId . $query . '&limit=' . $limit;
+        $detail = CRM::crmV2Loc(1, $locationId, $query, 'get');
+
+        // $detail = CRM::crmV2($user->id, $query, 'get', '', [], false, $token->location_id);
+        $contacts = [];
+        if ($detail && property_exists($detail, 'contacts')) {
+            $detail = $detail->contacts;
+            foreach ($detail as $det) {
+                $contacts[] = ['name' => $det->contactName, 'id' => $det->id];
             }
+        }
 
-            $query = 'contacts/?locationId=' . $locationId . $query . '&limit=' . $limit;
-            $detail  = CRM::crmV2Loc(1,$locationId , $query, 'get');
-
-            // $detail = CRM::crmV2($user->id, $query, 'get', '', [], false, $token->location_id);
-            $contacts = [];
-            if ($detail && property_exists($detail, 'contacts')) {
-                $detail = $detail->contacts;
-                foreach ($detail as $det) {
-                    $contacts[] = ['name' => $det->contactName, 'id' => $det->id];
-                }
-            }
-
-            return response()->json($contacts);
+        return response()->json($contacts);
 
         return response()->json(['status' => $status, 'message' => $message]);
 

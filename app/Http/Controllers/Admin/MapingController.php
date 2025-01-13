@@ -65,7 +65,7 @@ class MapingController extends Controller
 
     public function ghlToNolocoForm()
     {
-        $mapping = json_decode(supersetting('ghlMapping'), true) ?? [];
+        $mapping = json_decode(supersetting('dealsMapping'), true) ?? [];
         $columns = $this->getDealsFields();
         $locationId = supersetting('crm_location_id');
         $contact_fileds = CRM::getContactFields($locationId, true);
@@ -122,9 +122,81 @@ class MapingController extends Controller
 
         return $data;
     }
+
+
+    public function processString($input)
+    {
+        // Step 1: Split the input string by dots
+        $parts = explode('.', $input);
+
+        // Step 2: Extract the object name (first word)
+        $objectName = array_shift($parts); // Removes and returns the first element
+
+        // Step 3: Convert the remaining parts into the required format
+        $formattedString = collect($parts)->map(fn($part) => "['$part']")->join('');
+
+        // Return both object name and formatted string
+        return [
+            'objectName' => $objectName,
+            'formatted' => $formattedString,
+        ];
+    }
+
+    public function getObjectData($string)
+    {
+        $availableObjects = [];
+        // Step 1: Extract the object name (first word before dot)
+        $parts = explode('.', $string);
+        $objectName = array_shift($parts); // This will give you "contact" from "contact.name.id.uuid"
+
+        // Step 2: Check if the object exists in the provided array
+        if (!isset($availableObjects[$objectName])) {
+            return null; // Return null if the object doesn't exist
+        }
+
+        // Step 3: Get the object
+        $currentObject = $availableObjects[$objectName];
+
+        // Step 4: Build the dynamic access path
+        foreach ($parts as $key) {
+            // Check if $currentObject is an array and the key exists
+            if (is_array($currentObject) && array_key_exists($key, $currentObject)) {
+                $currentObject = $currentObject[$key];
+            }
+            // Check if $currentObject is an object and the property exists
+            elseif (is_object($currentObject) && property_exists($currentObject, $key)) {
+                $currentObject = $currentObject->$key;
+            } else {
+                return null; // Key does not exist
+            }
+        }
+        return $currentObject;
+    }
     public function ghlToNolocoFormSubmit(Request $request)
     {
-        save_settings('ghlMapping', $request->mapping);
+        $data = $request->mapping;
+        $filteredData = array_filter($data, function ($value) {
+            return !is_null($value);
+        });
+
+        // $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData) {
+        //     $value = $filteredData[$keyf];
+
+        //     $updatedData = preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($keyf, &$result) {
+        //         $key = $matches[1];
+
+        //         return $key;
+        //     }, $value);
+
+        //     $result[$keyf] = $this->getObjectData($updatedData);
+
+        //     // $result[$keyf] = $updatedData;
+
+        //     return $result;
+        // }, []);
+        // dd($replacedData);
+
+        save_settings('dealsMapping', $filteredData);
 
         return response()->json(['success' => true, 'route' => route('admin.mappings.ghl.form')]);
     }
