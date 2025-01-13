@@ -18,7 +18,7 @@ class InventoryController extends Controller
         try {
             $query = $inventoryService->setQuery($request);
             // return $query;
-            $data = $inventoryService->submitRequest($query);
+            $data = $inventoryService->submitRequest($query,1);
 
             return $data;
         } catch (\Exception $e) {

@@ -373,6 +373,7 @@ class CRM
 
     public static function crmV2Loc($company_id = null, $location_id = null, $urlmain = '', $method = 'get', $data = '', $token = '', $json = true)
     {
+
         if (!$company_id) {
             return self::$no_record;
         }
@@ -383,9 +384,9 @@ class CRM
         if (!$token) {
             $token = static::connectLocation($company_id, $location_id);
         }
-
         if (empty($token) || is_null($token)) {
-            return self::$no_token;
+            $token = static::getLocationAccessToken($company_id, $location_id);
+            // return self::$no_token;
         }
         return self::crmV2($company_id, $urlmain, $method, $data, [], $json, $location_id, $token);
     }

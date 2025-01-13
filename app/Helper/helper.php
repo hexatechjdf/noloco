@@ -30,6 +30,25 @@ function supersetting($key, $default = '', $keys_contain = null)
 
 }
 
+function getNestedValue(array $array, string $path)
+{
+    $keys = explode('.', $path); // Split the string into keys
+    foreach ($keys as $key) {
+        if (!isset($array[$key])) {
+            return null; // Return null if the key doesn't exist
+        }
+        if($key == 'number')
+        {
+           $array =  str_replace(' ', '', @$array['_root']);
+        }
+        else{
+        $array = $array[$key]; // Move deeper into the array
+
+        }
+    }
+    return $array; // Return the final value
+}
+
 function braceParser($value)
 {
     return str_replace(['[', ']'], ['{', '}'], $value);

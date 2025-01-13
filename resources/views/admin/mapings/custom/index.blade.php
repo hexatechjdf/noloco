@@ -30,7 +30,7 @@
                                         <th scope="row">{{ $item->mapping ? 'Yes' : 'No' }}</th>
                                         <td>
                                             <a class="btn btn-primary btn-sm m-1 "
-                                                href="{{ route('admin.mappings.custom.form', $item->id) }}"><i
+                                                href="{{ route('admin.mappings.custom.form', $item->uuid) }}"><i
                                                     class="bi bi-pencil"></i></a>
                                         </td>
                                     </tr>

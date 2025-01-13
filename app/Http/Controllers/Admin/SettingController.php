@@ -86,7 +86,7 @@ class SettingController extends Controller
         $data = [];
         try {
             $query = $inventoryService->setTableQuery($request->table_options);
-            $data = $inventoryService->submitRequest($query);
+            $data = $inventoryService->submitRequest($query,1);
         } catch (\Exception $e) {
             $data = [];
         }

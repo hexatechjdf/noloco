@@ -27,7 +27,8 @@ class MappingUrlRequest extends FormRequest
 
             'displayable_fields' => 'required|array|min:1',
             'displayable_fields.*' => 'required|string',
-
+            'maps' => 'required|array|min:1',
+            'maps.*' => 'required|string',
             'attr' => 'required|array|min:1',
             'attr.*' => 'required|string',
             'table' => 'required',

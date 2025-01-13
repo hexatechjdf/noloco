@@ -10,6 +10,7 @@ use App\Http\Controllers\Location\CoborrowerController;
 use App\Http\Controllers\Form\ImageController;
 use App\Http\Controllers\Location\DealsController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +77,8 @@ Route::group(['as' => 'deals.', 'prefix' => 'deals'], function () {
 Route::group(['as' => 'coborrower.', 'prefix' => 'coborrower'], function () {
     Route::get('/management', [CoborrowerController::class, 'index'])->name('setting');
     Route::get('/contacts/search', [CoborrowerController::class, 'contactsSearch'])->name('contacts.search');
+    Route::get('/get/customer', [CoborrowerController::class, 'getCustomer'])->name('get.customer');
+    Route::get('/set/deal', [CoborrowerController::class, 'setDeal'])->name('set.deal');
 });
 
 
@@ -106,9 +109,45 @@ Route::get('check/auth', [AutoAuthController::class, 'connect'])->name('auth.che
 Route::get('check/auth/error', [AutoAuthController::class, 'authError'])->name('error');
 Route::get('checking/auth', [AutoAuthController::class, 'authChecking'])->name('admin.auth.checking');
 
+use Illuminate\Support\Facades\Log;
+use App\Helper\CRM;
+Route::get('webhook/customer', function (Request $request) {
+    $nol =  $request->all();
+    $filteredData = json_decode(supersetting('customerMapping'), true) ?? [];
 
-Route::get('webhook/testing', function () {
+    $payload = [];
+    $array = [];
+    foreach ($filteredData as $key => $value) {
+        // Remove the curly braces {{}} and split by the delimiter }}{{
+        $value = str_replace(["{{", "}}"], "", $value);
+        $variables = explode("}}{{", $value);
+        $payload[] = $key;
 
+        if (count($variables) > 1) {
+            foreach($variables as $var)
+            {
+                $array[$var] = getNestedValue($nol, $key);
+            }
+        }
+        else{
+            $array[$variables[0]] = getNestedValue($nol, $key);
+        }
+    }
+
+    $client_id = "HuVkfWx59Pv4mUMgGRTp" ?? $nol['highlevelClientId'];
+    $contact_id = "Aiml0qxtPRr1fiK5mOf3" ??  $nol['_meta']['user']['dealershipSubAccountId'];
+    if($client_id && $contact_id)
+    {
+        try {
+            $response = CRM::crmV2Loc('1', $client_id, 'contacts/' . $contact_id, 'put', json_encode($array));
+            return [$response,$array];
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+    // $data = (array)$data;
+    return [$array,$payload];
+    // Log::info($request->all());
 });
 
 use App\Jobs\ProcessRefreshToken;
