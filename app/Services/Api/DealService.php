@@ -21,11 +21,11 @@ class DealService
         $this->inventoryService = $inventoryService;
     }
 
-    public function getCustomerQuery($dealershipSubAccountId, $highlevelClientId)
+    public function getCustomerQuery($highlevelClientId,$dealershipSubAccountId)
     {
         $query = <<<GRAPHQL
             query {
-              customersCollection(where: { dealershipSubAccountId: { equals: "%s" }, highlevelClientId: { equals: "%l" } }) {
+              customersCollection(where: { dealershipSubAccountId: { equals: "%l" }, highlevelClientId: { equals: "%s" } }) {
                 edges {
                    node {
                             id
@@ -44,7 +44,7 @@ class DealService
     GRAPHQL;
 
         $query = str_replace(
-            ['%s', '%l'],
+            [ '%l','%s'],
             [$dealershipSubAccountId, $highlevelClientId],
             $query
         );

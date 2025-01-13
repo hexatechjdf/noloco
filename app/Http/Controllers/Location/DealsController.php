@@ -87,7 +87,6 @@ class DealsController extends Controller
                 $deals = $this->getDeals($customer_id);
             }
         } catch (\Exception $e) {
-            dd($e);
             return response()->json(['error' => 'There is something wrong with location id or contact id']);
         }
         $view = view('locations.deals.components.listView', get_defined_vars())->render();

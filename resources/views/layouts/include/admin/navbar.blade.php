@@ -3,6 +3,7 @@
 @if (@$authUser)
     <nav class="navbar main_nav d-none navbar-expand-md w-100 navbar-light bg-white shadow-sm position-absolute">
         <div class="container">
+            @if (!$nav)
             <a class="navbar-brand" href="{{ url('/') }}">
                 {{ config('app.name', 'Laravel') }}
             </a>
@@ -10,7 +11,7 @@
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            @if (!$nav)
+
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
