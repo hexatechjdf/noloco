@@ -93,8 +93,9 @@ class DealService
     }
 
 
-    public function setCustomerCreateQuery($graphqlPayload)
+    public function setCustomerCreateQuery($graphqlPayload,$dealer_id)
     {
+        $dealer_id = (int)$dealer_id;
         $mutation = <<<GRAPHQL
         mutation {
             createCustomers($graphqlPayload) {
@@ -103,6 +104,34 @@ class DealService
         }
         GRAPHQL;
 
+        $mutation = str_replace(
+            ['%c'],
+            [$dealer_id],
+            $mutation
+        );
+        return $mutation;
+    }
+
+    public function updateDealQuery($customer_id,$dealId)
+    {
+        $customer_id = (int)$customer_id;
+        $mutation = <<<GRAPHQL
+        mutation {
+            updateDeals(
+            id: "{$dealId}",
+            coBorrowerId: {$customer_id}
+            ) {
+            id
+
+             }
+        }
+        GRAPHQL;
+
+        // $mutation = str_replace(
+        //     ['%c'],
+        //     [$dealer_id],
+        //     $mutation
+        // );
         return $mutation;
     }
 

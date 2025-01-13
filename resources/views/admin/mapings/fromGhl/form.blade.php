@@ -4,6 +4,11 @@
         .show_values {
             cursor: pointer;
         }
+        .optionButton {
+  padding: 5px;
+  border: 1px solid black;
+  margin: 5px;
+}
     </style>
 @endpush
 @section('content')
@@ -27,7 +32,7 @@
                                             <input type="text" data-mapping="mappingFields" data-key="mappingkey"
                                                 name="mapping[{{ $col }}]" value="{{ @$mapping[$col] }}"
                                                 placeholder="Select mapping values"
-                                                class="selectedvalue nullable form-control" required multiple>
+                                                class="selectedvalue nullable form-control options">
                                         </div>
                                     </div>
                                 </div>
@@ -50,9 +55,12 @@
     @include('admin.mapings.custom.components.mappingScript')
 
     <script>
-        let jsonDataa = @json($contact_fileds);
+        let contact = @json($contact_fileds);
+        let vehicle = @json($vehicle);
+        let customer = @json($customer);
+        let dealership = @json($dealership);
 
         // jsonDataa = convertToList(jsonDataa);
-        initMappingPicker('.mappingPicker', {}, false, true);
+        initMappingPicker('.mappingPicker', {}, false);
     </script>
 @endpush

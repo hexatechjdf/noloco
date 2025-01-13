@@ -44,72 +44,18 @@ class CustomerController extends Controller
         return view('admin.mapings.coborrower.form', get_defined_vars());
     }
 
-    public function getCountryForPhoneNumber($phoneNumber, $defaultRegion = 'PK')
-    {
-        // Create an instance of PhoneNumberUtil
-        $phoneUtil = PhoneNumberUtil::getInstance();
 
-        try {
-            // Parse the phone number
-            $numberProto = $phoneUtil->parse($phoneNumber);
-
-            // Get the region (country code)
-            $regionCode = $phoneUtil->getRegionCodeForNumber($numberProto);
-
-            return [$numberProto->getNationalNumber(), $regionCode]; //] Returns country code like 'PK' for Pakistan
-        } catch (\libphonenumber\NumberParseException $e) {
-            return [null, null];
-        }
-    }
-
-    public function formatPhoneNumberWithCountryCode($phoneData)
-    {
-        // Check if phone data is in the correct format
-        if (is_object($phoneData)) {
-            $phoneData = (array) $phoneData;
-        }
-        if (!isset($phoneData['number']) || !isset($phoneData['country'])) {
-            return 'Invalid phone data.';
-        }
-
-        $phoneNumber = $phoneData['number'];
-        $countryCode = $phoneData['country'];
-
-        // Create an instance of PhoneNumberUtil
-        $phoneUtil = PhoneNumberUtil::getInstance();
-
-        try {
-            // Parse the phone number
-            $numberProto = $phoneUtil->parse($phoneNumber, $countryCode);
-
-            // Format the number in international format
-            $formattedNumber = $phoneUtil->format($numberProto, PhoneNumberFormat::E164);
-
-            return $formattedNumber; // Example: +17867867867
-        } catch (\libphonenumber\NumberParseException $e) {
-            return 'Invalid Number: ' . $e->getMessage();
-        }
-    }
-
-    public function replaceLastWordAfterDot($string, $replacement)
-    {
-        // Check if there's a dot in the string and replace the last word after it
-        return preg_replace('/\.(\w+)$/', '.' . $replacement, $string);
-    }
-
-    public function getContact()
-    {
-        $contact_id = 'Aiml0qxtPRr1fiK5mOf3';
-        try {
-            $response = CRM::crmV2Loc('2', 'HuVkfWx59Pv4mUMgGRTp', 'contacts/' . $contact_id, 'get');
-            return $response->contact;
-        } catch (\Exception $e) {
-        }
-    }
     public function formSubmit(Request $request)
     {
+         $data = $request->mapping;
+        $filteredData = array_filter($data, function ($value) {
+            return !is_null($value);
+        });
+
+        save_settings('customerMapping', $filteredData);
+
+        return response()->json(['success' => true, 'route' => route('admin.mappings.customer.form')]);
         $filteredData = json_decode(supersetting('customerMapping'), true) ?? [];
-        dd($filteredData);
         $nol = new \stdClass();
         $nol->firstName = "John";
         $nol->lastName = "Doe";
@@ -120,44 +66,17 @@ class CustomerController extends Controller
             // Remove the curly braces {{}} and split by the delimiter }}{{
             $value = str_replace(["{{", "}}"], "", $value);
             $variables = explode("}}{{", $value);
-
-            // Initialize a variable to hold the corresponding value from $nol
-            $mappedValue = '';
-
-            // Handle the case if the value contains more than one variable (split by commas)
             if (count($variables) > 1) {
-                // Concatenate the values if needed (e.g., for fullName as "firstName lastName")
-                $mappedValue = '';
-                foreach ($variables as $variable) {
-                    $mappedValue .= $nol->{$variable}; // Concatenate variables
+                foreach($variables as $var)
+                {
+                    $array[$var] = 1;
                 }
-            } else {
-                // If there's only one variable, fetch the corresponding value from $nol
-                $mappedValue = isset($nol->{$variables[0]}) ? $nol->{$variables[0]} : '';
             }
-
-            // Now, we handle the key to match the object path
-            // Check if there's a dot in the key (indicating object hierarchy)
-            if (strpos($key, '.') !== false) {
-                // Break the key into parts (e.g., "fullName.title")
-                $keyParts = explode('.', $key);
-
-                // Traverse through the object hierarchy
-                $temp = $nol;
-                foreach ($keyParts as $part) {
-                    if (isset($temp->$part)) {
-                        $temp = $temp->$part; // Traverse to the next level in the object
-                    }
-                }
-
-                // Set the value of the final object part in the result
-                $payload[$keyParts[count($keyParts) - 1]] = $temp; // The final value in the hierarchy
-            } else {
-                // If no dot, it's a simple key-value mapping
-                $payload[$variables[0]] = $mappedValue; // Map directly to the final key
+            else{
+                $array[$variables[0]] = 1;
             }
         }
-        dd($payload);
+        dd($array,$filteredData);
 
 
         // dd($filteredData);

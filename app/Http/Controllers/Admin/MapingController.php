@@ -70,27 +70,26 @@ class MapingController extends Controller
         $locationId = supersetting('crm_location_id');
         $contact_fileds = CRM::getContactFields($locationId, true);
 
-        $customer_data = $this->getMappingFieldsByTable('customersCollection', 'customersFields');
-        $dealership_data = $this->getMappingFieldsByTable('dealershipCollection', 'dealershipFields');
-        $vehicle_data = $this->getMappingFieldsByTable('inventoryCollection', 'inventoryFields');
+        $vehicle = $this->getFieldsByTable('inventoryCollection', 'invetoryFields');
+        $dealership = $this->getFieldsByTable('dealershipCollection', 'dealershipFields');
+        $customer = $this->getFieldsByTable('customersCollection', 'customerFields');
 
         return view('admin.mapings.fromGhl.form', get_defined_vars());
     }
 
-    public function getMappingFieldsByTable($table, $key)
+    public function getFieldsByTable($table_name, $key)
     {
-        $data = Cache::remember($key, 60 * 60, function () use ($table) {
-            $table = MappingTable::where('title', $table)->first();
+        Cache::forget($key);
+        $data = Cache::remember($key, 60 * 60, function () use ($table_name) {
+            $table = MappingTable::where('title', $table_name)->first();
             $data = [];
             if ($table) {
-                $columns = json_decode($table->columns, true) ?? [];
-                $data = $this->processColumns($columns);
+                $data = json_decode($table->fields, true);
             }
             return $data;
         });
         return $data;
     }
-
 
     public function getDealsFields()
     {
@@ -136,7 +135,7 @@ class MapingController extends Controller
         $data = [];
         try {
             $query = $inventoryService->setTableQuery($tables);
-            $data = $inventoryService->submitRequest($query);
+            $data = $inventoryService->submitRequest($query, 1);
         } catch (\Exception $e) {
 
         }
