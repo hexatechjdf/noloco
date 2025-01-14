@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AdminMapingUrl;
 use Illuminate\Support\Str;
+ use App\Models\CrmAuths;
 use App\Services\Api\InventoryService;
 
 class MappingExtentionController extends Controller
 {
     public function store(Request $request)
     {
+
         // return $request->all();
         $url = null;
         $token = null;
@@ -83,6 +85,76 @@ class MappingExtentionController extends Controller
     }
 
     public function search(Request $request, InventoryService $inventoryService)
+    {
+        $messsage = 'location token is invalid';
+        $filter = $request->dealsFilter;
+        if(!$filter)
+        {
+            return response()->json(['error' => 'There is issue in your payload']);
+        }
+
+        $location = @$filter['location'] ?? null;
+        if (!$location) {
+            return response()->json(['error' => 'first']);
+        }
+        try {
+            $loc = CrmAuths::where('location_id', $location)->first();
+            if (!$loc) {
+                $res = CRM::getLocationAccessToken(1, $location);
+                $code = $res->statusCode ?? 200;
+                if ($code != 200) {
+                    return response()->json(['error' => $messsage]);
+                }
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $messsage]);
+        }
+
+        $whereClause = @$filter['ids'] ? $this->setIdsFilter($filter['ids']) : null;
+        // if($whereClause)
+        // {
+        //     $request->merge(['filters' => $fil]);
+        // }
+
+        try {
+            $query = $inventoryService->setQuery($request, null, $whereClause, 'dealsCollection' );
+            // return $query;
+            $data = $inventoryService->submitRequest($query);
+            $data = @$data['data']['dealsCollection']['edges'] ?? [];
+            return response()->json(['data' => $data]);
+        } catch (\Exception $e) {
+            return response()->json(['data' => [],'error' => 'there is some issues']);
+        }
+    }
+
+    public function setIdsFilter($ids)
+    {
+        $column = 'uuid';
+        $order = 'in';
+        $quotedIds = array_map(fn($id) => '"' . $id . '"', $ids);
+
+// Create the string of IDs
+$string = implode(', ', $quotedIds);
+
+// Construct the where clause
+$whereClause = "{ {$column}: { {$order}: [{$string}] } }";
+
+// Return the query
+return $whereClause;
+        // where: { uuid: { in: ["64", "66"] } }
+        $filters = [];
+        foreach($ids as $id)
+        {
+          $filters[] = [
+            "column" => "uuid",
+            "value" =>  $id,
+            "order" => "equals"
+          ];
+        }
+        return $filters;
+    }
+
+    public function _search(Request $request, InventoryService $inventoryService)
     {
         $url = $this->searchByUrl($request->url);
         if (!$url || !$url->mapping) {

@@ -83,7 +83,7 @@ class CustomerController extends Controller
             if ($table) {
                 $columns = json_decode($table->columns, true) ?? [];
                 // dd($columns);
-                $data = $this->processColumns($columns);
+                $data = processColumns($columns,'',['createdBy', 'previousResidence', 'dealership']);
             }
             return $data;
         });
@@ -92,21 +92,5 @@ class CustomerController extends Controller
     }
 
 
-    private function processColumns($columns, $parentKey = '')
-    {
-        $data = [];
-        foreach ($columns as $key => $column) {
-            if (is_array($column)) {
-                if (!in_array($key, ['createdBy', 'previousResidence', 'dealership'])) {
-                    $currentKey = $parentKey ? $parentKey . '.' . $key : $key;
-                    $data = array_merge($data, $this->processColumns($column, $currentKey));
-                }
-            } else {
-                $currentKey = $parentKey ? $parentKey . '.' . $column : $column;
-                $data[] = $currentKey;
-            }
-        }
 
-        return $data;
-    }
 }

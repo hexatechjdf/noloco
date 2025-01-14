@@ -31,20 +31,11 @@ class MapingController extends Controller
         $table_name = $url->table ?? '';
 
         $data1 = [];
-        // $tables = getMappingTables('array');
-        $tables = getMappingTables();
+        $selectedTable = 'dealsCollection';
+        $tables = getMappingTables(null, ['dealsCollection']);
         foreach ($tables as $table) {
             $data1[$table->title] = json_decode($table->fields, true);
         }
-        // $data = gCache::get('mappings', function () use ($tables, $inventoryService) {
-        //     try {
-        //         $query = $inventoryService->setTableQuery($tables);
-        //         $data = $inventoryService->submitRequest($query);
-        //         return $data;
-        //     } catch (\Exception $e) {
-        //         return [];
-        //     }
-        // });
 
         return view('admin.mapings.custom.map', get_defined_vars());
     }
@@ -93,55 +84,17 @@ class MapingController extends Controller
 
     public function getDealsFields()
     {
-        $data = Cache::remember('dealsssFields', 60 * 60, function () {
+        $data = Cache::remember('dealsFields', 60 * 60, function () {
             $table = MappingTable::where('title', 'dealsCollection')->first();
             $data = [];
             if ($table) {
                 $columns = json_decode($table->columns, true) ?? [];
-                $data = $this->processColumns($columns);
+                $data = processColumns($columns,'',['createdBy', 'lienholders', 'employeeSigner','coBorrower']);
             }
             return $data;
         });
         return $data;
     }
-
-    private function processColumns($columns, $parentKey = '')
-    {
-        $data = [];
-        foreach ($columns as $key => $column) {
-            if (is_array($column)) {
-                if (!in_array($key, ['createdBy', 'previousResidence', 'dealership'])) {
-                    $currentKey = $parentKey ? $parentKey . '.' . $key : $key;
-                    $data = array_merge($data, $this->processColumns($column, $currentKey));
-                }
-            } else {
-                $currentKey = $parentKey ? $parentKey . '.' . $column : $column;
-                $data[] = $currentKey;
-            }
-        }
-
-        return $data;
-    }
-
-
-    public function processString($input)
-    {
-        // Step 1: Split the input string by dots
-        $parts = explode('.', $input);
-
-        // Step 2: Extract the object name (first word)
-        $objectName = array_shift($parts); // Removes and returns the first element
-
-        // Step 3: Convert the remaining parts into the required format
-        $formattedString = collect($parts)->map(fn($part) => "['$part']")->join('');
-
-        // Return both object name and formatted string
-        return [
-            'objectName' => $objectName,
-            'formatted' => $formattedString,
-        ];
-    }
-
 
     public function ghlToNolocoFormSubmit(Request $request)
     {
@@ -150,39 +103,8 @@ class MapingController extends Controller
             return !is_null($value);
         });
 
-        // $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData) {
-        //     $value = $filteredData[$keyf];
-
-        //     $updatedData = preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($keyf, &$result) {
-        //         $key = $matches[1];
-
-        //         return $key;
-        //     }, $value);
-
-        //     $result[$keyf] = $this->getObjectData($updatedData);
-
-        //     // $result[$keyf] = $updatedData;
-
-        //     return $result;
-        // }, []);
-        // dd($replacedData);
-
         save_settings('dealsMapping', $filteredData);
 
         return response()->json(['success' => true, 'route' => route('admin.mappings.ghl.form')]);
-    }
-
-    public function customMapingFields(Request $request, InventoryService $inventoryService)
-    {
-        $tables = json_decode(supersetting('table_options') ?? '');
-        $data = [];
-        try {
-            $query = $inventoryService->setTableQuery($tables);
-            $data = $inventoryService->submitRequest($query, 1);
-        } catch (\Exception $e) {
-
-        }
-
-        dd($data);
     }
 }

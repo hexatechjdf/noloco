@@ -153,12 +153,28 @@ class DealService
        $conId = $request->contactId;
        $locId = $request->locationId;
        $keyy = 'customer_'.$conId.$locId;
-    //    Cache::forget($keyy);
+
+       $filters =  [[
+        "column" => "dealershipSubAccountId",
+        "value" =>  $locId,
+        "order" => "equals"
+    ],
+    [
+        "column" => "highlevelClientId",
+        "value" => $conId,
+        "order" => "equals"
+    ]
+];
+
+    $request->merge(['filters' => $filters]);
+
+       Cache::forget($keyy);
    try{
-       $data = Cache::remember($keyy, 60 * 60, function () use ($conId,$locId) {
-           $query = $this->getCustomerQuery($conId, $locId);
-           $data = $this->inventoryService->submitRequest($query, 1);
-           return $data;
+       $data = Cache::remember($keyy, 60 * 60, function () use ($request) {
+        $query = $this->inventoryService->setQuery($request,null,null,'customersCollection');
+        return $this->inventoryService->submitRequest($query);
+        //    $query = $this->getCustomerQuery($conId, $locId);
+        //    $data = $this->inventoryService->submitRequest($query, 1);
        });
        return $data;
    } catch (\Exception $e) {
@@ -180,10 +196,12 @@ class DealService
             ],
         ];
         $request->merge(['filters' => $filters]);
-        $keyy = 'dealerhip_'.$conId;
+        $keyy = 'dealerhipp_'.$conId;
+            Cache::forget($keyy);
         try{
             $data = Cache::remember($keyy, 60 * 60, function () use ($conId,$request) {
             $query = $this->inventoryService->setQuery($request, null, null, 'dealershipCollection');
+            // dd($query);
             return  $this->inventoryService->submitRequest($query, 1);
             });
             $res = $data['data']['dealershipCollection'];
@@ -200,7 +218,7 @@ class DealService
 
     public function getContact($locationId,$contact_id)
     {
-         $contact_id = "Aiml0qxtPRr1fiK5mOf3";
+        //  $contact_id = "Aiml0qxtPRr1fiK5mOf3";
         // dd($locationId,$contact_id);
         try {
             $response = CRM::crmV2Loc('1', $locationId, 'contacts/' . $contact_id, 'get');

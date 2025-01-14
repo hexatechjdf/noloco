@@ -31,8 +31,8 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item {{ Route::is('admin.mappings.custom.index') ? 'active' : '' }}"
                                         href="{{ route('admin.mappings.custom.index') }}">Extention</a></li>
-                                <li><a class="dropdown-item {{ Route::is('admin.mappings.customer.form') ? 'active' : '' }}"
-                                        href="{{ route('admin.mappings.customer.form') }}">Customer</a></li>
+                                {{-- <li><a class="dropdown-item {{ Route::is('admin.mappings.customer.form') ? 'active' : '' }}"
+                                        href="{{ route('admin.mappings.customer.form') }}">Customer</a></li> --}}
                                 <li><a class="dropdown-item {{ Route::is('admin.mappings.ghl.form') ? 'active' : '' }}"
                                         href="{{ route('admin.mappings.ghl.form') }}">Deals</a></li>
 

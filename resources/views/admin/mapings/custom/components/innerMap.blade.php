@@ -20,7 +20,7 @@
             @endif
         </div>
     </div>
-    <div class="mb-3">
+    {{-- <div class="mb-3">
         <label class="form-label">Select Table</label>
         <select class="form-control table_option select2" name="table">
             <option value="">Select Option</option>
@@ -29,7 +29,8 @@
                 <option {{ $selected }} value="{{ $table->title }}">{{ $table->title }}</option>
             @endforeach
         </select>
-    </div>
+    </div> --}}
+    <label class="form-label">Mapping Fields</label>
     <div class="appendBody">
         @php($mappingKeys = json_decode($url->mapping ?? '', true) ?? [])
         <div class="">

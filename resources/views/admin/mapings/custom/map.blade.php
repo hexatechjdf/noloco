@@ -90,7 +90,7 @@
                     allowClear: true
                 });
 
-                let selectedTable = '';
+                let selectedTable = '{{$selectedTable}}';
                 $(document).on('click', '.setMaping', function(e) {
                     e.preventDefault();
                     let id = $(this).data('id');
@@ -100,19 +100,21 @@
                     return;
                 })
 
-                $(document).on('change', '.table_option', function() {
-                    let val = $(this).val();
-                    if (selectedTable && selectedTable != val) {
-                        alertConfirmation(selectedTable, $(this));
-                    } else {
-                        selectedTable = $(this).val();
-                        updateMapping(selectedTable);
-                    }
-                });
+                // $(document).on('change', '.table_option', function() {
+                //     let val = $(this).val();
+                //     if (selectedTable && selectedTable != val) {
+                //         alertConfirmation(selectedTable, $(this));
+                //     } else {
+                //         selectedTable = $(this).val();
+                //         updateMapping(selectedTable);
+                //     }
+                // });
                 // let fieldsList = makeMappedList(jsonData.data);
                 initMappingPicker('.mappingPicker', {});
+                updateMapping(selectedTable);
 
-                $('.table_option').trigger('change');
+
+                // $('.table_option').trigger('change');
 
                 function processObject(obj) {
                     let searchable_values = [];

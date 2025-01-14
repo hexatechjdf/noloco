@@ -172,7 +172,7 @@ function getNonObjectFields($input, $table = null)
 {
     $fields = [];
     foreach ($input as $key => $value) {
-        if (!is_array($value) && $value != 'featuredPhoto') {
+        if (!is_array($value) && $value != 'featuredPhoto' && $value!='vendorAddress') {
             $fields[] = $value;
         }
     }
@@ -234,12 +234,14 @@ function fields($tableName = null)
 }
 
 
-function getMappingTables($type = null)
+function getMappingTables($type = null,$names= null)
 {
     Cache::forget('table_options');
-    $data = gCache::get('table_options', function () {
+    $data = gCache::get('table_options', function () use($names) {
         try {
-            return MappingTable::get();
+            return MappingTable::when($names,function($q) use($names){
+               $q->whereIn('title',$names);
+            })->get();
         } catch (\Exception $e) {
             return [];
         }
@@ -287,4 +289,23 @@ function defaultContactFields()
         "opportunities" => '',
         "notes" => '',
     ];
+}
+
+function processColumns($columns, $parentKey = '',$exclude= [])
+{
+    // ['createdBy', 'previousResidence', 'dealership']
+    $data = [];
+    foreach ($columns as $key => $column) {
+        if (is_array($column)) {
+            if (!in_array($key, $exclude)) {
+                $currentKey = $parentKey ? $parentKey . '.' . $key : $key;
+                $data = array_merge($data, processColumns($column, $currentKey,$exclude));
+            }
+        } else {
+            $currentKey = $parentKey ? $parentKey . '.' . $column : $column;
+            $data[] = $currentKey;
+        }
+    }
+
+    return $data;
 }

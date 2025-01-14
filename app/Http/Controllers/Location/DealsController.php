@@ -153,7 +153,7 @@ class DealsController extends Controller
         $availableObjects = [];
         try {
         $availableObjects['customer'] = $this->getDataFromObject($this->dealService->getCustomerInfo($request),'customersCollection');
-        list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->contactId);
+        list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->locationId);
         $availableObjects['dealership'] = $dealership;
         $availableObjects['contact'] = $this->dealService->getContact($request->locationId,$request->contactId);
         $filters = [
@@ -163,11 +163,11 @@ class DealsController extends Controller
                 "order" => "equals",
             ],
         ];
-        $request->merge(['filters' => $filters]);
+            $request->merge(['filters' => $filters]);
             $query = $this->inventoryService->setQuery($request);
             $data = $this->inventoryService->submitRequest($query);
             $availableObjects['vehicle'] = $this->getDataFromObject($data,'inventoryCollection');
-            dd($availableObjects);
+            // dd($availableObjects);
             $array = $this->setQueryData($availableObjects);
         }
             catch(\Exception $e){
@@ -183,7 +183,9 @@ class DealsController extends Controller
 
     public function setQueryData($availableObjects)
     {
+        dd($availableObjects);
         $filteredData = json_decode(supersetting('dealsMapping'), true) ?? [];
+        // dd($filteredData);
          $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData,$availableObjects) {
             $value = $filteredData[$keyf];
             $updatedData = preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($keyf, &$result,$availableObjects) {
@@ -195,6 +197,7 @@ class DealsController extends Controller
             // $result[$keyf] = $updatedData;
             return $result;
         }, []);
+        dd($replacedData,$filteredData);
         return $replacedData;
     }
     public function getObjectData($string,$availableObjects)

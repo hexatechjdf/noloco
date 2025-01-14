@@ -57,7 +57,7 @@
     <script>
         let contact = @json($contact_fileds);
         let vehicle = @json($vehicle);
-        let customer = @json($customer);
+        // let customer = @json($customer);
         let dealership = @json($dealership);
 
         // jsonDataa = convertToList(jsonDataa);

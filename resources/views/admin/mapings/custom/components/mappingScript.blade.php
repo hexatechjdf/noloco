@@ -332,7 +332,7 @@
             t.addEventListener('focus', function(e) {
                 let target = e.currentTarget;
                 if ($(this).hasClass('options')) {
-                    const options = ["contact", "dealership", "vehicle", "customer"];
+                    const options = ["contact", "dealership", "vehicle"];
                     let userSelection = null;
 
                     const modalHTML = `
