@@ -20,23 +20,9 @@
                         <h4 class="h4">GHL to Noloco Mapping</h4>
                     </div>
                     <div class="card-body">
-                        <form method="POST" class="submitForm" action="{{ route('admin.mappings.ghl.form.submit') }}">
+                        <form method="POST" class="submitForm" action="{{ route('admin.mappings.customer.form.submit') }}">
                             @csrf
-                            @foreach ($columns as $col)
-                                <div class="row mb-2">
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" readonly value="{{ $col }}">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mappingPicker">
-                                            <input type="text" data-mapping="mappingFields" data-key="mappingkey"
-                                                name="mapping[{{ $col }}]" value="{{ @$mapping[$col] }}"
-                                                placeholder="Select mapping values"
-                                                class="selectedvalue nullable form-control options">
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
+                            @include('admin.mapings.components.columnFields')
                             <div class="row mb-2">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-primary">Submit</button>

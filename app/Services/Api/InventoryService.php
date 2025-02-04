@@ -16,6 +16,7 @@ class InventoryService
         $before = $request->before;
         $query = $this->getQuery($table_name);
         $whereClause = ($filters ? $filters : $this->setFilters($request, $id)) ?: '{}';
+
         $sortingClause = $table_name == 'inventoryCollection' ? $this->getSorting($request) : "";
         // return $whereClause;
 
@@ -201,7 +202,6 @@ class InventoryService
 
     public function setFilters($request, $id = null, $is_optional = false)
     {
-        // dd($request->all());
         $whereClause = '';
         $filterParts = [];
         $filterFields = [];
@@ -283,11 +283,11 @@ class InventoryService
         $appApiKey = supersetting('noloco_app_key', null);
         $appName = supersetting('noloco_app_name', null);
 
-        if($test == 1)
-        {
-            $appApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoic2FhZGpkZnVubmVsQGdtYWlsLmNvbSIsInByb2plY3QiOiJzdGFyYXV0byIsInR5cGUiOiJBUEkiLCJpYXQiOjE3MzY0MzUzNTV9.Ff03UbpAjiSQLyk24NH2YhbG1zFbZATLzXoF7rbGLTg";
-            $appName = "starauto";
-        }
+        // if($test == 1)
+        // {
+        //     $appApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoic2FhZGpkZnVubmVsQGdtYWlsLmNvbSIsInByb2plY3QiOiJzdGFyYXV0byIsInR5cGUiOiJBUEkiLCJpYXQiOjE3MzY0MzUzNTV9.Ff03UbpAjiSQLyk24NH2YhbG1zFbZATLzXoF7rbGLTg";
+        //     $appName = "starauto";
+        // }
         if ($appApiKey && $appName) {
             try {
                 $response = Http::withHeaders([
@@ -308,5 +308,17 @@ class InventoryService
         }
 
         return [];
+    }
+
+    public function setInventoryDataByCsv($graphqlPayload,$invMutationType)
+    {
+        $mutation = <<<GRAPHQL
+        mutation {
+            $invMutationType($graphqlPayload) {
+                id
+            }
+        }
+        GRAPHQL;
+        return $mutation;
     }
 }

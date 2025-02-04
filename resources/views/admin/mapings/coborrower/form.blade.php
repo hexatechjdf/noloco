@@ -12,26 +12,12 @@
             <div class="col-md-12 mt-2">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
-                        <h4 class="h4">Customer Mapping</h4>
+                        <h4 class="h4 text-capitalize">{{$keyy}} Mapping</h4>
                     </div>
                     <div class="card-body">
                         <form method="POST" class="submitForm" action="{{ route('admin.mappings.customer.form.submit') }}">
                             @csrf
-                            @foreach ($columns as $col)
-                                <div class="row mb-2">
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" readonly value="{{ $col }}">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mappingPicker">
-                                            <input type="text" data-mapping="mappingFields" data-key="mappingkey"
-                                                name="mapping[{{ $col }}]" value="{{ @$mapping[$col] }}"
-                                                placeholder="Select mapping values"
-                                                class="selectedvalue nullable form-control"  multiple>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
+                            @include('admin.mapings.components.columnFields')
                             <div class="row mb-2">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-primary">Submit</button>

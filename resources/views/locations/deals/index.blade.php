@@ -37,6 +37,8 @@
                         <div class="appendData">
 
                         </div>
+
+                        @include('components.loader')
                     </div>
                 </div>
             </div>

@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\MappingTable;
 use Illuminate\Support\Str;
 use Nwidart\Modules\Facades\Module;
+use libphonenumber\PhoneNumberUtil;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberToCarrierMapper;
 
 function supersetting($key, $default = '', $keys_contain = null)
 {
@@ -111,9 +114,9 @@ function setKeyValueJson($key, $value, $jsonData)
 function customDate($date, $format, $type = null)
 {
     try {
-        if ($type == 'payroll_date') {
-            $dateParts = explode('/', $date);
-            $date = $dateParts[0] . '/01/' . $dateParts[1];
+        if($type=='time')
+        {
+         return Carbon::parse($date)->toIso8601String();
         }
         return Carbon::parse($date)->format($format);
     } catch (\Throwable $th) {
@@ -256,7 +259,7 @@ function getMappingTables($type = null,$names= null)
 function defaultContactFields()
 {
     return [
-        "id" => 'Contact Id',
+        "id",
         "contactName" => '',
         "locationId" => '',
         "firstName" => '',
@@ -272,40 +275,222 @@ function defaultContactFields()
         "dndSettings" => '',
         "type" => '',
         "source" => '',
-        "assignedTo" => 'Assigned User',
-        "address" => '',
+        "assignedTo",
+        "address1" => '',
         "city" => '',
         "state" => '',
         "country" => '',
         "postalCode" => '',
-        "website" => '',
-        "tags" => '',
         "dateOfBirth" => '',
-        "dateAdded" => '',
-        "dateUpdated" => '',
-        // "businessId" => '',
-        "businessName" => '',
-        "lastActivity" => '',
-        "opportunities" => '',
-        "notes" => '',
     ];
 }
 
-function processColumns($columns, $parentKey = '',$exclude= [])
+function processColumns($columns, $parentKey = '',$exclude= [],$containKey = null)
 {
     // ['createdBy', 'previousResidence', 'dealership']
     $data = [];
     foreach ($columns as $key => $column) {
         if (is_array($column)) {
             if (!in_array($key, $exclude)) {
+                if($containKey && !Str::contains($key, $containKey))
+                {
+                    continue;
+                }
                 $currentKey = $parentKey ? $parentKey . '.' . $key : $key;
                 $data = array_merge($data, processColumns($column, $currentKey,$exclude));
             }
         } else {
+            if($containKey && !Str::contains($column, $containKey))
+            {
+                continue;
+            }
             $currentKey = $parentKey ? $parentKey . '.' . $column : $column;
             $data[] = $currentKey;
         }
     }
 
     return $data;
+}
+
+function columnsTypes()
+{
+return [
+   'string' => 'string',
+   'phone' => 'Phone',
+   'date' => 'date',
+   'float' => 'float',
+   'int' => 'int',
+   'enum' => 'Enum',
+];
+}
+
+function getColumnsByTable($key,$exclude = [], $contain = null,$table_name = 'dealsCollection')
+{
+    // Cache::forget($key);
+    $data = [];
+    $data = Cache::remember($key, 60 * 60, function () use ($data,$table_name,$exclude,$contain) {
+        $table = MappingTable::where('title', $table_name)->first();
+        if ($table) {
+            $columns = json_decode($table->columns, true) ?? [];
+            $data = processColumns($columns,'',$exclude,$contain);
+        }
+        return $data;
+    });
+    return $data;
+}
+
+
+function arrayToGraphQL($data)
+{
+    $result = [];
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+            $nested = arrayToGraphQL($value);
+            $result[] = "$key: { $nested }";
+        } else {
+            list($type,$value) = convertStringToArray('__', $value);
+            $result[] = checkValueByType($type,$key,$value);
+        }
+    }
+    return implode(', ', $result);
+}
+
+function convertStringToArray($del, $value)
+{
+    $parts = explode($del, $value);
+
+    return [@$parts[1] ?? 'string', @$parts[0] ?? null];
+}
+
+function checkValueByType($type,$key,$value,$is_seperate = null)
+{
+    if ($type === 'Int' || $type === 'int') {
+        $value = ltrim($value, '0');
+        $ret =   "$key: $value";
+    } elseif ($type === 'Float' || $type === 'float' ) {
+        $value = (float)$value;
+        $ret =  "$key: $value";
+    } elseif ($type === 'ENUM' || $type === 'enum') {
+        $value = transformStateString(strtoupper($value));
+        $ret =  "$key: $value";
+
+    }elseif ($type === 'DateTime' || $type == 'Date') {
+        $value  = customDate($value, 'm/d/Y','time');
+        $ret =  "$key: \"$value\"";
+
+    } else {
+        $value = (string)$value;
+        $ret =  "$key: \"$value\"";
+    }
+
+    return $ret;
+}
+
+function setDataWithType($array,$result,$dealershipId=null,$vehicleId = null)
+{
+        if($dealershipId && $vehicleId)
+        {
+            $vId = $filteredData = supersetting('deal_vehicle_col') ?? '';
+            $array[$vId] = ['column' => $vehicleId, 'type' => 'int'];
+            $dId = $filteredData = supersetting('deal_dealership_col') ?? '';
+            $array[$dId] = ['column' => $dealershipId, 'type' => 'int'];
+        }
+        foreach ($array as $key => $data) {
+            if (!is_array($data) || !isset($data['column'], $data['type'])) {
+                continue;
+            }
+            $value = $data['column'];
+            if(!empty($value))
+            {
+                $type = $data['type'];
+
+                $value = $value.'__'.$type;
+                $keys = explode('.', $key);
+                $temp = &$result;
+                foreach ($keys as $k) {
+                    if (!isset($temp[$k])) {
+                        $temp[$k] = [];
+                    }
+                    $temp = &$temp[$k];
+                }
+                $temp = $value;
+            }
+
+        }
+        return $result;
+}
+
+function setDealQueryData($contact,$result,$map_type = 'customerMapping')
+{
+    $filteredData = json_decode(supersetting($map_type), true) ?? [];
+    $result = [];
+    $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData, $contact) {
+        $value = $filteredData[$keyf];
+        $updatedData = preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($value,$contact, $keyf, &$result) {
+            $key = $matches[1];
+            if (@$value['type'] == 'phone' && isset($contact->{$key})) {
+                $phone = $contact->{$key};
+                list($number, $country) = getCountryForPhoneNumber($phone);
+                $updatedString = replaceLastWordAfterDot($keyf, 'country');
+                $result[$updatedString] = ['column' => $country, 'type' => 'string'];
+                return $number;
+            }
+            return isset($contact->{$key}) ? $contact->{$key} : '';
+        }, $value);
+
+        $result[$keyf] = $updatedData;
+
+        return $result;
+    }, []);
+
+    $result = setDataWithType($replacedData,[]);
+    $result['id'] = "%s";
+
+    return  arrayToGraphQL($result);
+}
+
+function getCountryForPhoneNumber($phoneNumber, $defaultRegion = 'PK')
+{
+    $phoneUtil = PhoneNumberUtil::getInstance();
+    try {
+        $numberProto = $phoneUtil->parse($phoneNumber);
+        $regionCode = $phoneUtil->getRegionCodeForNumber($numberProto);
+
+        return [$numberProto->getNationalNumber(), $regionCode]; //] Returns country code like 'PK' for Pakistan
+    } catch (\libphonenumber\NumberParseException $e) {
+        return [null, null];
+    }
+}
+
+function formatPhoneNumberWithCountryCode($phoneData)
+{
+    if (is_object($phoneData)) {
+        $phoneData = (array) $phoneData;
+    }
+    if (!isset($phoneData['number']) || !isset($phoneData['country'])) {
+        return 'Invalid phone data.';
+    }
+
+    $phoneNumber = $phoneData['number'];
+    $countryCode = $phoneData['country'];
+    $phoneUtil = PhoneNumberUtil::getInstance();
+    try {
+        $numberProto = $phoneUtil->parse($phoneNumber, $countryCode);
+        $formattedNumber = $phoneUtil->format($numberProto, PhoneNumberFormat::E164);
+        return $formattedNumber;
+    } catch (\libphonenumber\NumberParseException $e) {
+        return 'Invalid Number: ' . $e->getMessage();
+    }
+}
+
+function replaceLastWordAfterDot($string, $replacement)
+{
+    return preg_replace('/\.(\w+)$/', '.' . $replacement, $string);
+}
+
+
+function transformStateString($string)
+{
+    // Use regex to match the pattern and replace spaces or hyphens with an underscore
+    return preg_replace('/\s*[-\s]\s*/', '_', $string);
 }

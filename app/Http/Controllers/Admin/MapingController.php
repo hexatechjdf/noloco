@@ -10,9 +10,20 @@ use App\Models\MappingTable;
 use Illuminate\Support\Facades\Cache;
 use App\Helper\CRM;
 use App\Http\Requests\Admin\MappingUrlRequest;
+use App\Services\Api\DealService;
 
 class MapingController extends Controller
 {
+
+    protected $inventoryService;
+    protected $dealService;
+
+    public function __construct(InventoryService $inventoryService, DealService $dealService)
+    {
+        $this->inventoryService = $inventoryService;
+        $this->dealService = $dealService;
+    }
+
     public function customMaping()
     {
         $items = AdminMapingUrl::paginate(10);
@@ -20,7 +31,7 @@ class MapingController extends Controller
         return view('admin.mapings.custom.index', get_defined_vars());
     }
 
-    public function customMapingForm(InventoryService $inventoryService, $id)
+    public function customMapingForm($id)
     {
         $url = AdminMapingUrl::where('uuid', $id)->firstOrFail();
         $attrr = $url->listed_attributes ?? $url->attributes;
@@ -42,35 +53,56 @@ class MapingController extends Controller
 
     public function customMapingFormSubmit(MappingUrlRequest $request)
     {
-        AdminMapingUrl::where('id', $request->id)->update([
-            'table' => $request->table,
-            'mapping' => json_encode($request->maps),
-            'searchable_fields' => json_encode($request->searchable_fields),
-            'displayable_fields' => json_encode($request->displayable_fields),
-            'listed_attributes' => json_encode($request->attr),
-            'related_urls' => json_encode($request->related_urls),
+        AdminMapingUrl::where('uuid', $request->id)->update([
+            'table' => $request->table ?? '',
+            'mapping' => json_encode($request->maps) ?? '',
+            'searchable_fields' => json_encode($request->searchable_fields) ?? '',
+            'displayable_fields' => json_encode($request->displayable_fields) ?? '',
+            'listed_attributes' => json_encode($request->attr) ?? '',
+            'related_urls' => json_encode($request->related_urls) ?? '',
         ]);
 
         return response()->json(['success' => true, 'route' => route('admin.mappings.custom.index')]);
     }
 
-    public function ghlToNolocoForm()
+    public function customerForm()
     {
-        $mapping = json_decode(supersetting('dealsMapping'), true) ?? [];
-        $columns = $this->getDealsFields();
-        $locationId = supersetting('crm_location_id');
-        $contact_fileds = CRM::getContactFields($locationId, true);
+        $keyy = 'customer';
+        list($mapping, $columns,$locationId,$contact_fileds) = $this->getFields($keyy);
+        return view('admin.mapings.coborrower.form', get_defined_vars());
+    }
 
+    public function coborrowerForm()
+    {
+        $keyy = 'coborrower';
+        list($mapping, $columns,$locationId,$contact_fileds) = $this->getFields($keyy);
+        return view('admin.mapings.coborrower.form', get_defined_vars());
+    }
+
+    public function dealsForm()
+    {
+        $keyy = 'deals';
         $vehicle = $this->getFieldsByTable('inventoryCollection', 'invetoryFields');
         $dealership = $this->getFieldsByTable('dealershipCollection', 'dealershipFields');
         $customer = $this->getFieldsByTable('customersCollection', 'customerFields');
+        list($mapping, $columns,$locationId,$contact_fileds) = $this->getFields($keyy);
+        return view('admin.mapings.deals.form', get_defined_vars());
+    }
 
-        return view('admin.mapings.fromGhl.form', get_defined_vars());
+
+    public function getFields($key,$exclude = [], $contain = null)
+    {
+        $mapping = json_decode(supersetting($key.'Mapping'), true) ?? [];
+        $columns = json_decode(supersetting($key.'MappingSetting'), true) ?? [];
+
+        $locationId = supersetting('crm_location_id');
+        $contact_fileds = CRM::getContactFields($locationId, true);
+
+        return [$mapping, $columns,$locationId,$contact_fileds];
     }
 
     public function getFieldsByTable($table_name, $key)
     {
-        // Cache::forget($key);
         $data = Cache::remember($key, 60 * 60, function () use ($table_name) {
             $table = MappingTable::where('title', $table_name)->first();
             $data = [];
@@ -82,29 +114,30 @@ class MapingController extends Controller
         return $data;
     }
 
-    public function getDealsFields()
+    public function formSubmit(Request $request)
     {
-        $data = Cache::remember('dealsFields', 60 * 60, function () {
-            $table = MappingTable::where('title', 'dealsCollection')->first();
-            $data = [];
-            if ($table) {
-                $columns = json_decode($table->columns, true) ?? [];
-                $data = processColumns($columns,'',['createdBy', 'lienholders', 'employeeSigner','coBorrower']);
+        $keyy = $request->key . 'Mapping';
+        $mapping = $request->mapping;
+        $type = $request->type;
+        $filteredData = [];
+        foreach ($mapping as $key => $value) {
+            if(!is_null($value))
+            {
+                if (array_key_exists($key, $type)) {
+                    $filteredData[$key] = [
+                        'column' => $value,
+                        'type' => $type[$key]
+                    ];
+                }
             }
-            return $data;
-        });
-        return $data;
+
+        }
+
+        save_settings($keyy, $filteredData);
+
+        $route = $request->key == 'customer' ? route('admin.mappings.customer.form') : ( $request->key == 'deals' ? route('admin.mappings.deals.form') : route('admin.mappings.coborrower.form'));
+
+        return response()->json(['success' => true, 'route' => $route]);
     }
 
-    public function ghlToNolocoFormSubmit(Request $request)
-    {
-        $data = $request->mapping;
-        $filteredData = array_filter($data, function ($value) {
-            return !is_null($value);
-        });
-
-        save_settings('dealsMapping', $filteredData);
-
-        return response()->json(['success' => true, 'route' => route('admin.mappings.ghl.form')]);
-    }
 }

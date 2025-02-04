@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class MappingExtentionRequest extends FormRequest
+class CsvLocationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +22,8 @@ class MappingExtentionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'seachable_fields' => 'required',
-            // 'maps' => 'required',
-            // 'table' => 'nullable',
-            // 'id' => 'nullable',
+            'location_id' => 'required|string|max:255',
+            'account_id' => 'required|unique:csv_mapping_locations,account_id',
         ];
     }
 }

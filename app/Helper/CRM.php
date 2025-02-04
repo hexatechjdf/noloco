@@ -5,6 +5,7 @@ namespace App\Helper;
 use App\Models\CrmAuths;
 use Illuminate\Support\Facades\Cache;
 use App\Helper\gCache;
+use Illuminate\Support\Facades\DB;
 
 class CRM
 {
@@ -437,6 +438,7 @@ class CRM
         $location_id = $location->location_id ?? '';
         $company_id = $location->company_id ?? '';
         $methodl = strtolower($method);
+        // dd($url);
         if ((strpos($url, 'templates') !== false || strpos($url, 'tags') !== false || strpos($url, 'custom') !== false || strpos($url, 'tasks/search') !== false) && strpos($url, 'locations/') === false) {
             if (strpos($url, 'custom-fields') !== false) {
                 $url = str_replace('-fields', 'Fields', $url);
@@ -445,7 +447,12 @@ class CRM
             if (strpos($url, 'custom-values') !== false) {
                 $url = str_replace('-values', 'Values', $url);
             }
-            $url = 'locations/' . $location_id . '/' . $url;
+            if (strpos($url, 'tags') !== false) {
+                $url = $url;
+            }
+            else{
+                $url = 'locations/' . $location_id . '/' . $url;
+            }
         } else if ($methodl == 'get') {
             $urlap = self::urlFix($url);
             if (strpos($url, 'location_id=') === false && strpos($url, 'locationId=') === false && strpos($url, 'locations/') === false) {
@@ -671,11 +678,20 @@ class CRM
     public static function getContactFields($locationId, $is_values = null)
     {
         $contactFields = defaultContactFields();
-        $cacheKey = "contactFields_{$locationId}";
+        $cacheKey = "contactFields";
+
         $data = Cache::remember($cacheKey, 60 * 60, function () use ($contactFields, $locationId) {
             $customFields = self::getLocationCustomFields($locationId);
+            if(count($customFields) > 0)
+            {
+                DB::table('custom_fields')->delete();
+                foreach($customFields as $k => $f)
+                {
+                    $data = ['field_id' => $k, 'key' => $f];
+                    DB::table('custom_fields')->insert($data);
+                }
+            }
             $mergedFields = array_merge($contactFields, $customFields);
-
             return $mergedFields;
         });
         $array = [];

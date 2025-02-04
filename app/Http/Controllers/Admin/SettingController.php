@@ -10,8 +10,17 @@ use App\Models\Setting;
 use App\Models\MappingTable;
 use App\Helper\CRM;
 use App\Helper\gCache;
+use Illuminate\Support\Str;
 class SettingController extends Controller
 {
+
+    protected $inventoryService;
+
+    public function __construct(InventoryService $inventoryService)
+    {
+        $this->inventoryService = $inventoryService;
+    }
+
     public function index(Request $request)
     {
         $settings = Setting::pluck('value', 'key')->toArray();
@@ -21,8 +30,6 @@ class SettingController extends Controller
         $company_id = null;
         $authuser = loginUser();
         $crmauth = $authuser->crmauth;
-        $inv_data = $this->getSpecificFields();
-        $noloco_tables = getMappingTables('array');
         try {
             if (@$crmauth->company_id) {
                 list($company_name, $company_id) = CRM::getCompany($authuser);
@@ -33,6 +40,71 @@ class SettingController extends Controller
 
         return view('admin.setting.index', get_defined_vars());
     }
+
+    public function noloco(Request $request)
+    {
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $inv_data = $this->getSpecificFields();
+        $noloco_tables = getMappingTables('array');
+
+        return view('admin.setting.noloco', get_defined_vars());
+    }
+
+    public function mapping(Request $request,$type = 'deals')
+    {
+        $keyy = $type.'MappingSetting';
+        $mapping = json_decode(supersetting($keyy), true) ?? [];
+        // dd($mapping);
+        $columns = json_decode(supersetting('dealsCustomTypeColumns'), true) ?? $this->nolocoCustomColumnsWithType();
+
+        // $columns = getColumnsByTable('dealsColumns',[],  null,'dealsCollection');
+
+        return view('admin.setting.mapping', get_defined_vars());
+    }
+
+    public function nolocoCustomColumnsWithType($tableName = 'dealsCollection')
+    {
+        $final = [];
+        try {
+            $query = $this->inventoryService->setTableQuery([$tableName]);
+            $data = $this->inventoryService->submitRequest($query,1);
+            $fields = $data['data']['dealsCollection']['fields'];
+            // dd($fields);
+            $final = $this->fetchNonObjectColumns($fields) ?? [];
+
+            save_settings('dealsCustomTypeColumns', $final);
+            return $final;
+        } catch (\Exception $e) {
+            return $final;
+        }
+    }
+
+    public function fetchNonObjectColumns($fields, $parent_key = null)
+    {
+        $final = [];
+
+        foreach ($fields as $f) {
+            $k = @$f['type']['kind'];
+            $m = @$f['type']['name'];
+            $sf = @$f['type']['fields'];
+            $name = $parent_key ? $parent_key . '.' . $f['name'] : $f['name'];
+
+            if (!in_array($name, ['vehicles', 'lienholders', 'dealership', 'employeeSigner','worksheets'])) {
+                $t = $k == 'SCALAR' ? $m : $k;
+
+                // If the field is an object, process its fields recursively
+                if ($k == 'OBJECT' && $sf) {
+                    $nestedFields = $this->fetchNonObjectColumns($sf, $name);
+                    $final = array_merge($final, $nestedFields); // Merge the nested results
+                } else {
+                    $final[$name] = Str::contains($name, '.number') ? 'Phone' : $t; // Add scalar or non-object fields
+                }
+            }
+        }
+
+        return $final;
+    }
+
 
     public function getSpecificFields($table = 'inventoryCollection')
     {
@@ -60,10 +132,10 @@ class SettingController extends Controller
         return response()->json(['success' => true, 'message' => 'Successfully Submitted']);
     }
 
-    public function nolocoTables(Request $request, InventoryService $inventoryService)
+    public function nolocoTables(Request $request)
     {
-        $query = $inventoryService->getTableQuery($request);
-        $data = $inventoryService->submitRequest($query);
+        $query = $this->inventoryService->getTableQuery($request);
+        $data = $this->inventoryService->submitRequest($query);
         $tables = [];
         if (isset($data['data']['__type']['fields'])) {
             $fields = $data['data']['__type']['fields'];
@@ -80,13 +152,13 @@ class SettingController extends Controller
         $view = view('admin.setting.components.tables', get_defined_vars())->render();
         return response()->json(['success' => true, 'view' => $view], 200);
     }
-    public function nolocoTablesInfo(Request $request, InventoryService $inventoryService)
+    public function nolocoTablesInfo(Request $request)
     {
         $this->updateMappingTables($request);
         $data = [];
         try {
-            $query = $inventoryService->setTableQuery($request->table_options);
-            $data = $inventoryService->submitRequest($query,1);
+            $query = $this->inventoryService->setTableQuery($request->table_options);
+            $data = $this->inventoryService->submitRequest($query,1);
         } catch (\Exception $e) {
             $data = [];
         }
@@ -104,7 +176,7 @@ class SettingController extends Controller
         }
 
     }
-    public function nolocoTablesSubmit(Request $request, InventoryService $inventoryService)
+    public function nolocoTablesSubmit(Request $request)
     {
 
         $data = json_decode($request->data, true);

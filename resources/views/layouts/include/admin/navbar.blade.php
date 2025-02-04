@@ -14,9 +14,20 @@
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link {{ Route::is('admin.setting.index') ? 'active' : '' }}"
-                                href="{{ route('admin.setting.index') }}">Setting</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ Route::is('admin.setting') ? 'active' : '' }}"
+                                href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                Setting
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item {{ Route::is('admin.setting.index') ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.index') }}">GHL Setting</a></li>
+                                <li><a class="dropdown-item {{ Route::is('admin.setting.noloco') ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.noloco') }}">Noloco Setting</a></li>
+                                <li><a class="dropdown-item {{ Route::is('admin.setting.mapping') ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.mapping','deals') }}">Mapping Setting</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ Route::is('admin.scripts.index') ? 'active' : '' }}"
@@ -31,10 +42,14 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item {{ Route::is('admin.mappings.custom.index') ? 'active' : '' }}"
                                         href="{{ route('admin.mappings.custom.index') }}">Extention</a></li>
-                                {{-- <li><a class="dropdown-item {{ Route::is('admin.mappings.customer.form') ? 'active' : '' }}"
-                                        href="{{ route('admin.mappings.customer.form') }}">Customer</a></li> --}}
+                                <li><a class="dropdown-item {{ Route::is('admin.mappings.customer.form') ? 'active' : '' }}"
+                                        href="{{ route('admin.mappings.customer.form') }}">Customer</a></li>
+                                <li><a class="dropdown-item {{ Route::is('admin.mappings.coborrower.form') ? 'active' : '' }}"
+                                        href="{{ route('admin.mappings.coborrower.form') }}">Coborrower</a></li>
                                 <li><a class="dropdown-item {{ Route::is('admin.mappings.ghl.form') ? 'active' : '' }}"
-                                        href="{{ route('admin.mappings.ghl.form') }}">Deals</a></li>
+                                        href="{{ route('admin.mappings.deals.form') }}">Deals</a></li>
+                                <li><a class="dropdown-item {{ Route::is('admin.mappings.csv.index') ? 'active' : '' }}"
+                                        href="{{ route('admin.mappings.csv.index') }}">CSV</a></li>
 
                             </ul>
                         </li>

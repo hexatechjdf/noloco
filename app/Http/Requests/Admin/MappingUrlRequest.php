@@ -22,16 +22,16 @@ class MappingUrlRequest extends FormRequest
     public function rules()
     {
         return [
-            'searchable_fields' => 'required|array|min:1',
-            'searchable_fields.*' => 'required|string',
+            // 'searchable_fields' => 'required|array|min:1',
+            // 'searchable_fields.*' => 'required|string',
 
             'displayable_fields' => 'required|array|min:1',
             'displayable_fields.*' => 'required|string',
-            'maps' => 'required|array|min:1',
-            'maps.*' => 'required|string',
-            'attr' => 'required|array|min:1',
-            'attr.*' => 'required|string',
-            'table' => 'required',
+            // 'maps' => 'required|array|min:1',
+            // 'maps.*' => 'required|string',
+            // 'attr' => 'required|array|min:1',
+            // 'attr.*' => 'required|string',
+            // 'table' => 'required',
         ];
     }
 

@@ -21,16 +21,17 @@
 @endpush
 @section('content')
     <div class="container ">
+
         <div class="row">
             <div class="col-md-12 mt-2">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
-                        <h4 class="h4">Coborrower Management -  <span class="cus_name"></span></h4>
+                        <h4 class="h4">Coborrower Management - (Deal: {{$deal_id}})  <span class="cus_name"></span></h4>
                     </div>
                     <div class="card-body">
                         <div class="" id="processArea">
                             <div class="py-2 ">
-                                <label>Contacts</label>
+                                <label>Coborrowers</label>
                                 <select class="form-select custom_select contact select2 form-control" name="contact">
                                 </select>
                             </div>
@@ -39,6 +40,8 @@
                         <div class="appendData">
 
                         </div>
+
+                        @include('components.loader')
                     </div>
                 </div>
             </div>

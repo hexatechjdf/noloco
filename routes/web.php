@@ -5,9 +5,10 @@ use App\Http\Controllers\CRMController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ScriptController;
 use App\Http\Controllers\Admin\MapingController;
-use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\CsvMappingController;
 use App\Http\Controllers\Location\CoborrowerController;
 use App\Http\Controllers\Form\ImageController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Location\DealsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -33,7 +34,11 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
     Route::get('setting/fetch/noloco/tables', [SettingController::class, 'nolocoTables'])->name('setting.fetch.nolocotables');
     Route::get('setting/fetch/noloco/tables/info', [SettingController::class, 'nolocoTablesInfo'])->name('setting.fetch.nolocotables.info');
     Route::post('setting/fetch/noloco/tables', [SettingController::class, 'nolocoTablesSubmit'])->name('setting.fetch.nolocotables.submit');
+
+
     Route::any('setting', [SettingController::class, 'index'])->name('setting.index');
+    Route::any('setting/noloco', [SettingController::class, 'noloco'])->name('setting.noloco');
+    Route::any('setting/mapping/{type?}', [SettingController::class, 'mapping'])->name('setting.mapping');
     Route::post('/setting/save', [SettingController::class, 'save'])->name('setting.save');
 
     Route::group(['as' => 'scripts.', 'prefix' => 'scripts'], function () {
@@ -51,16 +56,32 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
             Route::get('/fields', [MapingController::class, 'customMapingFields'])->name('fields');
         });
 
-        Route::group(['as' => 'ghl.', 'prefix' => 'ghl'], function () {
-            Route::get('/form', [MapingController::class, 'ghlToNolocoForm'])->name('form');
-            Route::post('/form/submit', [MapingController::class, 'ghlToNolocoFormSubmit'])->name('form.submit');
+        Route::group(['as' => 'deals.', 'prefix' => 'deals'], function () {
+            Route::get('/form', [MapingController::class, 'dealsForm'])->name('form');
+            Route::post('/form/submit', [MapingController::class, 'formSubmit'])->name('form.submit');
         });
 
         Route::group(['as' => 'customer.', 'prefix' => 'customer'], function () {
-            Route::get('/', [CustomerController::class, 'index'])->name('index');
-            Route::get('/form/{id?}', [CustomerController::class, 'form'])->name('form');
-            Route::post('/form/submit', [CustomerController::class, 'formSubmit'])->name('form.submit');
-            Route::get('/fields', [CustomerController::class, 'customMapingFields'])->name('fields');
+            Route::get('/form/{id?}', [MapingController::class, 'customerForm'])->name('form');
+            Route::post('/form/submit', [MapingController::class, 'formSubmit'])->name('form.submit');
+        });
+
+        Route::group(['as' => 'coborrower.', 'prefix' => 'coborrower'], function () {
+            Route::get('/form/{id?}', [MapingController::class, 'coborrowerForm'])->name('form');
+            Route::post('/form/submit', [MapingController::class, 'formSubmit'])->name('form.submit');
+        });
+
+        Route::group(['as' => 'csv.', 'prefix' => 'csv'], function () {
+            Route::get('/', [CsvMappingController::class, 'index'])->name('index');
+            Route::get('/create/{id?}', [CsvMappingController::class, 'create'])->name('create');
+            Route::post('/store/{id?}', [CsvMappingController::class, 'store'])->name('store');
+            Route::get('/manage/{id}', [CsvMappingController::class, 'manage'])->name('manage');
+            Route::post('/ftp', [CsvMappingController::class, 'ftp'])->name('ftp');
+            Route::get('/location/form', [CsvMappingController::class, 'locationForm'])->name('location.form');
+            Route::post('/location/store', [CsvMappingController::class, 'locationStore'])->name('location.store');
+
+
+            Route::get('/test/csvs/data', [CsvMappingController::class, 'setCvsFiles']);
         });
     });
 
@@ -70,8 +91,8 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
 Route::group(['as' => 'deals.', 'prefix' => 'deals'], function () {
     Route::get('/management', [DealsController::class, 'index'])->name('setting');
     Route::get('/inventories/search', [DealsController::class, 'searchInventory'])->name('inventories.search');
-    Route::get('/get/customers', [DealsController::class, 'getCustomers'])->name('get.customers');
-    Route::get('/get/deals', [DealsController::class, 'getDeals'])->name('get.deals');
+    Route::get('/get/list', [DealsController::class, 'getDeals'])->name('get.list');
+    // Route::get('/get/deals', [DealsController::class, 'getDeals'])->name('get.deals');
     Route::get('/create/setting', [DealsController::class, 'create'])->name('create.setting');
 });
 
@@ -112,9 +133,13 @@ Route::get('checking/auth', [AutoAuthController::class, 'authChecking'])->name('
 
 use Illuminate\Support\Facades\Log;
 use App\Helper\CRM;
+
+Route::get('webhook/ghl/customer', [WebhookController::class, 'ghlContactToNoloco']);
 Route::get('webhook/customer', function (Request $request) {
     $nol =  $request->all();
     $filteredData = json_decode(supersetting('customerMapping'), true) ?? [];
+
+
 
     $payload = [];
     $array = [];

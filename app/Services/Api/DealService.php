@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Services\Api\InventoryService;
 use App\Models\Setting;
 use App\Helper\CRM;
+use App\Models\CustomFields;
 use Illuminate\Support\Facades\Http;
 
 class DealService
@@ -55,11 +56,12 @@ class DealService
 
 
 
-    public function getDealsByCustomerQuery($customerId, $first = 100)
+    public function getDealsByCustomerQuery($locId,$conId, $first = 100)
     {
+
         $query = <<<GRAPHQL
         query {
-          dealsCollection(first: 100 ,where: {customerId: {equals: "%c"} dealStatus:{equals: "OPEN"}}) {
+          dealsCollection(first: 100 ,where: {dealershipSubAccountId: {equals: "%l"} highlevelClientId: {equals: "%c"} dealStatus:{equals: "OPEN"}}) {
             edges {
               node {
                     id
@@ -96,12 +98,60 @@ class DealService
         GRAPHQL;
 
         $query = str_replace(
-            ['%c'],
-            [$customerId],
+            ['%l','%c'],
+            [$locId,$conId],
             $query
         );
+        return $query;
+    }
 
-        return sprintf($query, $first, $customerId);
+    public function getDealsByCoborrowerQuery($locId,$conId, $first = 100)
+    {
+
+        $query = <<<GRAPHQL
+        query {
+          dealsCollection(first: 100 ,where: {dealershipSubAccountId: {equals: "%l"} coBorrowerHighlevelClientId : {equals: "%c"} dealStatus:{equals: "OPEN"}}) {
+            edges {
+              node {
+                    id
+                    uuid
+                    createdAt
+                    updatedAt
+                    dealStatus
+                    dealType
+                    salesPrice
+                    downPayment
+                    term
+
+                    vehicles {
+                      id
+                      uuid
+                      name
+                      __typename
+                    }
+
+                    docFee
+                    titleFee
+                    licenseFee
+                    lienFee
+                  }
+            }
+            pageInfo {
+               startCursor
+               endCursor
+               hasNextPage
+               hasPreviousPage
+            }
+          }
+        }
+        GRAPHQL;
+
+        $query = str_replace(
+            ['%l','%c'],
+            [$locId,$conId],
+            $query
+        );
+        return $query;
     }
 
 
@@ -124,8 +174,23 @@ class DealService
         return $mutation;
     }
 
-    public function updateDealQuery($customer_id,$dealId)
+    public function updateDealQuery($dealId,$graphqlPayload)
     {
+        $mutation = <<<GRAPHQL
+        mutation {
+            updateDeals($graphqlPayload) {
+                id
+            }
+        }
+        GRAPHQL;
+
+        $mutation = str_replace(
+            ['%s'],
+            [$dealId],
+            $mutation
+        );
+        return $mutation;
+
         $customer_id = (int)$customer_id;
         $mutation = <<<GRAPHQL
         mutation {
@@ -144,6 +209,18 @@ class DealService
         //     [$dealer_id],
         //     $mutation
         // );
+        return $mutation;
+    }
+
+    public function createDealQuery($graphqlPayload)
+    {
+        $mutation = <<<GRAPHQL
+        mutation {
+            createDeals($graphqlPayload) {
+                id
+            }
+        }
+        GRAPHQL;
         return $mutation;
     }
 
@@ -218,14 +295,58 @@ class DealService
 
     public function getContact($locationId,$contact_id)
     {
-        //  $contact_id = "Aiml0qxtPRr1fiK5mOf3";
-        // dd($locationId,$contact_id);
+        $customFields = CustomFields::pluck('key','field_id')->toArray();
+        $array = [];
         try {
             $response = CRM::crmV2Loc('1', $locationId, 'contacts/' . $contact_id, 'get');
-            return $response->contact;
+            // dd($response);
+            foreach($response->contact as $key => $c)
+            {
+                if($key == 'customFields')
+                {
+                    foreach($c as $cf)
+                    {
+                       $k = @$customFields[$cf->id] ?? null;
+                       if($k)
+                       {
+                         $array[$k] = $cf->value;
+                       }
+                    }
+                }
+                if(is_array($c) || is_object($c))
+                {
+                    continue;
+                }
+                $array[$key] = $c;
+            }
+            return $array;
         } catch (\Exception $e) {
             throw $e;
         }
+    }
+
+    public function getContactDeals($locationId,$contactId,$type = 'customerMapping',$only_id = null)
+    {
+        $deals = [];
+        try {
+            $query = $type == 'customerMapping' ? $this->getDealsByCustomerQuery($locationId,$contactId) : $this->getDealsByCoborrowerQuery($locationId,$contactId);
+            $data = $this->inventoryService->submitRequest($query, 1);
+            $res = $data['data']['dealsCollection'];
+            if (isset($res['edges'])) {
+                foreach ($res['edges'] as $edge) {
+                    $item = $edge['node'];
+                    if($only_id)
+                    {
+                       $deals[] = $item['id'];
+                    }else{
+                        $deals[] = ['id' => $item['id'], 'status' => $item['dealStatus'], 'type' => $item['dealType'], 'uuid' => $item['uuid'], 'docType' => $item['docFee']];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+        }
+
+        return $deals;
     }
 
 }

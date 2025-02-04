@@ -2,38 +2,45 @@
 
      let dealId = '{{ $deal_id }}'
      let locationId = '{{ $location_id }}'
-     let contactId = '{{ $location_id }}'
+     let contactId = '{{ @$contact_id }}'
 
-    $('.custom_select').select2({
-        placeholder: 'Select a Vehicle',
-        allowClear: true,
-        dropdownParent: $("#processArea"),
-        ajax: {
-            url: "{{ route('coborrower.contacts.search') }}",
-            data:{locationId: locationId},
-            dataType: 'json',
-            delay: 250,
-            processResults: function(data) {
-                console.log(data);
-                return {
-                    results: [].concat($.map(data, function(item) {
-                        return {
-                            text: item.name,
-                            id: item.id
-                        };
-                    }))
-                };
-            },
-            cache: true
-        }
-    });
+     $('.custom_select').select2({
+    placeholder: 'Select a Coborrower',
+    allowClear: true,
+    dropdownParent: $("#processArea"),
+    ajax: {
+        url: "{{ route('coborrower.contacts.search') }}",
+        dataType: 'json',
+        delay: 250,
+        data: function(params) {
+            return {
+                locationId: locationId,
+                term: params.term // Send the search term to the server
+            };
+        },
+        processResults: function(data) {
+            console.log(data);
+            return {
+                results: $.map(data, function(item) {
+                    return {
+                        text: item.name,
+                        id: item.id
+                    };
+                })
+            };
+        },
+        cache: true
+    }
+});
+
 
 
 
 
     $(document).on('change', '.contact', function() {
-        let contactId = $(this).val();
-
+        contactId = $(this).val();
+        confirmation();
+        return ;
         $.ajax({
             type: 'GET',
             data: {
@@ -55,7 +62,7 @@
 
     })
 
-    function confirmation(customer_id) {
+    function confirmation() {
                     swal.fire({
                         title: 'Are you sure?',
                         text: "You want to add this contact as coborrower in your deal ?",
@@ -65,14 +72,15 @@
                         cancelButtonText: 'No, cancel!',
                         reverseButtons: true
                     }).then(function(result) {
+                        if(result.value)
+                    {
+                        $("#loader-overlay").css("display", "flex").hide().fadeIn(); // Ensures hidden first, then fades in
                         $.ajax({
             type: 'GET',
             data: {
                 contactId: contactId,
                 locationId: locationId,
                 dealId: dealId,
-                customer_id: customer_id,
-
             },
             url: '{{ route('coborrower.set.deal') }}',
             success: function(response) {
@@ -83,8 +91,10 @@
             }else{
                 toastr.error(response.error)
             }
+            $("#loader-overlay").fadeOut();
             }
         });
+                    }
                     });
                 }
     // -
