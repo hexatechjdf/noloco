@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Jobs\SetDealsOBjectJob;
+use App\Services\Api\DealService;
 
 class GetDealsJob implements ShouldQueue
 {
@@ -36,7 +37,7 @@ class GetDealsJob implements ShouldQueue
            $customer_deals =  $dealService->getContactDeals($this->locationId,$this->contactId,$this->type,true);
            foreach($customer_deals as $deal_id)
            {
-             dispatch((new SetDealsOBjectJob($contact, $deal_id,$type)));
+             dispatch((new SetDealsOBjectJob($this->contact, $deal_id,$this->type)));
            }
     }
 }

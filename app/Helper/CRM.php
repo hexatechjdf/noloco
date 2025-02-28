@@ -6,6 +6,8 @@ use App\Models\CrmAuths;
 use Illuminate\Support\Facades\Cache;
 use App\Helper\gCache;
 use Illuminate\Support\Facades\DB;
+use App\Models\CustomFields;
+use Illuminate\Support\Str;
 
 class CRM
 {
@@ -666,7 +668,10 @@ class CRM
             if ($response && property_exists($response, 'customFields')) {
                 $customFields = $response->customFields ?? null;
 
-                $finalCustomFields = collect($customFields)->pluck('name', 'id')->toArray();
+                $finalCustomFields = collect($customFields)->mapWithKeys(function ($item) {
+                    $key = Str::replace("contact.", "", $item->fieldKey);
+                    return [$item->id => ['name' => $item->name, 'fieldKey' => $key]];
+                })->toArray();
             }
 
         } catch (\Exception $e) {
@@ -680,25 +685,25 @@ class CRM
         $contactFields = defaultContactFields();
         $cacheKey = "contactFields";
 
-        $data = Cache::remember($cacheKey, 60 * 60, function () use ($contactFields, $locationId) {
+        $data = Cache::remember($cacheKey, 3 * 3, function () use ($contactFields, $locationId) {
             $customFields = self::getLocationCustomFields($locationId);
             if(count($customFields) > 0)
             {
-                DB::table('custom_fields')->delete();
+                CustomFields::updateOrCreate(['key' => $locationId],[ 'content' => json_encode($customFields)]);
+                $dataa = [];
                 foreach($customFields as $k => $f)
                 {
-                    $data = ['field_id' => $k, 'key' => $f];
-                    DB::table('custom_fields')->insert($data);
+                    $dataa[$f['fieldKey']] = $f['name'];
                 }
             }
-            $mergedFields = array_merge($contactFields, $customFields);
+            $mergedFields = array_merge($contactFields, $dataa);
             return $mergedFields;
         });
         $array = [];
         if ($is_values) {
             foreach ($data as $key => $field) {
                 $keyy = $field && !empty($field) ? $field : $key;
-                $array[$keyy] = '{{' . $keyy . '}}';
+                $array[$keyy] = '{{' . $key . '}}';
             }
 
             return $array;

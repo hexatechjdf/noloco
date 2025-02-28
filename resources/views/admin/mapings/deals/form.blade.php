@@ -22,7 +22,7 @@
                     <div class="card-body">
                         <form method="POST" class="submitForm" action="{{ route('admin.mappings.customer.form.submit') }}">
                             @csrf
-                            @include('admin.mapings.components.columnFields')
+                            @include('admin.mapings.components.columnFields',['opt' => 'options'])
                             <div class="row mb-2">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-primary">Submit</button>

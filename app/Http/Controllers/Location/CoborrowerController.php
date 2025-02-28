@@ -34,6 +34,7 @@ class CoborrowerController extends Controller
     {
         $contact = $this->dealService->getContact($request->locationId,$request->contactId);
         $contact = (object)$contact;
+
         dispatch((new SetDealsOBjectJob($contact, $request->dealId,'coborrowerMapping')));
 
         return response()->json(['success' => 'Successfully Updated']);
@@ -66,18 +67,18 @@ class CoborrowerController extends Controller
             foreach ($detail as $det) {
                 $nameParts = [$det->contactName];
 
-if (!empty($det->email)) {
-    $nameParts[] = $det->email;
-}
+                if (!empty($det->email)) {
+                    $nameParts[] = $det->email;
+                }
 
-if (!empty($det->phone)) {
-    $nameParts[] = $det->phone;
-}
+                if (!empty($det->phone)) {
+                    $nameParts[] = $det->phone;
+                }
 
-$contacts[] = [
-    'name' => implode(' / ', $nameParts),
-    'id' => $det->id
-];
+                $contacts[] = [
+                    'name' => implode(' / ', $nameParts),
+                    'id' => $det->id
+                ];
             }
         }
 

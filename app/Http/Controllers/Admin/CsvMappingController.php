@@ -14,24 +14,28 @@ use App\Models\FtpAccount;
 use Illuminate\Support\Facades\File;
 use App\Services\Api\InventoryService;
 use Illuminate\Support\Facades\DB;
-
+use App\Services\Api\DealService;
+use App\Jobs\GetFoldersJob;
 
 class CsvMappingController extends Controller
 {
     protected $ftpService;
     protected $inventoryService;
+    protected $dealService;
 
-
-    public function __construct(FtpService $ftpService,InventoryService $inventoryService)
+    public function __construct(FtpService $ftpService,InventoryService $inventoryService,DealService $dealService)
     {
         $this->ftpService = $ftpService;
         $this->inventoryService = $inventoryService;
+        $this->dealService = $dealService;
 
     }
 
     public function index()
     {
         $items = CsvMapping::withCount(['locations','accounts'])->paginate(10);
+        $setting = supersetting('ftp_setting', '', 'ftp_%');
+
 
         return view('admin.mapings.csv.index', get_defined_vars());
     }
@@ -91,8 +95,29 @@ class CsvMappingController extends Controller
 
     public function store(CsvMappingRequest $request,$id = null)
     {
-        // dd($request->all());
-        $mapping = json_encode($request->mapping);
+        $headers = $request->headerss ?? [];
+        $count = 0;
+        $data = [];
+        foreach($request->mapping as $key => $map)
+        {
+            if(!$map)
+            {
+                $count++;
+                continue;
+            }
+
+              if(in_array($key, $headers))
+              {
+                 $data[$key] = ['column' => $map];
+              }elseif(isset($headers[$count])){
+                     $ky = $headers[$count];
+                     $data[$ky] = ['column' => $map];
+              }
+              $count++;
+
+        }
+
+        $mapping = json_encode($data);
         $item = CsvMapping::updateOrCreate(['id'=>$id],
         [
             'content' => $mapping,
@@ -106,7 +131,17 @@ class CsvMappingController extends Controller
 
     public function ftp(FtpAccountRequest $request)
     {
-        // dd($request->all());
+        $acc = FtpAccount::when($request->id, function($q)use($request){
+                     $q->where('id','!=',$request->id);
+        })->where('location_id',$request->location_id)->first();
+
+        if($acc)
+        {
+                return response()->json([
+                    'errors' => [['Location already exist']], // Expected format by the front-end
+                    'message' => 'Validation failed',
+                ], 422);
+        }
         list($res,$errors)  = $this->ftpService->createAccount($request);
 
         if($errors)
@@ -118,6 +153,31 @@ class CsvMappingController extends Controller
         }
 
         return response()->json(['success' => true, 'route' => route('admin.mappings.csv.index')]);
+    }
+
+    public function ftpDelete(Request $request)
+    {
+        list($res,$errors)  = $this->ftpService->deleteAccount($request);
+
+        if($errors)
+        {
+            return response()->json([
+                'errors' => [$errors], // Expected format by the front-end
+                'message' => 'Validation failed',
+            ], 422);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function ftpForm(Request $request)
+    {
+        $accounts = FtpAccount::where('mapping_id',$request->csv_id)->get();
+        $idd = $request->csv_id;
+
+        $view = view('admin.mapings.csv.components.ftpSetting', get_defined_vars())->render();
+
+        return response()->json(['success' => true, 'html' => $view]);
     }
 
     public function locationForm(Request $request)
@@ -151,182 +211,99 @@ class CsvMappingController extends Controller
 
     public function setCvsFiles()
     {
-        // $folders = $this->getFolders();
-        // dd($folders);
-        $folders  = ["zaini" =>  ['unique' => 'VIN','mapping' => [
-        "Phone" => "id__NON_NULL",
-        "Email" => "uuid__NON_NULL",
-        "First Name" => "createdAt__NON_NULL",
-        "Last Name" => "vin__String",
-        "Business Name" => "listedPrice__Float",
-        "Source" => "interiorFeatures__String",
-        "Additional Emails" => "vehicleOptions__String",
-        "Additional Phones" => "updatedAt__DateTime",
-        "Notes" => "dealershipSubAccountId__String",
-        "VIN" => "updatedAt__DateTime",
-      ], 'files' => [
-                   "app/csvfiles/zaini/HuVkfWx59Pv4mUMgGRTp_20250128160650_csvsample.csv",
-               ]]];
+        // dispatch((new GetFoldersJob()))->delay(5);
+        // dd(!23);
+        // // $folders = $this->getFolders();
+        // // dd($folders);
+        $folders  = [
+            "noloco002" => [
+                "unique" => "VIN",
+                "mapping" => [
+                    "VIN" => ["column" => "vin__String"],
+                    "Stock" => ["column" => "stock__Int"],
+                    "Year" => ["column" => "year__Int"],
+                    "Make" => ["column" => "make__String"],
+                    "Model" => ["column" => "model__String"],
+                    "Trim" => ["column" => "trim__String"],
+                    "BodyStyle" => ["column" => "bodyStyle__String"],
+                    "ListPrice" => ["column" => "listedPrice__Float"],
+                    "CostPrice" => ["column" => "vehicleCost__Float"],
+                    "Mileage" => ["column" => "miles__Int"],
+                    "FuelType" => ["column" => "fuelType__String"],
+                    "PhotoURL" => ["column" => "photosUrls__String"],
+                    "City" => ["column" => "mpgCity__String"],
+                ],
+                "files" => [
+                    "app/csvfiles/noloco002/geAOl3NEW1iIKIWheJcj_20250211132604_Inventory 1.csv"
+                ],
+                "locationId" => "geAOl3NEW1iIKIWheJcj",
+            ]
+        ];
+
         foreach($folders as $folder => $data)
         {
                $files = $data['files'];
                $unique = $data['unique'];
                $mapping = $data['mapping'];
+               $locationId = $data['locationId'];
+
                 foreach ($files as $csvFile) {
                     $rows = $this->parseCsvFile($csvFile);
+
                     foreach ($rows as $fields) {
                         $val = $fields[$unique];
                         $key = $mapping[$unique];
+
+                        // dd($key,$mapping);
+
                         $invType = 'createInventory';
-                        $filters = $this->setFilter($val,$key);
-                        $id = $this->isExist($key,$val,$filters);
+                        $filters = $this->setFilter($val,$key['column']);
+                        // list($dealer_id,$dealership) =  $this->dealService->getDealership(request(),$locationId);
+                        $dealer_id = 9;
+
+                        $id = 83 ?? $this->isExist($key,$val,$filters,$locationId);
+
                         $data = [];
-                        foreach ($fields as $key => $field) {
-                            // Map CSV headers to fields based on the mapping
-                            if (isset($mapping[$key])) {
-                                list($type,$value) = convertStringToArray('__', $mapping[$key]);
-                                $data[$value] = $field.'__'.$type;
+
+                        foreach($mapping as $k => $map)
+                        {
+                            list($type,$value) = convertStringToArray('__', $map['column']);
+                            if (isset($fields[$k]) && $fields[$k] != '') {
+                                $data[$value] = $fields[$k].'__'.$type;
+                            }elseif(!isset($fields[$k])){
+                                $data[$value] = $k.'__'.$type;
                             }
                         }
+
                         if($id)
                         {
                             $data['id'] = $id.'__Int';
                             $invType = 'updateInventory';
-                        }
-                        $data = arrayToGraphQL($data);
-                        try {
-                            $query = $this->inventoryService->setInventoryDataByCsv($invType,$data);
-                            $data = $this->inventoryService->submitRequest($query);
-                        } catch (\Exception $e) {
+                            try{
+                                $dId = supersetting('deal_dealership_col') ?? '';
+                                $data[$dId] = $dealer_id.'__Int';
+                            }catch(\Exception $e){
+                            }
+                            $variables = ['graphqlPayload' => [arrayToGraphQL1($data)]];
 
+                            try {
+                                $query = $this->inventoryService->setInventoryDataByCsv($variables,$invType);
+                                $data = $this->inventoryService->submitRequest($query,1,$variables);
+
+                                dd($data);
+
+                            } catch (\Exception $e) {
+                               dd($e);
+                            }
                         }
+
+
                     }
             }
         }
-        $accounts = FtpAccount::with('mapping', 'location')
-            ->select('username', 'mapping_id', 'id')
-            ->get();
-            // make it chunks
 
-        foreach ($accounts as $acc) {
-            $externalPath = base_path('../csvfiles/' . $acc->username); // External folder
-            $storagePath = storage_path('app/csvfiles/'.$acc->username); // Target storage folder
-            $unique = $acc->mapping->unique_field;
+        dd(!23);
 
-            // Create storage path if it doesn't exist
-            if (!File::exists($storagePath)) {
-                File::makeDirectory($storagePath, 0755, true);
-            }
-
-            // Skip if external folder doesn't exist
-            if (!File::exists($externalPath)) {
-                continue;
-            }
-
-            $mapping = json_decode(@$acc->mapping->content, true) ?? [];
-            $locationId = @$acc->location->location_id ?? '';
-
-            // Get all files from the external folder
-            $files = File::files($externalPath);
-
-            // foreach ($files as $file) {
-            //     if ($file->getExtension() === 'csv') {
-            //         $newFileName = $locationId . '_' . now()->format('YmdHis') . '_' . $file->getFilename();
-            //         $newFilePath = $storagePath . '/' . $newFileName;
-            //         File::move($file->getPathname(), $newFilePath);
-
-            //         $newFiles[] = $newFilePath;
-            //     }
-            // }
-
-            // Remove all files from the external folder
-            // File::deleteDirectory($externalPath);
-
-            // Process files from the storage folder
-            // $newFiles = File::files($storagePath);
-
-            foreach ($newFiles as $csvFile) {
-                $rows = $this->parseCsvFile($csvFile->getPathname());
-                foreach ($rows as $fields) {
-
-                    $val = $fields[$unique];
-                    $key = $mapping[$unique];
-                    $invType = 'createInventory';
-
-                    $filters = $this->setFilter($val,$key);
-                    $id = $this->isExist($key,$val,$filters);
-                    $data = [];
-                    foreach ($fields as $key => $field) {
-                        // Map CSV headers to fields based on the mapping
-                        if (isset($mapping[$key])) {
-                            list($type,$value) = convertStringToArray('__', $mapping[$key]);
-                            $data[$value] = $field.'__'.$type;
-                        }
-                    }
-                    if($id)
-                    {
-                        $data['id'] = $id.'__Int';
-                        $invType = 'updateInventory';
-                    }
-                    $data = arrayToGraphQL($data);
-                    try {
-                        $query = $this->inventoryService->setInventoryDataByCsv($invType,$data);
-                        $data = $this->inventoryService->submitRequest($query);
-
-                        dd($data);
-
-                    } catch (\Exception $e) {
-
-                    }
-                    dd($data,$mapping);
-                }
-            }
-        }
-    }
-
-    public function getFolders()
-    {
-        $basePath = base_path('../csvfiles'); // Parent folder containing multiple folders
-        $folders = File::directories($basePath); // Get all subdirectories
-        $csvFolders = [];
-
-        foreach ($folders as $folder) {
-            $folderName = basename($folder); // Get folder name
-
-            $acc = FtpAccount::with('mapping', 'location')
-            ->where('username',$folderName)
-            ->select('username', 'mapping_id', 'id')
-            ->first();
-
-            if($acc)
-            {
-                $mapping = json_decode(@$acc->mapping->content, true) ?? [];
-                $locationId = @$acc->location->location_id ?? '';
-                $unique = $acc->mapping->unique_field;
-
-                $files = File::files($folder); // Get all files in the folder
-                $csvFiles = [];
-                $path = 'app/csvfiles/';
-                $storagePath = public_path($path.$folderName);
-                if (!File::exists($storagePath)) {
-                    File::makeDirectory($storagePath, 0755, true);
-                }
-
-                foreach ($files as $file) {
-                    if ($file->getExtension() === 'csv') {
-                        $newFileName = $locationId . '_' . now()->format('YmdHis') . '_' . $file->getFilename();
-                        $newFilePath = $storagePath . '/' . $newFileName;
-                        File::move($file->getPathname(), $newFilePath);
-                        $csvFiles[] = $path. $folderName.'/' . $newFileName;
-                    }
-                }
-
-                if (!empty($csvFiles)) {
-                    $csvFolders[$folderName] = ['unique' => $unique,'mapping' => $mapping, 'files' => $csvFiles];
-                }
-            }
-        }
-        return  $csvFolders;
     }
 
     public function setFilter($value,$key)
@@ -348,7 +325,7 @@ class CsvMappingController extends Controller
         return $filters;
     }
 
-    public function isExist($key,$value,$filters)
+    public function isExist($key,$value,$filters,$locationId)
     {
         $request = request();
         $request->merge(['filters' => $filters]);
@@ -357,6 +334,24 @@ class CsvMappingController extends Controller
             $query = $this->inventoryService->setQuery($request);
             $data = $this->inventoryService->submitRequest($query);
             $id = @$data['data']['inventoryCollection']['edges'][0]['node']['id'];
+            if(!$id)
+            {
+                try{
+                    list($dealer_id,$dealership) =  $this->dealService->getDealership(request(),$locationId);
+                    $dId = supersetting('deal_dealership_col') ?? '';
+                    $ar[$dId] = $dealer_id.'__Int';
+                }catch(\Exception $e){
+                }
+                $graph = arrayToGraphQL($ar);
+
+                try {
+                    $query = $this->inventoryService->setInventoryDataByCsv($graph,'createInventory');
+
+                    $inv = $this->inventoryService->submitRequest($query);
+                    $id = @$inv['data']['createInventory']['id'];
+                } catch (\Exception $e) {
+                }
+            }
 
         } catch (\Exception $e) {
 
@@ -376,12 +371,18 @@ class CsvMappingController extends Controller
         if (!file_exists($filePath)) {
             throw new \Exception("File not found: " . $filePath);
         }
+
+        $data = []; // Initialize data array
+
         if (($handle = fopen($filePath, 'r')) !== false) {
             $headers = fgetcsv($handle);
 
             while (($row = fgetcsv($handle)) !== false) {
                 if ($headers && count($headers) == count($row)) {
-                    $data[] = array_combine($headers, $row);
+                    // Remove rows where all values are empty
+                    if (!empty(array_filter($row))) {
+                        $data[] = array_combine($headers, $row);
+                    }
                 }
             }
 
@@ -390,4 +391,5 @@ class CsvMappingController extends Controller
 
         return $data;
     }
+
 }

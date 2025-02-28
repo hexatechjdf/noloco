@@ -100,11 +100,12 @@ class MappingExtentionController extends Controller
         try {
             $loc = CrmAuths::where('location_id', $location)->first();
             if (!$loc) {
-                $res = CRM::getLocationAccessToken(1, $location);
-                $code = $res->statusCode ?? 200;
-                if ($code != 200) {
-                    return response()->json(['error' => $messsage]);
-                }
+                // add background job for token
+                // $res = CRM::getLocationAccessToken(1, $location);
+                // $code = $res->statusCode ?? 200;
+                // if ($code != 200) {
+                return response()->json(['error' => $messsage]);
+                // }
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $messsage]);
@@ -117,8 +118,7 @@ class MappingExtentionController extends Controller
         // }
 
         try {
-            $query = $inventoryService->setQuery($request, null, $whereClause, 'dealsCollection' );
-            // return $query;
+            $query = $inventoryService->setQuery($request, null, $whereClause, 'dealsCollection' ,true);
             $data = $inventoryService->submitRequest($query);
             $data = @$data['data']['dealsCollection']['edges'] ?? [];
             return response()->json(['data' => $data]);

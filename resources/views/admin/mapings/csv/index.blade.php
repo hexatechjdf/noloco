@@ -50,6 +50,7 @@
         </div>
 
         @include('admin.mapings.csv.modals.ftp')
+        @include('admin.mapings.csv.modals.ftpList')
         @include('admin.mapings.csv.modals.location')
     @endsection
 
@@ -57,10 +58,64 @@
         @include('components.submitForm')
         {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script> --}}
         <script>
-            $(document).on('click','.add_account',function(){
+            $(document).on('click','.manage_accounts',function(){
                   let csvId = $(this).data('id');
                   $('.csv_id').val(csvId);
-                  $('#ftpModal').modal('show')
+
+                  $.ajax({
+                    type: 'GET',
+                    url: '{{route('admin.mappings.csv.ftp.form')}}',
+                    data: {csv_id : csvId},
+                    success: function(response) {
+                        $('.append-data').html(response.html)
+                        $('.csv_id').val(csvId);
+                        $('#ftpModal').modal('show')
+                    }
+                });
+
+            })
+
+            $(document).on('click','.add_account',function(){
+
+                  $(this).closest('.modal').modal('hide')
+                  let id = $(this).data('id');
+                  let csvId = $(this).data('csvid');
+                  let username = $(this).data('username');
+                  let location = $(this).data('location');
+                  $('.username').val(username);
+                  $('.location').val(location);
+                  $('.csv_id').val(csvId);
+                  $('.id').val(id);
+                  if(id)
+                  {
+                    $('.password_area').addClass('hidden');
+                  }else{
+                    $('.password_area').removeClass('hidden');
+                  }
+                  $('#ftpModal1').modal('show')
+            })
+
+            $(document).on('click','.remove_ftp',function(){
+                let id = $(this).data('id');
+                let that = $(this);
+                swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel!',
+                    reverseButtons: true
+                }).then(function(result) {
+                    $.ajax({
+                        type: 'GET',
+                        url: '{{route('admin.mappings.csv.ftp.delete')}}',
+                        data: {id : id},
+                        success: function(response) {
+                            $(that).closest('tr').remove();
+                        }
+                    });
+                })
             })
 
 

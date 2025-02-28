@@ -18,6 +18,7 @@ class FtpAccount extends Model
         'quota',
         'quota_limit',
         'status',
+        'location_id',
     ];
 
     public function mapping()
@@ -28,5 +29,10 @@ class FtpAccount extends Model
     public function location()
     {
      return $this->hasOne(CsvMappingLocation::class, 'account_id');
+    }
+
+    public function getMainUsernameAttribute()
+    {
+        return $this->username.'_'.$this->domain;
     }
 }

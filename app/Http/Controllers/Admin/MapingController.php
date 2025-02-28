@@ -98,6 +98,7 @@ class MapingController extends Controller
         $locationId = supersetting('crm_location_id');
         $contact_fileds = CRM::getContactFields($locationId, true);
 
+
         return [$mapping, $columns,$locationId,$contact_fileds];
     }
 

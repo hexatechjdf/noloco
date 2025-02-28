@@ -39,6 +39,8 @@
                             @csrf
                         <div id="headersContainer" class="mt-4">
 
+
+
                         </div>
                         </form>
                     </div>
@@ -55,7 +57,8 @@
 
 
     <script>
-       $(document).ready(function () {
+
+$(document).ready(function () {
     // Initialize Dropify
     const fields = @json($fields);
     const mapping = @json($mapping);
@@ -63,67 +66,98 @@
     const title = '{{$title}}';
     $('.dropify').dropify();
 
-    // Handle file processing on button click
-    $('#processCsv').on('click', function () {
-    const fileInput = $('#csvFile')[0].files[0];
-
-    if (!fileInput) {
-        alert('Please select a CSV file first.');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-        const csvContent = event.target.result;
-        const rows = csvContent.split('\n');
-
-        // Split headers and clean them
-        const headers = rows[0]
-            .split(',')
-            .map(header => header.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, ''));
-
-        console.log('Cleaned Headers:', headers); // Debug log
-
-        // Display headers with Select2 options
+    function initializeTable(existingHeaders = []) {
         let headersHtml = '<hr><h1 class="csv_head_title">Manage CSV Mapping</h1>';
-        headersHtml += '<div><table class="table">';
-        headersHtml += '<thead><tr><th colspan="3"><label>Enter Title</label><div><input class="form-control title" value="'+title+'" name="title"></div></th></tr><tr><th>CSV Header</th><th>Mapping Option</th><th>Select Unique Field</th></tr></thead><tbody>';
+        headersHtml += '<div><table class="table" id="csvTable">';
+        headersHtml += '<thead><tr><th colspan="4"><label>Enter Title</label><div><input class="form-control title" value="'+title+'" name="title"></div></th></tr>';
+        headersHtml += '<tr><th>CSV Header</th><th>Mapping Option</th><th>Select Unique Field</th><th>Action</th></tr></thead><tbody>';
 
-        headers.forEach(header => {
-            let options = '<option value="">Select Mapping</option>';
-            for (const [field, type] of Object.entries(fields)) {
-                const selected = mapping.hasOwnProperty(header) && mapping[header] === `${field}__${type}` ? 'selected' : '';
-                options += `<option ${selected} value="${field}__${type}">${field}</option>`;
-            }
-            const checked = uniqueF === header ? 'checked' : '';
-            headersHtml += `
-                <tr>
-                    <td>${header}</td>
-                    <td>
-                        <select class="form-control select2 w-100" name="mapping[${header}]">
-                            ${options}
-                        </select>
-                    </td>
-                    <td>
-                        <input type="radio" ${checked} name="unique_field" value="${header}" />
-                    </td>
-                </tr>
-            `;
-        });
+        // If existing mappings are available (Edit Mode)
+        if (existingHeaders.length > 0) {
+            existingHeaders.forEach(header => {
+                headersHtml += generateRow(header, mapping, uniqueF);
+            });
+        }
 
         headersHtml += '</tbody></table></div>';
-        headersHtml += '<div class="w-100"><button class="btn btn-success">Submit</button></div>';
+        headersHtml += '<div class="w-100"><button id="addMore" type="button" class="btn btn-primary">Add More</button> ';
+        headersHtml += '<button class="btn btn-success">Submit</button></div>';
+
         $('#headersContainer').html(headersHtml);
+        $('.select2').select2(); // Initialize Select2 for dropdowns
+    }
 
-        // Initialize Select2
-        $('.select2').select2();
-    };
+    // Handle CSV processing
+    $('#processCsv').on('click', function () {
+        const fileInput = $('#csvFile')[0].files[0];
 
-    reader.readAsText(fileInput);
+        if (!fileInput) {
+            alert('Please select a CSV file first.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const csvContent = event.target.result;
+            const rows = csvContent.split('\n');
+
+            // Extract and clean headers
+            const headers = rows[0]
+                .split(',')
+                .map(header => header.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, ''));
+
+            console.log('Cleaned Headers:', headers); // Debugging
+
+            initializeTable(headers);
+        };
+
+        reader.readAsText(fileInput);
+    });
+
+    // Function to generate table row
+    function generateRow(header = '', mapping = {}, uniqueF = '') {
+        let options = '<option value="">Select Mapping</option>';
+        for (const [field, type] of Object.entries(fields)) {
+            const selected = mapping.hasOwnProperty(header) && mapping[header]['column'] === `${field}__${type}` ? 'selected' : '';
+            options += `<option ${selected} value="${field}__${type}">${field}</option>`;
+        }
+        const checked = uniqueF === header ? 'checked' : '';
+        return `
+            <tr>
+                <td><input type="text" class="form-control" name="headerss[]" value="${header}"></td>
+                <td>
+                    <select class="form-control select2 w-100" name="mapping[${header}]">
+                        ${options}
+                    </select>
+                </td>
+                <td>
+                    <input type="radio" ${checked} name="unique_field" value="${header}" />
+                </td>
+                <td>
+                    <button class="btn btn-danger removeRow">Remove</button>
+                </td>
+            </tr>
+        `;
+    }
+
+    // Load existing mapping on edit page
+    if (Object.keys(mapping).length > 0) {
+        initializeTable(Object.keys(mapping));
+    }
+
+    // Add More Button
+    $(document).on('click', '#addMore', function () {
+        $('#csvTable tbody').append(generateRow());
+        $('.select2').select2(); // Reinitialize Select2 for new rows
+    });
+
+    // Remove Row
+    $(document).on('click', '.removeRow', function () {
+        $(this).closest('tr').remove();
+    });
 });
 
 
-});
 
     </script>
 @endpush

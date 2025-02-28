@@ -1,4 +1,5 @@
 <input type="hidden" name="key" value="{{$keyy}}">
+@php($opt = $opt ?? null)
 @foreach ($columns as $col => $type)
     <div class="row mb-2">
         <div class="col-md-5">
@@ -9,7 +10,7 @@
                 <input type="text" data-mapping="mappingFields" data-key="mappingkey"
                     name="mapping[{{ $col }}]" value="{{ @$mapping[$col]['column'] }}"
                     placeholder="Select mapping values"
-                    class="selectedvalue nullable form-control" >
+                    class="selectedvalue nullable form-control {{$opt}}" >
             </div>
         </div>
         <div class="col-md-2">

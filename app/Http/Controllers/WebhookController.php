@@ -28,13 +28,21 @@ class WebhookController extends Controller
         $contact =  (object)$contact;
         $locationId = @$contact->location['id'] ?? null;
         $contactId = @$contact->contact_id ?? null;
-
-        if($locationId && $contactId)
+        $tags = explode(',', (@$contact->tags ?? '')) ?? [];
+        if(in_array('deals',$tags))
         {
-            dispatch((new GetDealsJob($contact,$contactId,$locationId,'customerMapping')))->delay(5);
-            dispatch((new GetDealsJob($contact,$contactId,$locationId,'coborrowerMapping')))->delay(5);
+            if($locationId && $contactId)
+            {
+                $contact =  $this->dealService->getContact($locationId,$contactId);
+                $contact =  (object)$contact;
+                // Log::info($contact);
+                dispatch((new GetDealsJob($contact,$contactId,$locationId,'customerMapping')))->delay(5);
+                dispatch((new GetDealsJob($contact,$contactId,$locationId,'coborrowerMapping')))->delay(5);
+            }
+
+            return response()->json(['success',true],200);
         }
 
-        return response()->json(['success',true],200);
+
     }
 }

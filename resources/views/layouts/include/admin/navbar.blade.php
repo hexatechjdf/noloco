@@ -53,6 +53,10 @@
 
                             </ul>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Route::is('admin.logs.history') ? 'active' : '' }}"
+                                href="{{ route('admin.logs.history','deals') }}">Logs History</a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         @guest

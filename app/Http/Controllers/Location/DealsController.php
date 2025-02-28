@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Cache;
 use App\Services\Api\InventoryService;
 use App\Services\Api\DealService;
 use App\Jobs\SetDealsOBjectJob;
+use App\Jobs\UpdateDealJob;
 use App\Helper\CRM;
+use Carbon\Carbon;
 
 class DealsController extends Controller
 {
@@ -45,6 +47,7 @@ class DealsController extends Controller
         try {
             $query = $this->inventoryService->setQuery($request);
             $data = $this->inventoryService->submitRequest($query);
+
             if (isset($data['data']['inventoryCollection']['edges'])) {
                 foreach ($data['data']['inventoryCollection']['edges'] as $item) {
                     $node = $item['node'];
@@ -72,6 +75,7 @@ class DealsController extends Controller
         $contact =  $this->dealService->getContact($request->locationId,$request->contactId);
         $customer_name = @$contact['firstName'] . ' '. @$contact['lastName'];
         $deals = $this->dealService->getContactDeals($request->locationId,$request->contactId);
+        // dd($deals);
         $view = view('locations.deals.components.listView', get_defined_vars())->render();
 
         return response()->json(['view' => $view, 'customer_name' => $customer_name]);
@@ -82,26 +86,31 @@ class DealsController extends Controller
         $availableObjects = [];
         $deal_id = null;
         try {
-        list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->locationId);
-        $availableObjects['dealership'] = $dealership;
-        $availableObjects['contact'] = $this->dealService->getContact($request->locationId,$request->contactId);
+            list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->locationId);
+            $availableObjects['dealership'] = $dealership;
+            $availableObjects['contact'] = $this->dealService->getContact($request->locationId,$request->contactId);
 
-        // dd($availableObjects['contact'] );
-        $availableObjects['vehicle'] = $this->getVehicle($request);
-        $data = $this->setQueryData($availableObjects,$dealer_id,@$availableObjects['vehicle']['id'] ?? null);
-        $query = $this->dealService->createDealQuery($data);
-        $data = $this->inventoryService->submitRequest($query, 1);
-        $deal_id = @$data['data']['createDeals']['id'] ?? null;
+            $availableObjects['vehicle'] = $this->getVehicle($request);
+            $variables = updateDealQueryData(null,$dealer_id,@$availableObjects['vehicle']['id'] ?? null);
+            $query = $this->dealService->createDealQuery($variables);
+
+            // $data = $this->inventoryService->submitRequest($query, 1);
+            // $deal_id = @$data['data']['createDeals']['id'] ?? null;
+
+            $deal_id = 132;
         }
         catch(\Exception $e){
             $deal_id = null;
             throw $e;
         }
 
+        if($deal_id && count($availableObjects) > 0)
+        {
+            dispatch((new UpdateDealJob($availableObjects, $deal_id)));
+        }
         if($deal_id && $availableObjects['contact'])
         {
             $contact = (object) $availableObjects['contact'];
-            // ->delay(Carbon::now()->addMinutes(5)))
             dispatch((new SetDealsOBjectJob($contact, $deal_id)));
         }
 
@@ -110,23 +119,23 @@ class DealsController extends Controller
 
     public function getVehicle($request)
     {
-try{
-    $filters = [
-        "filters" => [
-            "column" => "id",
-            "value" => $request->vehicle_id,
-            "order" => "equals",
-        ],
-    ];
-        $request->merge(['filters' => $filters]);
-        $query = $this->inventoryService->setQuery($request);
-        $data = $this->inventoryService->submitRequest($query);
-        return  $this->getDataFromObject($data,'inventoryCollection');
-}catch(Exception $e)
-{
+        try{
+            $filters = [
+                "filters" => [
+                    "column" => "id",
+                    "value" => $request->vehicle_id,
+                    "order" => "equals",
+                ],
+            ];
+            $request->merge(['filters' => $filters]);
+            $query = $this->inventoryService->setQuery($request);
+            $data = $this->inventoryService->submitRequest($query);
+            return  $this->getDataFromObject($data,'inventoryCollection');
+        }catch(Exception $e)
+        {
 
-}
-return [];
+        }
+        return [];
     }
 
     public function getDataFromObject($data,$table_name)
@@ -134,47 +143,4 @@ return [];
        return   $res = @$data['data'][$table_name]['edges'][0]['node'] ?? [];
     }
 
-    public function setQueryData($availableObjects,$dealershipId,$vehicleId = null)
-    {
-        $filteredData = json_decode(supersetting('dealsMapping'), true) ?? [];
-         $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData,$availableObjects) {
-            $value = $filteredData[$keyf];
-            $updatedData = preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($keyf, &$result,$availableObjects) {
-                $key = $matches[1];
-                return $key;
-            }, $value);
-
-            $val = $this->getObjectData($updatedData['column'],$availableObjects) ?? null;
-            $result[$keyf] = ['column' => $val, 'type' => $updatedData['type']];
-            return $result;
-        }, []);
-        $result = [];
-        $result = setDataWithType($replacedData,$result,$dealershipId,$vehicleId);
-
-        return  arrayToGraphQL($result);
-    }
-
-
-
-    public function getObjectData($string,$availableObjects)
-    {
-        $parts = explode('.', $string);
-        $objectName = array_shift($parts);
-
-        if (!isset($availableObjects[$objectName])) {
-            return null;
-        }
-        $currentObject = $availableObjects[$objectName];
-        foreach ($parts as $key) {
-            if (is_array($currentObject) && array_key_exists($key, $currentObject)) {
-                $currentObject = $currentObject[$key];
-            }
-            elseif (is_object($currentObject) && property_exists($currentObject, $key)) {
-                $currentObject = $currentObject->$key;
-            } else {
-                return null;
-            }
-        }
-        return $currentObject;
-    }
 }

@@ -1,0 +1,73 @@
+[data-action="slider"] .contentHolderUnit{
+    height: 400px !important;
+}
+[data-action="slider"] .container {
+           border:1px solid gray;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        [data-action="slider"] .image-container {
+            position: relative;
+            padding:0px 0px 2px 0px;
+        }
+        [data-action="slider"] .image-container img {
+            display: block;
+        }
+        [data-action="slider"]  .info {
+
+            background-color: white;
+            display: flex;
+            justify-content:space-around;
+            align-items: center;
+            position: absolute;
+            bottom: 0px;
+            width: 100%;
+            height: 60px !important;
+        }
+        [data-action="slider"]  .info h2 {
+            font-size: 20px;
+            color: #333;
+            text-align: left;
+        }
+        [data-action="slider"] .info p {
+            margin-top: -12px;
+            text-align: left;
+            font-size: 16px;
+            color: #666;
+
+        }
+        [data-action="slider"] .shop-btn {
+            display: block;
+            padding: 5px 10px;
+            background-color: black;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+            text-align: center;
+            width: 80px;
+        }
+        [data-action="slider"] .shop-btn:hover{
+            background-color: rgb(56, 55, 55);
+        }
+
+
+        [data-action="slider"] .multimedia_perspective_carousel_bottomNav {
+            display: none !important;
+        }
+
+        [data-action="slider"] .multimedia_perspective_carousel.white .leftNav {
+            left: 100px !important;
+        }
+
+        [data-action="slider"] .multimedia_perspective_carousel.white .rightNav {
+            right: 100px !important;
+        }

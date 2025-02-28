@@ -174,21 +174,22 @@ class DealService
         return $mutation;
     }
 
-    public function updateDealQuery($dealId,$graphqlPayload)
+    public function updateDealQuery($graphqlPayload)
     {
         $mutation = <<<GRAPHQL
-        mutation {
-            updateDeals($graphqlPayload) {
-                id
+            mutation bulkUpdateDeals(\$graphqlPayload: [DealsInput!]!) {
+                bulkUpdateDeals(values: \$graphqlPayload) {
+                    id
+                }
             }
-        }
         GRAPHQL;
-
-        $mutation = str_replace(
-            ['%s'],
-            [$dealId],
-            $mutation
-        );
+        // $mutation = <<<GRAPHQL
+        // mutation {
+        //     updateDeals($graphqlPayload) {
+        //         id
+        //     }
+        // }
+        // GRAPHQL;
         return $mutation;
 
         $customer_id = (int)$customer_id;
@@ -295,7 +296,8 @@ class DealService
 
     public function getContact($locationId,$contact_id)
     {
-        $customFields = CustomFields::pluck('key','field_id')->toArray();
+        $fields = CustomFields::where('key',$locationId)->select('content')->first();
+        $customFields = $fields ?  (json_decode($fields->content,true) ?? []) : [];
         $array = [];
         try {
             $response = CRM::crmV2Loc('1', $locationId, 'contacts/' . $contact_id, 'get');
@@ -309,7 +311,7 @@ class DealService
                        $k = @$customFields[$cf->id] ?? null;
                        if($k)
                        {
-                         $array[$k] = $cf->value;
+                         $array[$k['fieldKey']] = $cf->value;
                        }
                     }
                 }
@@ -323,6 +325,7 @@ class DealService
         } catch (\Exception $e) {
             throw $e;
         }
+
     }
 
     public function getContactDeals($locationId,$contactId,$type = 'customerMapping',$only_id = null)
@@ -331,6 +334,7 @@ class DealService
         try {
             $query = $type == 'customerMapping' ? $this->getDealsByCustomerQuery($locationId,$contactId) : $this->getDealsByCoborrowerQuery($locationId,$contactId);
             $data = $this->inventoryService->submitRequest($query, 1);
+            // dd($data);
             $res = $data['data']['dealsCollection'];
             if (isset($res['edges'])) {
                 foreach ($res['edges'] as $edge) {

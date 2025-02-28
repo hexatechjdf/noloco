@@ -68,10 +68,42 @@
                                             value="{{ route('coborrower.setting') }}?locationId={{ braceParser('[[location.id]]') }}&dealId={{ braceParser('[[deal.id]]') }}">
                                     </div>
                                 </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Inventory Link Search Contacts</label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('inventory.setting') }}?locationId={{ braceParser('[[location.id]]') }}&vin={{ braceParser('[[inventory.vin]]') }}">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </form>
+            </div>
+            <div class="col-md-12 mt-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="h4">Ghl contact webhook url for workflow</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger">
+                            <ul>
+                                <li>Add below url to your webhook url.</li>
+                            </ul>
+                        </div>
+                        <div class="copy-container">
+                            <input type="text" class="form-control code_url"
+                                value="{{ route('ghl.to.noloco') }}"
+                                readonly>
+                            <div class="row my-2">
+                                <div class="col-md-12" style="text-align: left !important">
+                                    <button type="button" class="btn btn-primary script_code copy_url" data-message="Link Copied"
+                                        id="kt_account_profile_details_submit">Copy URL</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="col-md-12 mt-2">
@@ -224,6 +256,30 @@
                                         <input type="text" class="form-control "
                                             value="{{ $settings['ftp_domain'] ?? '' }}"
                                             name="setting[ftp_domain]" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Port</label>
+                                        <input type="text" class="form-control "
+                                            value="{{ $settings['ftp_port'] ?? '' }}"
+                                            name="setting[ftp_port]" required>
+                                    </div>
+                                </div>
+                                {{-- <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Server</label>
+                                        <input type="text" class="form-control "
+                                            value="{{ $settings['ftp_server'] ?? '' }}"
+                                            name="setting[ftp_server]" required>
+                                    </div>
+                                </div> --}}
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Host / Server / IP Address</label>
+                                        <input type="text" class="form-control "
+                                            value="{{ $settings['ftp_ip'] ?? '' }}"
+                                            name="setting[ftp_ip]" required>
                                     </div>
                                 </div>
 

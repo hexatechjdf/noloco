@@ -37,6 +37,7 @@
 
     <script>
         let jsonDataa = @json($contact_fileds);
+        console.log(jsonDataa);
 
         // jsonDataa = convertToList(jsonDataa);
         initMappingPicker('.mappingPicker', {}, false, true);

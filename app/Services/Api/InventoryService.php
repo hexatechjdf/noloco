@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\Http;
 
 class InventoryService
 {
-    public function setQuery($request, $id = null, $filters = null, $table_name = null)
+    public function setQuery($request, $id = null, $filters = null, $table_name = null,$isAll = null)
     {
         $table_name = $table_name ?? 'inventoryCollection';
         $after = $request->after;
         $before = $request->before;
-        $query = $this->getQuery($table_name);
+        $query = $this->getQuery($table_name,'title','ASC', $isAll);
+        // return $query;
         $whereClause = ($filters ? $filters : $this->setFilters($request, $id)) ?: '{}';
 
         $sortingClause = $table_name == 'inventoryCollection' ? $this->getSorting($request) : "";
@@ -48,20 +49,30 @@ class InventoryService
         }
         return ", orderBy: { field :  \"$sortColumn\", direction: $sortDirection }";
     }
-    public function getQuery($tableName = null, $sortColumn = 'title', $sortDirection = 'ASC')
+
+
+
+
+    public function getQuery($tableName = null, $sortColumn = 'title', $sortDirection = 'ASC',$isAll = false)
     {
 
         $tableName = $tableName ?? 'inventoryCollection';
-        $fields = fields($tableName); // Get the array of fields from the helper function
+        $fields = fields($tableName,$isAll); // Get the array of fields from the helper function
 
-        // return $fields;
-        // Generate the fields dynamically
         $fieldsString = '';
-        foreach ($fields as $field) {
-            $fieldsString .= is_array($field)
-                ? sprintf("%s { %s } ", key($field), implode(' ', current($field)))
-                : $field . "\n";
+
+        if($isAll)
+        {
+           $fieldsString = buildGraphQLFields($fields);
+        }else{
+            foreach ($fields as $field) {
+                $fieldsString .= is_array($field)
+                    ? sprintf("%s { %s } ", key($field), implode(' ', current($field)))
+                    : $field . "\n";
+            }
         }
+
+
 
         $query = <<<GRAPHQL
         query {
@@ -278,16 +289,17 @@ class InventoryService
         return "{$column}: { {$order}: $formattedValue }";
     }
 
-    public function submitRequest($query,$test = 1)
+    public function submitRequest($query,$test = 1,$values = null,$retry = 0)
     {
+        $try = 1;
         $appApiKey = supersetting('noloco_app_key', null);
         $appName = supersetting('noloco_app_name', null);
 
-        // if($test == 1)
-        // {
-        //     $appApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoic2FhZGpkZnVubmVsQGdtYWlsLmNvbSIsInByb2plY3QiOiJzdGFyYXV0byIsInR5cGUiOiJBUEkiLCJpYXQiOjE3MzY0MzUzNTV9.Ff03UbpAjiSQLyk24NH2YhbG1zFbZATLzXoF7rbGLTg";
-        //     $appName = "starauto";
-        // }
+        if($test == 1)
+        {
+            $appApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoic2FhZGpkZnVubmVsQGdtYWlsLmNvbSIsInByb2plY3QiOiJzdGFyYXV0byIsInR5cGUiOiJBUEkiLCJpYXQiOjE3MzY0MzUzNTV9.Ff03UbpAjiSQLyk24NH2YhbG1zFbZATLzXoF7rbGLTg";
+            $appName = "starauto";
+        }
         if ($appApiKey && $appName) {
             try {
                 $response = Http::withHeaders([
@@ -295,30 +307,48 @@ class InventoryService
                     'Content-Type' => 'application/json',
                 ])->post("https://api.portals.noloco.io/data/{$appName}", [
                             'query' => $query,
+                            'variables' => $values
                         ]);
                 if ($response->successful()) {
 
                     $data = $response->json();
                     return $data;
+                }else{
+                    $data = $response->json();
+                    if(isset($data['errors']) && $values)
+                    {
+                        return $data;
+                    }
                 }
             } catch (\Exception $e) {
-
+                dd($e);
                 throw $e;
             }
         }
-
         return [];
     }
 
     public function setInventoryDataByCsv($graphqlPayload,$invMutationType)
     {
-        $mutation = <<<GRAPHQL
-        mutation {
-            $invMutationType($graphqlPayload) {
-                id
-            }
+        if( $invMutationType == 'updateInventory')
+        {
+            $mutation = <<<GRAPHQL
+                mutation bulkUpdateInventory(\$graphqlPayload: [InventoryInput!]!) {
+                    bulkUpdateInventory(values: \$graphqlPayload) {
+                        id
+                    }
+                }
+           GRAPHQL;
         }
-        GRAPHQL;
+        else{
+            $mutation = <<<GRAPHQL
+                mutation {
+                    $invMutationType($graphqlPayload) {
+                        id
+                    }
+                }
+            GRAPHQL;
+        }
         return $mutation;
     }
 }

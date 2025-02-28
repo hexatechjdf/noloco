@@ -9,7 +9,9 @@ use Illuminate\Support\Str;
 use Nwidart\Modules\Facades\Module;
 use libphonenumber\PhoneNumberUtil;
 use libphonenumber\PhoneNumberFormat;
+use Illuminate\Support\Facades\Log;
 use libphonenumber\PhoneNumberToCarrierMapper;
+use App\Models\ErrorLog;
 
 function supersetting($key, $default = '', $keys_contain = null)
 {
@@ -187,15 +189,63 @@ function getNonObjectFields($input, $table = null)
 
     return $fields;
 }
-function fields($tableName = null)
-{
 
+function transformGraphQLData($data,$parent=false)
+{
+    if (is_array($data)) {
+        $transformed = [];
+        foreach ($data as $key => $value) {
+            if($parent && in_array($value, ['inventory','vendorAddress','photos', 'phoneNumber','streetAddress','vendors','logo','customers','dealership']))
+            {
+                continue;
+            }
+            if(!in_array($value,['createdBy', 'deals', 'vendorAddress']) && !in_array($key,['createdBy', 'deals', 'vendorAddress']))
+            {
+
+                if (is_numeric($key)) {
+                    $transformed[] = $value;
+                }
+                else{
+                    $transformed[$key] = transformGraphQLData($value,$key);
+                }
+            }
+
+
+            // Recursively transform nested arrays
+        }
+        return $transformed;
+    }
+    if($data != 'createdBy' && $data != 'deals')
+    {
+        return $data;
+    }
+}
+
+
+
+function buildGraphQLFields($fields) {
+    $fieldsString = '';
+
+    foreach ($fields as $key => $field) {
+        if (is_array($field)) {
+            $nestedFields = buildGraphQLFields($field);
+            $fieldsString .= sprintf("%s { %s } ", $key, $nestedFields);
+        } else {
+            $fieldsString .= $field . " ";
+        }
+    }
+
+    return trim($fieldsString);
+}
+
+
+function fields($tableName = null,$isall = false)
+{
     try {
         if ($tableName) {
             $table = MappingTable::where('title', $tableName)->first();
             $columns = json_decode($table->columns, true);
-
-            $data = getNonObjectFields($columns, $table->title);
+            $data = $isall ?  transformGraphQLData($columns) :getNonObjectFields($columns, $table->title);
             $data = array_filter($data, function ($str) {
                 if (!is_array($str)) {
                     return strpos($str, '_') !== 0; // Only include strings NOT starting with '_'
@@ -259,10 +309,10 @@ function getMappingTables($type = null,$names= null)
 function defaultContactFields()
 {
     return [
-        "id",
+        "id" => 'Contact Id',
         "contactName" => '',
         "locationId" => '',
-        "firstName" => '',
+        "firstName" =>'',
         "lastName" => '',
         // 'firstNameLowerCase' => 'First Name',
         // 'lastNameLowerCase' => 'Last Name',
@@ -275,7 +325,7 @@ function defaultContactFields()
         "dndSettings" => '',
         "type" => '',
         "source" => '',
-        "assignedTo",
+        "assignedTo" => '',
         "address1" => '',
         "city" => '',
         "state" => '',
@@ -315,12 +365,14 @@ function processColumns($columns, $parentKey = '',$exclude= [],$containKey = nul
 function columnsTypes()
 {
 return [
-   'string' => 'string',
-   'phone' => 'Phone',
-   'date' => 'date',
-   'float' => 'float',
-   'int' => 'int',
-   'enum' => 'Enum',
+   'Int' => 'Integer',
+   'Phone' => 'Phone',
+   'DateTime' => 'DateTime',
+   'Date' => 'Date',
+   'Float' => 'Float',
+   'Boolean' => 'Boolean',
+   'ENUM' => 'ENUM',
+   'String' => 'String',
 ];
 }
 
@@ -352,7 +404,9 @@ function arrayToGraphQL($data)
             $result[] = checkValueByType($type,$key,$value);
         }
     }
-    return implode(', ', $result);
+    $res =  implode(', ', $result);
+    return $res;
+    // dd($data);
 }
 
 function convertStringToArray($del, $value)
@@ -371,6 +425,7 @@ function checkValueByType($type,$key,$value,$is_seperate = null)
         $value = (float)$value;
         $ret =  "$key: $value";
     } elseif ($type === 'ENUM' || $type === 'enum') {
+        // add value checker
         $value = transformStateString(strtoupper($value));
         $ret =  "$key: $value";
 
@@ -378,6 +433,13 @@ function checkValueByType($type,$key,$value,$is_seperate = null)
         $value  = customDate($value, 'm/d/Y','time');
         $ret =  "$key: \"$value\"";
 
+    }elseif ($type === 'Boolean' || $type === 'bool') {
+        $value = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if (is_null($value)) {
+            $ret = "$key: null"; // Handle invalid values as null
+        } else {
+            $ret = "$key: " . ($value ? 'true' : 'false'); // Ensure GraphQL expects true/false
+        }
     } else {
         $value = (string)$value;
         $ret =  "$key: \"$value\"";
@@ -388,41 +450,44 @@ function checkValueByType($type,$key,$value,$is_seperate = null)
 
 function setDataWithType($array,$result,$dealershipId=null,$vehicleId = null)
 {
-        if($dealershipId && $vehicleId)
+    if($dealershipId && $vehicleId)
+    {
+        $vId = supersetting('deal_vehicle_col') ?? '';
+        $array[$vId] = ['column' => $vehicleId, 'type' => 'int'];
+        $dId  = supersetting('deal_dealership_col') ?? '';
+        $array[$dId] = ['column' => $dealershipId, 'type' => 'int'];
+        $array['dealStatus'] = ['column' => 'open', 'type' => 'ENUM'];
+    }
+    foreach ($array as $key => $data) {
+        if (!is_array($data) || !isset($data['column'], $data['type'])) {
+            continue;
+        }
+        $value = $data['column'];
+        if(!empty($value))
         {
-            $vId = $filteredData = supersetting('deal_vehicle_col') ?? '';
-            $array[$vId] = ['column' => $vehicleId, 'type' => 'int'];
-            $dId = $filteredData = supersetting('deal_dealership_col') ?? '';
-            $array[$dId] = ['column' => $dealershipId, 'type' => 'int'];
-        }
-        foreach ($array as $key => $data) {
-            if (!is_array($data) || !isset($data['column'], $data['type'])) {
-                continue;
-            }
-            $value = $data['column'];
-            if(!empty($value))
-            {
-                $type = $data['type'];
+            $type = $data['type'];
 
-                $value = $value.'__'.$type;
-                $keys = explode('.', $key);
-                $temp = &$result;
-                foreach ($keys as $k) {
-                    if (!isset($temp[$k])) {
-                        $temp[$k] = [];
-                    }
-                    $temp = &$temp[$k];
+            $value = $value.'__'.$type;
+            $keys = explode('.', $key);
+            $temp = &$result;
+            foreach ($keys as $k) {
+                if (!isset($temp[$k])) {
+                    $temp[$k] = [];
                 }
-                $temp = $value;
+                $temp = &$temp[$k];
             }
-
+            $temp = $value;
         }
-        return $result;
+
+    }
+    return $result;
 }
 
 function setDealQueryData($contact,$result,$map_type = 'customerMapping')
 {
     $filteredData = json_decode(supersetting($map_type), true) ?? [];
+    Log::info($filteredData);
+    // Log::info($contact);
     $result = [];
     $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData, $contact) {
         $value = $filteredData[$keyf];
@@ -435,6 +500,10 @@ function setDealQueryData($contact,$result,$map_type = 'customerMapping')
                 $result[$updatedString] = ['column' => $country, 'type' => 'string'];
                 return $number;
             }
+            if($key == 'today')
+            {
+                return Carbon::now();
+            }
             return isset($contact->{$key}) ? $contact->{$key} : '';
         }, $value);
 
@@ -444,9 +513,46 @@ function setDealQueryData($contact,$result,$map_type = 'customerMapping')
     }, []);
 
     $result = setDataWithType($replacedData,[]);
+
     $result['id'] = "%s";
 
+    return  ['graphqlPayload' => [arrayToGraphQL1($result)]];
+
     return  arrayToGraphQL($result);
+}
+
+function arrayToGraphQL1($data)
+{
+    $result = [];
+
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+            // Recursively process nested arrays
+            $result[$key] = arrayToGraphQL1($value);
+        } else {
+            list($type, $value) = convertStringToArray('__', $value);
+            $result[$key] = formatValueByType1($type, $value);
+        }
+    }
+
+    return $result;
+}
+
+function formatValueByType1($type, $value)
+{
+    if ($type === 'Int' || $type === 'int') {
+        return (int) ltrim($value, '0'); // Remove leading zeros for integers
+    } elseif ($type === 'Float' || $type === 'float') {
+        return (float) $value;
+    } elseif ($type === 'Boolean' || $type === 'bool') {
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+    } elseif ($type === 'ENUM' || $type === 'enum') {
+        return transformStateString(strtoupper($value));
+    } elseif ($type === 'DateTime' || $type === 'Date') {
+        return customDate($value, 'm/d/Y', 'time');
+    }
+
+    return (string) $value;
 }
 
 function getCountryForPhoneNumber($phoneNumber, $defaultRegion = 'PK')
@@ -493,4 +599,143 @@ function transformStateString($string)
 {
     // Use regex to match the pattern and replace spaces or hyphens with an underscore
     return preg_replace('/\s*[-\s]\s*/', '_', $string);
+}
+
+function extractGraphQLErrors(array $errors,$type = 'update')
+{
+    $extractedErrors = [];
+    foreach ($errors as $error) {
+        if (isset($error['message'])) {
+            preg_match('/"graphqlPayload\[0\]\.(.*?)"/', $error['message'], $matches);
+
+            if (!empty($matches[1])) {
+                $columnName = $matches[1];
+                $errorMessage = explode(';', $error['message'])[1] ?? $error['message'];
+
+                $extractedErrors[] = [
+                    'column' => $columnName,
+                    'error' => trim($errorMessage),
+                ];
+            }
+        }
+    }
+
+    return $extractedErrors;
+}
+
+
+function removeInvalidGraphQLFields(array &$variables, array $errors)
+{
+    foreach ($errors as $error) {
+        if (isset($error['column'])) {
+            $keys = explode('.', $error['column']); // Convert "coBorrowerPhone.number" to ['coBorrowerPhone', 'number']
+            unsetNestedKey($variables['graphqlPayload'][0], $keys);
+        }
+    }
+
+    // Recursively remove empty arrays
+    $variables['graphqlPayload'][0] = removeEmptyArrays($variables['graphqlPayload'][0]);
+
+    return $variables;
+}
+
+function unsetNestedKey(array &$array, array $keys)
+{
+    $key = array_shift($keys); // Get the first key
+
+    if (count($keys) === 0) {
+        unset($array[$key]); // If it's the last key, remove it
+    } elseif (isset($array[$key]) && is_array($array[$key])) {
+        unsetNestedKey($array[$key], $keys); // Recursively move deeper
+    }
+}
+
+
+function removeEmptyArrays(array $array)
+{
+    foreach ($array as $key => &$value) {
+        if (is_array($value)) {
+            $value = removeEmptyArrays($value);
+            if (empty($value)) {
+                unset($array[$key]); // Remove empty arrays
+            }
+        }
+    }
+    return $array;
+}
+
+function createErrorLogs($errors,$variables,$type = 'create', $dealId =null ,$table = 'Deals',$for = 'deals')
+{
+    $errors = extractGraphQLErrors($errors,$type);
+    $res = null;
+    if(is_array($errors) && count($errors) > 0)
+    {
+        $res = removeInvalidGraphQLFields($variables, $errors);
+        foreach($errors as $ee)
+        {
+            ErrorLog::create([
+                'type' => $type,
+                'table' => $table,
+                'for' => $for,
+                'table_id' => $dealId,
+                'column' => $ee['column'],
+                'error' => $ee['error'],
+            ]);
+        }
+    }
+
+
+    return $res;
+}
+
+function updateDealQueryData($availableObjects=null, $dealershipId=null, $vehicleId = null)
+{
+    $replacedData = [];
+    if($availableObjects)
+    {
+        $filteredData = json_decode(supersetting('dealsMapping'), true) ?? [];
+        $replacedData = array_map(function ($value) use ($availableObjects) {
+            if (preg_match('/\{\{(.*?)\}\}/', $value['column'], $matches)) {
+                $val = getDealsObjectData($matches[1], $availableObjects) ?? null;
+            } else {
+                $val = $value['column'];
+            }
+            return ['column' => $val, 'type' => $value['type']];
+        }, $filteredData);
+    }
+
+    $result = setDataWithType($replacedData, [], $dealershipId, $vehicleId);
+    if($availableObjects)
+    {
+        $result['id'] = "%s";
+        return ['graphqlPayload' => [arrayToGraphQL1($result)]];
+    }
+    return  arrayToGraphQL($result);
+}
+
+function getDealsObjectData($string,$availableObjects)
+{
+
+    $parts = explode('.', $string);
+    $objectName = array_shift($parts);
+
+    if (!isset($availableObjects[$objectName])) {
+        return null;
+    }
+    $currentObject = $availableObjects[$objectName];
+    foreach ($parts as $key) {
+        if (is_array($currentObject) && array_key_exists($key, $currentObject)) {
+            $currentObject = $currentObject[$key];
+        }
+        elseif (is_object($currentObject) && property_exists($currentObject, $key)) {
+            $currentObject = $currentObject->$key;
+        } else {
+            if($key == 'today')
+            {
+                return Carbon::now();
+            }
+            return null;
+        }
+    }
+    return $currentObject;
 }

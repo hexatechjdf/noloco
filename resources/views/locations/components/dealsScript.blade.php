@@ -53,37 +53,43 @@ function formatSelection(item) {
     let locationId = '{{ $location_id }}'
 
     $(document).ready(function() {
+        getDealsList();
+    })
+
+    function getDealsList()
+    {
         $("#loader-overlay").css("display", "flex").hide().fadeIn(); // Ensures hidden first, then fades in
 
-        $.ajax({
-            type: 'GET',
-            data: {
-                contactId: contactId,
-                locationId: locationId,
-            },
-            url: '{{ route('deals.get.list') }}',
-            success: function(response) {
-                console.log(response);
-                if(response.error)
-            {
-                toastr.error(response.error);
-                return ;
-            }
-                $('.cus_name').text(response.customer_name);
-                if(response.customer_name)
-            {
-                $('.create_deal_btn').removeClass('hide');
-            }
-                $('.appendData').html(response.view);
-                $("#loader-overlay").fadeOut();
-            }
-        });
-    })
+$.ajax({
+    type: 'GET',
+    data: {
+        contactId: contactId,
+        locationId: locationId,
+    },
+    url: '{{ route('deals.get.list') }}',
+    success: function(response) {
+        console.log(response);
+        if(response.error)
+    {
+        toastr.error(response.error);
+        return ;
+    }
+        $('.cus_name').text(response.customer_name);
+        if(response.customer_name)
+    {
+        $('.create_deal_btn').removeClass('hide');
+    }
+        $('.appendData').html(response.view);
+        $("#loader-overlay").fadeOut();
+    }
+});
+    }
 
 
 
     $(document).on('click', '.create_deal_btn', function() {
         let id = $('.vehicle_field').val();
+
         if(!id)
     {
         toastr.error('Please select vehicle first');
@@ -101,7 +107,8 @@ function formatSelection(item) {
             url: '{{ route('deals.create.setting') }}',
             success: function(response) {
                 console.log(response);
-                $("#loader-overlay").fadeOut();
+                toastr.success('Successfully Created');
+                getDealsList();
             }
         });
 

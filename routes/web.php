@@ -7,8 +7,10 @@ use App\Http\Controllers\Admin\ScriptController;
 use App\Http\Controllers\Admin\MapingController;
 use App\Http\Controllers\Admin\CsvMappingController;
 use App\Http\Controllers\Location\CoborrowerController;
+use App\Http\Controllers\Location\InventoryController;
 use App\Http\Controllers\Form\ImageController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\LogsController;
 use App\Http\Controllers\Location\DealsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -40,6 +42,11 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
     Route::any('setting/noloco', [SettingController::class, 'noloco'])->name('setting.noloco');
     Route::any('setting/mapping/{type?}', [SettingController::class, 'mapping'])->name('setting.mapping');
     Route::post('/setting/save', [SettingController::class, 'save'])->name('setting.save');
+
+
+    Route::get('/logs/history/{type}', [LogsController::class, 'history'])->name('logs.history');
+    Route::get('/logs/history/form/setting', [LogsController::class, 'historyForm'])->name('logs.history.form');
+    Route::post('/logs/history/manage/{id}', [LogsController::class, 'historyManage'])->name('logs.history.manage');
 
     Route::group(['as' => 'scripts.', 'prefix' => 'scripts'], function () {
         Route::get('/', [ScriptController::class, 'index'])->name('index');
@@ -77,6 +84,11 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
             Route::post('/store/{id?}', [CsvMappingController::class, 'store'])->name('store');
             Route::get('/manage/{id}', [CsvMappingController::class, 'manage'])->name('manage');
             Route::post('/ftp', [CsvMappingController::class, 'ftp'])->name('ftp');
+            Route::get('/ftp/form', [CsvMappingController::class, 'ftpForm'])->name('ftp.form');
+            Route::get('/ftp/delete', [CsvMappingController::class, 'ftpDelete'])->name('ftp.delete');
+            Route::get('/delete', [CsvMappingController::class, 'delete'])->name('delete');
+
+
             Route::get('/location/form', [CsvMappingController::class, 'locationForm'])->name('location.form');
             Route::post('/location/store', [CsvMappingController::class, 'locationStore'])->name('location.store');
 
@@ -101,6 +113,9 @@ Route::group(['as' => 'coborrower.', 'prefix' => 'coborrower'], function () {
     Route::get('/contacts/search', [CoborrowerController::class, 'contactsSearch'])->name('contacts.search');
     Route::get('/get/customer', [CoborrowerController::class, 'getCustomer'])->name('get.customer');
     Route::get('/set/deal', [CoborrowerController::class, 'setDeal'])->name('set.deal');
+});
+Route::group(['as' => 'inventory.', 'prefix' => 'inventory'], function () {
+    Route::get('/management', [InventoryController::class, 'index'])->name('setting');
 });
 
 
@@ -134,12 +149,9 @@ Route::get('checking/auth', [AutoAuthController::class, 'authChecking'])->name('
 use Illuminate\Support\Facades\Log;
 use App\Helper\CRM;
 
-Route::get('webhook/ghl/customer', [WebhookController::class, 'ghlContactToNoloco']);
 Route::get('webhook/customer', function (Request $request) {
     $nol =  $request->all();
     $filteredData = json_decode(supersetting('customerMapping'), true) ?? [];
-
-
 
     $payload = [];
     $array = [];
@@ -177,13 +189,16 @@ Route::get('webhook/customer', function (Request $request) {
 });
 
 use App\Jobs\ProcessRefreshToken;
+
 use Modules\Onboarding\App\Jobs\CheckCustomValuesJob;
 Route::get('/cron-jobs/process_refresh_token', function () {
-
-    // dispatch((new CheckCustomValuesJob('HuVkfWx59Pv4mUMgGRTp', 9)));
-    // return response()->json(['success' => 'We are matching custom values']);
-
     dispatch((new ProcessRefreshToken()));
+});
+
+use App\Jobs\GetFoldersJob;
+
+Route::get('/cron-jobs/process/csv/files', function () {
+    dispatch((new GetFoldersJob()))->delay(5);
 });
 
 

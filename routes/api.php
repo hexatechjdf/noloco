@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\MappingExtentionController;
 use App\Http\Controllers\Api\UploaderController;
+use App\Http\Controllers\WebhookController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -20,6 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+Route::post('webhook/ghl/customer', [WebhookController::class, 'ghlContactToNoloco'])->name('ghl.to.noloco')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::prefix('inventory')->name('inventory.')->group(function () {
     Route::post('/list', [InventoryController::class, 'index']);
