@@ -68,6 +68,25 @@
                                             value="{{ route('coborrower.setting') }}?locationId={{ braceParser('[[location.id]]') }}&dealId={{ braceParser('[[deal.id]]') }}">
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-12 mt-2">
+                <div class="card">
+                        <div class="card-header">
+                            <h4 class="h4">{{ __('file.noloco') }} Form Url's</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Deal's Form </label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('deals.form.setting') }}?locationId={{ braceParser('[[location.id]]') }} ">
+                                    </div>
+                                </div>
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label class="form-label">Inventory Link Search Contacts</label>
@@ -77,8 +96,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                </div>
             </div>
             <div class="col-md-12 mt-2">
                 <div class="card">
@@ -176,6 +194,12 @@
                                     <input type="text" class="form-control "
                                         value="{{ $settings['upl_all_image_col'] ?? '' }}"
                                         name="setting[upl_all_image_col]" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Vin Custom field id <code></code></label>
+                                    <input type="text" class="form-control "
+                                        value="{{ $settings['custom_field_id'] ?? '' }}" name="setting[custom_field_id]">
                                 </div>
                             </div>
                             <div class="row">

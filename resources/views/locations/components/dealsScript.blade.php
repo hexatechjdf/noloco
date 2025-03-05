@@ -1,5 +1,8 @@
+
+@php($script_type = $script_type ?? 'deal')
+
 <script>
-    $('.custom_select').select2({
+    $('.custom_select_vehicle').select2({
     placeholder: 'Select a Vehicle',
     allowClear: true,
     dropdownParent: $("#inventoriesProcessArea"),
@@ -32,6 +35,36 @@
     }
 });
 
+
+$('.custom_select').select2({
+    placeholder: 'Select a Contact',
+    allowClear: true,
+    dropdownParent: $("#processArea"),
+    ajax: {
+        url: "{{ route('coborrower.contacts.search') }}",
+        dataType: 'json',
+        delay: 250,
+        data: function(params) {
+            return {
+                locationId: locationId,
+                term: params.term // Send the search term to the server
+            };
+        },
+        processResults: function(data) {
+            console.log(data);
+            return {
+                results: $.map(data, function(item) {
+                    return {
+                        text: item.name,
+                        id: item.id
+                    };
+                })
+            };
+        },
+        cache: true
+    }
+});
+
 function formatVehicle(item) {
     if (!item.id) return item.text; // For the placeholder
 
@@ -53,7 +86,9 @@ function formatSelection(item) {
     let locationId = '{{ $location_id }}'
 
     $(document).ready(function() {
-        getDealsList();
+        @if($script_type == 'deals')
+            getDealsList();
+        @endif
     })
 
     function getDealsList()

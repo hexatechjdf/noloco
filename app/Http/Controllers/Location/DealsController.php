@@ -143,4 +143,12 @@ class DealsController extends Controller
        return   $res = @$data['data'][$table_name]['edges'][0]['node'] ?? [];
     }
 
+    public function dealForm(Request $request)
+    {
+        $contact_id = $request->contactId;
+        $location_id = $request->locationId;
+
+        return view('locations.deals.form.index', get_defined_vars());
+    }
+
 }

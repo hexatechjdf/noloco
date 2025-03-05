@@ -486,7 +486,7 @@ function setDataWithType($array,$result,$dealershipId=null,$vehicleId = null)
 function setDealQueryData($contact,$result,$map_type = 'customerMapping')
 {
     $filteredData = json_decode(supersetting($map_type), true) ?? [];
-    Log::info($filteredData);
+
     // Log::info($contact);
     $result = [];
     $replacedData = array_reduce(array_keys($filteredData), function ($result, $keyf) use ($filteredData, $contact) {
@@ -738,4 +738,16 @@ function getDealsObjectData($string,$availableObjects)
         }
     }
     return $currentObject;
+}
+
+
+function ghlRedurect($locationId, $contactId, $type = 'contact')
+{
+    $base = "https://app.gohighlevel.com/v2/";
+    if($type =='contact')
+    {
+        $url = $base.'location/'.$locationId.'/contacts/detail/'.$contactId;
+    }
+
+    return $url;
 }
