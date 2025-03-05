@@ -751,3 +751,27 @@ function ghlRedurect($locationId, $contactId, $type = 'contact')
 
     return $url;
 }
+
+
+function contactForm()
+{
+    return [
+        "first_name"             => ['input_type' => 'text', 'field_type' => 'simple'],
+        "middle_name"            => ['input_type' => 'text', 'field_type' => 'simple'],
+        "last_name"              => ['input_type' => 'text', 'field_type' => 'simple'],
+        "email"                  => ['input_type' => 'text', 'field_type' => 'simple'],
+        "phone"                  => ['input_type' => 'text', 'field_type' => 'simple'],
+        "address1"               => ['input_type' => 'text', 'field_type' => 'simple'],
+        "city"                   => ['input_type' => 'text', 'field_type' => 'simple'],
+        "state"                  => ['input_type' => 'text', 'field_type' => 'simple'],
+        "postal_code"            => ['input_type' => 'text', 'field_type' => 'simple'],
+        "source"                 => ['input_type' => 'text', 'field_type' => 'simple'],
+        "date_of_birth"          => ['input_type' => 'text', 'field_type' => 'extra'],
+        "social_security_number" => ['input_type' => 'text', 'field_type' => 'extra'],
+        "id_type"                => ['input_type' => 'text', 'field_type' => 'extra'],
+        "id_number"              => ['input_type' => 'text', 'field_type' => 'extra'],
+        "state_id"               => ['input_type' => 'text', 'field_type' => 'extra'],
+        "id_expiration"          => ['input_type' => 'text', 'field_type' => 'extra']
+    ];
+
+}

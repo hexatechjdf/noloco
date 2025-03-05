@@ -88,36 +88,42 @@ function formatSelection(item) {
     $(document).ready(function() {
         @if($script_type == 'deals')
             getDealsList();
+        @else
+            $('.create_deal_btn').removeClass('hide');
         @endif
     })
 
     function getDealsList()
     {
         $("#loader-overlay").css("display", "flex").hide().fadeIn(); // Ensures hidden first, then fades in
+        $.ajax({
+            type: 'GET',
+            data: {
+                contactId: contactId,
+                locationId: locationId,
+            },
+            url: '{{ route('deals.get.list') }}',
+            success: function(response) {
+                console.log(response);
+                if(response.error)
+                {
+                    toastr.error(response.error);
+                    return ;
+                }
+                $('.cus_name').text(response.customer_name);
+                if(response.customer_name)
+                {
+                    $('.create_deal_btn').removeClass('hide');
+                }
+                $('.appendData').html(response.view);
+                $("#loader-overlay").fadeOut();
+            }
+        });
+    }
 
-$.ajax({
-    type: 'GET',
-    data: {
-        contactId: contactId,
-        locationId: locationId,
-    },
-    url: '{{ route('deals.get.list') }}',
-    success: function(response) {
-        console.log(response);
-        if(response.error)
+    function validateContact()
     {
-        toastr.error(response.error);
-        return ;
-    }
-        $('.cus_name').text(response.customer_name);
-        if(response.customer_name)
-    {
-        $('.create_deal_btn').removeClass('hide');
-    }
-        $('.appendData').html(response.view);
-        $("#loader-overlay").fadeOut();
-    }
-});
+        return true;
     }
 
 
@@ -126,11 +132,24 @@ $.ajax({
         let id = $('.vehicle_field').val();
 
         if(!id)
-    {
-        toastr.error('Please select vehicle first');
-        return ;
-    }
-    $("#loader-overlay").css("display", "flex").hide().fadeIn(); // Ensures hidden first, then fades in
+        {
+            toastr.error('Please select vehicle first');
+            return ;
+        }
+
+        @if($script_type == 'form')
+            let contactId = $('.contact').val();
+            if(!validateContact())
+            {
+                toastr.error('Please select contact or create a new one');
+                return ;
+            }
+        @endif
+
+        alert(123);
+        return;
+
+        $("#loader-overlay").css("display", "flex").hide().fadeIn(); // Ensures hidden first, then fades in
 
         $.ajax({
             type: 'GET',
@@ -148,6 +167,12 @@ $.ajax({
         });
 
     })
+
+
+    $(document).on('click',".contact_create",function(){
+        var offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvasForm'));
+        offcanvas.show(); // Open the sidebar
+    });
 
 
 </script>

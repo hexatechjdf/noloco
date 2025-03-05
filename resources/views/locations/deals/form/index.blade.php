@@ -14,6 +14,9 @@
         .show_values {
             cursor: pointer;
         }
+        .add_pill{
+            padding: 2px 6px 4px 6px;
+        }
     </style>
 @endpush
 @section('content')
@@ -27,7 +30,11 @@
                     <div class="card-body">
                         <div class="" id="processArea">
                             <div class="py-2 ">
-                                <label>Contacts</label>
+                                <label>Contacts
+                                    <button class="btn btn-success btn-sm contact_create rounded-pill"  title="Create New">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </label>
                                 <select class="form-select custom_select contact select2 form-control" name="contact">
                                 </select>
                             </div>
@@ -50,7 +57,21 @@
                 </div>
             </div>
         </div>
-    @endsection
+    </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasForm">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Add New</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <!-- Form Inside Sidebar -->
+            <form>
+                 @include('forms.internals.contactform',['allowed_types' => ['simple']])
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+@endsection
 
     @push('script')
         @include('components.submitForm')
