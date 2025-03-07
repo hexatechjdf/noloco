@@ -82,9 +82,16 @@
                             <div class="row mt-2">
                                 <div class="col-md-12">
                                     <div class="mb-3">
-                                        <label class="form-label">Deal's Form </label>
+                                        <label class="form-label">Start Deal's Form </label>
                                         <input type="text" class="form-control " readonly
-                                            value="{{ route('deals.form.setting') }}?locationId={{ braceParser('[[location.id]]') }} ">
+                                            value="{{ route('start.deal.form.setting') }}?locationId={{ braceParser('[[location.id]]') }} ">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Update Contact Form </label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('update.contact.form.setting') }}?locationId={{ braceParser('[[location.id]]') }}&contactId={{ braceParser('[[user.contact_id]]') }} ">
                                     </div>
                                 </div>
                                 <div class="col-md-12">

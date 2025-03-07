@@ -28,10 +28,18 @@
                         <h4 class="h4">Deals Management -  <span class="cus_name"></span></h4>
                     </div>
                     <div class="card-body">
+
+                        <div class="" id="inventoriesProcessArea">
+                            <div class="py-2 ">
+                                <label>Vehicles</label>
+                                <select class="form-select custom_select_vehicle select2 vehicle_field form-control" name="vehicle">
+                                </select>
+                            </div>
+                        </div>
                         <div class="" id="processArea">
                             <div class="py-2 ">
                                 <label>Contacts
-                                    <button class="btn btn-success btn-sm contact_create rounded-pill"  title="Create New">
+                                    <button class="btn btn-success btn-sm contact_createe rounded-pill" data-bs-toggle="collapse" data-bs-target="#form-box"  title="Create New">
                                         <i class="bi bi-plus"></i>
                                     </button>
                                 </label>
@@ -39,18 +47,18 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="" id="inventoriesProcessArea">
-                            <div class="py-2 ">
-                                <label>Vehicles</label>
-                                <select class="form-select custom_select_vehicle select2 vehicle_field form-control" name="vehicle">
-                                </select>
+                        <div class="form-box" >
+                            <div class="collapse mt-2" id="form-box">
+                                <div class="card card-body shadow-sm">
+                                    <h5 class="card-title">Add New Contact</h5>
+                                    <form id="submForm">
+                                        @include('forms.internals.contactform',['cols'=> 'col-md-4','allowed_types' => ['simple']])
+                                    </form>
+                                </div>
                             </div>
-                        <button class="btn btn-primary create_deal_btn hide">Create New deal</button>
                         </div>
+                        <button class="btn btn-primary create_deal_btn hide mt-3">Create New deal</button>
 
-                        <div class="appendData">
-
-                        </div>
 
                         @include('components.loader')
                     </div>
@@ -65,9 +73,8 @@
         </div>
         <div class="offcanvas-body">
             <!-- Form Inside Sidebar -->
-            <form>
+            <form id="submForm">
                  @include('forms.internals.contactform',['allowed_types' => ['simple']])
-                <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>
     </div>

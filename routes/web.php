@@ -107,8 +107,11 @@ Route::group(['as' => 'deals.', 'prefix' => 'deals'], function () {
     // Route::get('/get/deals', [DealsController::class, 'getDeals'])->name('get.deals');
     Route::get('/create/setting', [DealsController::class, 'create'])->name('create.setting');
 
-    Route::get('/form/management/', [DealsController::class, 'dealForm'])->name('form.setting');
+
 });
+
+Route::get('start/deal/form/', [DealsController::class, 'startDealForm'])->name('start.deal.form.setting');
+Route::get('update/contact/form/', [DealsController::class, 'updateContactForm'])->name('update.contact.form.setting');
 
 Route::group(['as' => 'coborrower.', 'prefix' => 'coborrower'], function () {
     Route::get('/management', [CoborrowerController::class, 'index'])->name('setting');

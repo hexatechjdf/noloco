@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use libphonenumber\PhoneNumberToCarrierMapper;
 use App\Models\ErrorLog;
 
+
 function supersetting($key, $default = '', $keys_contain = null)
 {
     Cache::forget($key);
@@ -756,22 +757,96 @@ function ghlRedurect($locationId, $contactId, $type = 'contact')
 function contactForm()
 {
     return [
-        "first_name"             => ['input_type' => 'text', 'field_type' => 'simple'],
-        "middle_name"            => ['input_type' => 'text', 'field_type' => 'simple'],
-        "last_name"              => ['input_type' => 'text', 'field_type' => 'simple'],
-        "email"                  => ['input_type' => 'text', 'field_type' => 'simple'],
-        "phone"                  => ['input_type' => 'text', 'field_type' => 'simple'],
-        "address1"               => ['input_type' => 'text', 'field_type' => 'simple'],
-        "city"                   => ['input_type' => 'text', 'field_type' => 'simple'],
-        "state"                  => ['input_type' => 'text', 'field_type' => 'simple'],
-        "postal_code"            => ['input_type' => 'text', 'field_type' => 'simple'],
-        "source"                 => ['input_type' => 'text', 'field_type' => 'simple'],
-        "date_of_birth"          => ['input_type' => 'text', 'field_type' => 'extra'],
-        "social_security_number" => ['input_type' => 'text', 'field_type' => 'extra'],
-        "id_type"                => ['input_type' => 'text', 'field_type' => 'extra'],
-        "id_number"              => ['input_type' => 'text', 'field_type' => 'extra'],
-        "state_id"               => ['input_type' => 'text', 'field_type' => 'extra'],
-        "id_expiration"          => ['input_type' => 'text', 'field_type' => 'extra']
+        "first_name"             => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "middle_name"            => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "last_name"              => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "email"                  => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "phone"                  => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "address1"               => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "city"                   => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "state"                  => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "postal_code"            => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "source"                 => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "date_of_birth"          => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
+        "social_security_number" => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
+        "id_type"                => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
+        "id_number"              => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
+        "state_id"               => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
+        "id_expiration"          => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra']
     ];
 
+}
+
+function vehicleForm()
+{
+    return [
+        "stock_"             => ['sub_key' => 'stock','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "vin_"               => ['sub_key' => 'vin','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "year"               => ['sub_key' => 'year','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "make"               => ['sub_key' => 'make','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "model"              => ['sub_key' => 'model','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "trim"               => ['sub_key' => 'trim','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "mileage"            => ['sub_key' => 'miles','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "listed_price"       => ['sub_key' => 'listedPrice','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "vehicle_cost"       => ['sub_key' => 'vehicleCost','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+    ];
+
+}
+
+function creditAppForm()
+{
+    return [
+        "residence_type"            => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "years_at_residence"        => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "months_at_residence"       => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "residence_payment"         => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_address"          => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_city"             => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_state"            => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_postal_code"      => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_residence_years"  => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_residence_months" => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_residence_type"   => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_residence_payment"=> ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_country"          => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "employment_status"         => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "employer_name"             => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "job_position"              => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "job_years"                 => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "job_months"                => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "employer_phone_number"     => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "income_frequency"          => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "gross_income"              => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_employment_status"=> ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_employer"         => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_job_position"     => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_employer_phone"   => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_job_years"        => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_job_months"       => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "other_income_source"       => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "other_income_amount"       => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "down_payment"              => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+    ];
+}
+
+function tradeForm()
+{
+    return [
+        "trade_year"   => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "trade_make"   => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "trade_model"  => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "trade_trim"   => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "trade_vin"    => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "trade_miles"  => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "trade_pay_off"=> ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+    ];
+}
+
+
+function convertKeysToCamelCase(array $array): array {
+    $converted = [];
+    foreach ($array as $key => $value) {
+        $converted[Str::camel($key)] = $value;
+    }
+    return $converted;
 }

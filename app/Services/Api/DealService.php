@@ -294,6 +294,11 @@ class DealService
 
     }
 
+    public function createContact($locationId,$data)
+    {
+      $detail = CRM::crmV2Loc('1', $locationId, 'contacts/', 'post',$data);
+      dd($detail);
+    }
     public function getContact($locationId,$contact_id)
     {
         $fields = CustomFields::where('key',$locationId)->select('content')->first();

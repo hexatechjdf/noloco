@@ -32,12 +32,15 @@ class DealsController extends Controller
 
     public function searchInventory(Request $request)
     {
+        // dd($request->all());
         $res = [];
-        if ($request->term) {
+        if ($request->term || $request->vin) {
+            $column = $request->vin ? 'vin' : 'name';
+            $term = '3C4PDCABXKT8591858' ?? $request->vin ?? $request->term;
             $filters = [
                 "filters" => [
-                    "column" => "name",
-                    "value" => $request->term,
+                    "column" => $column,
+                    "value" => $term,
                     "order" => "contains",
                 ],
             ];
@@ -51,7 +54,19 @@ class DealsController extends Controller
             if (isset($data['data']['inventoryCollection']['edges'])) {
                 foreach ($data['data']['inventoryCollection']['edges'] as $item) {
                     $node = $item['node'];
-                    $res[$node['id']] = ['name' => $node['name'], 'image' => explode(',', $node['photosUrls'] ?? '')[0] ?? '', 'stock' => $node['stock']];
+                    $res[$node['id']] = [
+                        'vin'=> $node['vin'],
+                        'year'=> $node['year'],
+                        'make'=> $node['make'],
+                        'model'=> $node['model'],
+                        'trim'=> $node['trim'],
+                        'miles'=> $node['miles'],
+                        'listedPrice'=> $node['listedPrice'],
+                        'vehicleCost'=> $node['vehicleCost'],
+                        'name' => $node['name'],
+                        'image' => explode(',', $node['photosUrls'] ?? '')[0] ?? '',
+                        'stock' => $node['stock']
+                    ];
                 }
                 $res = collect($res)->map(function ($value, $key) {
                     return (object) [
@@ -59,6 +74,14 @@ class DealsController extends Controller
                         'name' => $value['name'],
                         'image' => $value['image'],
                         'stock' => $value['stock'],
+                        'vin'=> $value['vin'],
+                        'year'=> $value['year'],
+                        'make'=> $value['make'],
+                        'model'=> $value['model'],
+                        'trim'=> $value['trim'],
+                        'miles'=> $value['miles'],
+                        'listedPrice'=> $value['listedPrice'],
+                        'vehicleCost'=> $value['vehicleCost'],
                     ];
                 });
             }
@@ -81,8 +104,27 @@ class DealsController extends Controller
         return response()->json(['view' => $view, 'customer_name' => $customer_name]);
     }
 
+
+
     public function create(Request $request)
     {
+
+        if(!$request->contactId)
+        {
+            $req = $request->formData;
+            if(!$req)
+            {
+                return response()->json(['error' => 'Something wrong']);
+            }
+
+            try{
+              $req = convertKeysToCamelCase($req);
+              $res =  $this->dealService->createContact($request->locationId,$req);
+              dd($res);
+            }catch(\Exception $e){
+
+            }
+        }
         $availableObjects = [];
         $deal_id = null;
         try {
@@ -143,12 +185,28 @@ class DealsController extends Controller
        return   $res = @$data['data'][$table_name]['edges'][0]['node'] ?? [];
     }
 
-    public function dealForm(Request $request)
+    public function startDealForm(Request $request)
     {
-        $contact_id = $request->contactId;
+        $contact_id = $request->contactId ?? null;
         $location_id = $request->locationId;
 
         return view('locations.deals.form.index', get_defined_vars());
+    }
+
+    public function updateContactForm(Request $request)
+    {
+        $contact_id = $request->contactId;
+        $location_id = $request->locationId;
+        $contact = [];
+        try{
+            $contact = $this->dealService->getContact($request->locationId,$request->contactId);
+        }catch(\Exception $e){
+            $contact = [];
+        }
+        $vin = @$contact['vin_'];
+
+
+        return view('locations.deals.form.contact', get_defined_vars());
     }
 
 }
