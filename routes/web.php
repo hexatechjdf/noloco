@@ -4,6 +4,7 @@ use App\Http\Controllers\Location\AutoAuthController;
 use App\Http\Controllers\CRMController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ScriptController;
+use App\Http\Controllers\Admin\SourceController;
 use App\Http\Controllers\Admin\MapingController;
 use App\Http\Controllers\Admin\CsvMappingController;
 use App\Http\Controllers\Location\CoborrowerController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Location\InventoryController;
 use App\Http\Controllers\Form\ImageController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\LogsController;
+use App\Http\Controllers\IndexController;
 use App\Http\Controllers\Location\DealsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -43,6 +45,10 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
     Route::any('setting/mapping/{type?}', [SettingController::class, 'mapping'])->name('setting.mapping');
     Route::post('/setting/save', [SettingController::class, 'save'])->name('setting.save');
 
+    Route::get('/setting/crud/{key}', [SettingController::class, 'crudSetting'])->name('setting.crud');
+    Route::post('/setting/crud/save/{key}', [SettingController::class, 'crudSettingSave'])->name('setting.crud.save');
+
+
 
     Route::get('/logs/history/{type}', [LogsController::class, 'history'])->name('logs.history');
     Route::get('/logs/history/form/setting', [LogsController::class, 'historyForm'])->name('logs.history.form');
@@ -53,6 +59,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
         Route::get('/get/form', [ScriptController::class, 'getForm'])->name('get.form');
         Route::post('/store/{id?}', [ScriptController::class, 'store'])->name('store');
         Route::get('/delete/{id}', [ScriptController::class, 'delete'])->name('delete');
+    });
+    Route::group(['as' => 'sources.', 'prefix' => 'sources'], function () {
+        Route::get('/', [SourceController::class, 'index'])->name('index');
+        Route::get('/get/form', [SourceController::class, 'getForm'])->name('get.form');
+        Route::post('/store/{id?}', [SourceController::class, 'store'])->name('store');
+        Route::get('/delete/{id}', [SourceController::class, 'delete'])->name('delete');
     });
 
     Route::group(['as' => 'mappings.', 'prefix' => 'mappings'], function () {
@@ -112,6 +124,7 @@ Route::group(['as' => 'deals.', 'prefix' => 'deals'], function () {
 
 Route::get('start/deal/form/', [DealsController::class, 'startDealForm'])->name('start.deal.form.setting');
 Route::get('update/contact/form/', [DealsController::class, 'updateContactForm'])->name('update.contact.form.setting');
+Route::get('new/lead/form/', [DealsController::class, 'leadForm'])->name('lead.form.setting');
 
 Route::group(['as' => 'coborrower.', 'prefix' => 'coborrower'], function () {
     Route::get('/management', [CoborrowerController::class, 'index'])->name('setting');
@@ -122,6 +135,7 @@ Route::group(['as' => 'coborrower.', 'prefix' => 'coborrower'], function () {
 Route::group(['as' => 'inventory.', 'prefix' => 'inventory'], function () {
     Route::get('/management', [InventoryController::class, 'index'])->name('setting');
     Route::get('/get/list', [InventoryController::class, 'getList'])->name('get.list');
+
 });
 
 
@@ -135,6 +149,10 @@ Route::group(['as' => 'forms.', 'prefix' => 'forms'], function () {
 Route::prefix('authorization')->name('crm.')->group(function () {
     Route::get('/crm/oauth/callback', [CRMController::class, 'crmCallback'])->name('oauth_callback');
 });
+
+Route::get('/get/opportunities', [IndexController::class, 'getOpportunities'])->name('get.opportunities');
+Route::get('/create/opportunities', [IndexController::class, 'createOpportunities'])->name('create.opportunities');
+Route::get('/manage/conatct/fields', [IndexController::class, 'manageContactFields'])->name('manage.conatct.fields');
 
 /*
 

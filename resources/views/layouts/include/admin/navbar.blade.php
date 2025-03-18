@@ -4,13 +4,14 @@
     <nav class="navbar main_nav d-none navbar-expand-md w-100 navbar-light bg-white shadow-sm position-absolute">
         <div class="container">
             @if (!$nav)
-            <a class="navbar-brand" href="{{ url('/') }}">
-                {{ config('app.name', 'Laravel') }}
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <a class="navbar-brand" href="{{ url('/') }}">
+                    {{ config('app.name', 'Laravel') }}
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="{{ __('Toggle navigation') }}">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto">
@@ -26,12 +27,72 @@
                                 <li><a class="dropdown-item {{ Route::is('admin.setting.noloco') ? 'active' : '' }}"
                                         href="{{ route('admin.setting.noloco') }}">Noloco Setting</a></li>
                                 <li><a class="dropdown-item {{ Route::is('admin.setting.mapping') ? 'active' : '' }}"
-                                        href="{{ route('admin.setting.mapping','deals') }}">Mapping Setting</a></li>
+                                        href="{{ route('admin.setting.mapping', 'deals') }}">Mapping Setting</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ Route::is('admin.scripts.index') ? 'active' : '' }}"
                                 href="{{ route('admin.scripts.index') }}">Scripts</a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ Route::is('admin.setting.crud') ? 'active' : '' }}"
+                                href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                Crud Settings
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                @php($currentParam = request()->route('id'))
+                                <li>
+                                    <a class="dropdown-item {{ $currentParam === 'sources' ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.crud', 'sources') }}">
+                                        Sources
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ $currentParam === 'id_type' ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.crud', 'id_type') }}">
+                                        Id Type
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ $currentParam === 'state_id' ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.crud', 'state_id') }}">
+                                        State Id
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ $currentParam === 'residence_type' ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.crud', 'residence_type') }}">
+                                        Residence Type
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ $currentParam === 'previous_residence_type' ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.crud', 'previous_residence_type') }}">
+                                        Previous Residence Type
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ $currentParam === 'employment_status' ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.crud', 'employment_status') }}">
+                                        Employment Status
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ $currentParam === 'previous_employment_status' ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.crud', 'previous_employment_status') }}">
+                                        Previous Employment Status
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ $currentParam === 'income_frequency' ? 'active' : '' }}"
+                                        href="{{ route('admin.setting.crud', 'income_frequency') }}">
+                                        Income Frequency
+                                    </a>
+                                </li>
+                            </ul>
+
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {{ Route::is('admin.mappings.custom') ? 'active' : '' }}"
@@ -55,7 +116,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ Route::is('admin.logs.history') ? 'active' : '' }}"
-                                href="{{ route('admin.logs.history','deals') }}">Logs History</a>
+                                href="{{ route('admin.logs.history', 'deals') }}">Logs History</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">

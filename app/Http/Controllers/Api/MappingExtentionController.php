@@ -86,6 +86,7 @@ class MappingExtentionController extends Controller
 
     public function search(Request $request, InventoryService $inventoryService)
     {
+        // return $request->all();
         $messsage = 'location token is invalid';
         $filter = $request->dealsFilter;
         if(!$filter)
@@ -111,15 +112,14 @@ class MappingExtentionController extends Controller
             return response()->json(['error' => $messsage]);
         }
 
-        $whereClause = @$filter['ids'] ? $this->setIdsFilter($filter['ids']) : null;
-        // if($whereClause)
-        // {
-        //     $request->merge(['filters' => $fil]);
-        // }
+        $whereClause =  $this->setIdsFilter(@$filter['ids'], @$filter['keyword']) ?? null;
+
 
         try {
             $query = $inventoryService->setQuery($request, null, $whereClause, 'dealsCollection' ,true);
+            // return $query;
             $data = $inventoryService->submitRequest($query);
+            // return $data;
             $data = @$data['data']['dealsCollection']['edges'] ?? [];
             return response()->json(['data' => $data]);
         } catch (\Exception $e) {
@@ -127,8 +127,90 @@ class MappingExtentionController extends Controller
         }
     }
 
-    public function setIdsFilter($ids)
+    public function setIdsFilter($ids=null,$keyword=null)
     {
+        $column = 'uuid';
+$order = 'in';
+
+$whereConditions = [];
+
+// Handle IDs filter
+if (!empty($ids)) {
+    $quotedIds = array_map(fn($id) => '"' . $id . '"', $ids);
+    $idFilter = "{$column}: { {$order}: [" . implode(', ', $quotedIds) . "] }";
+    $whereConditions[] = $idFilter;
+}
+
+// Handle keyword filter
+if (!empty($keyword)) {
+    $keywordFilter = 'OR: [
+        { coBorrowerFullName: { first: { equals: "' . $keyword . '" } } },
+        { coBorrowerFullName: { last: { equals: "' . $keyword . '" } } },
+        { fullName: { first: { equals: "' . $keyword . '" } } },
+        { fullName: { last: { equals: "' . $keyword . '" } } },
+        { vehicle: { equals: "' . $keyword . '" } }
+    ]';
+    $whereConditions[] = $keywordFilter;
+}
+
+// Construct the final where clause
+$whereClause = !empty($whereConditions) ? "{ " . implode(', ', $whereConditions) . " }" : "{}";
+return $whereClause;
+        $column = 'uuid';
+$order = 'in';
+
+$whereConditions = [];
+
+// Handle IDs filter
+if (!empty($ids)) {
+    $quotedIds = array_map(fn($id) => '"' . $id . '"', $ids);
+    $idFilter = "{ {$column}: { {$order}: [" . implode(', ', $quotedIds) . "] } }";
+    $whereConditions[] = $idFilter;
+}
+
+// Handle keyword filter
+if (!empty($keyword)) {
+    $keywordFilter = '{
+        OR: [
+            { coBorrowerFullName: { first: { equals: "' . $keyword . '" } } },
+            { coBorrowerFullName: { last: { equals: "' . $keyword . '" } } },
+            { fullName: { first: { equals: "' . $keyword . '" } } },
+            { fullName: { last: { equals: "' . $keyword . '" } } },
+            { vehicle: { equals: "' . $keyword . '" } }
+        ]
+    }';
+    $whereConditions[] = $keywordFilter;
+}
+
+// Construct the final where clause
+$whereClause = !empty($whereConditions) ? "{ AND: [" . implode(', ', $whereConditions) . "] }" : '{}';
+return $whereClause;
+//         $column = 'uuid';
+// $order = 'in';
+// $quotedIds = array_map(fn($id) => '"' . $id . '"', $ids);
+// $string = implode(', ', $quotedIds);
+
+// // Construct the ID filter
+// $idFilter = "{ {$column}: { {$order}: [{$string}] } }";
+
+// // Construct the keyword filter
+// $keyword = "test"; // Replace with actual dynamic value
+// $keywordFilter = '{
+//     OR: [
+//         { coBorrowerFullName: { first: { equals: "' . $keyword . '" } } },
+//         { coBorrowerFullName: { last: { equals: "' . $keyword . '" } } },
+//         { fullName: { first: { equals: "' . $keyword . '" } } },
+//         { fullName: { last: { equals: "' . $keyword . '" } } },
+//         { vehicle: { equals: "' . $keyword . '" } }
+//     ]
+// }';
+
+// // Combine both filters
+// $whereClause = "{ AND: [ $idFilter, $keywordFilter ] }";
+
+// return $whereClause;
+
+
         $column = 'uuid';
         $order = 'in';
         $quotedIds = array_map(fn($id) => '"' . $id . '"', $ids);

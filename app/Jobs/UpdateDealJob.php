@@ -45,7 +45,7 @@ class UpdateDealJob implements ShouldQueue
 
             if($this->log_table_id)
             {
-                // ErrorLog::where('table_id',$this->log_table_id)->delete();
+                ErrorLog::where('table_id',$this->log_table_id)->delete();
             }
             if(isset($data['errors']) && $this->retry <=2)
             {

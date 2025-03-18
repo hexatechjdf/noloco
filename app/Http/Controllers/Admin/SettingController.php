@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Api\InventoryService;
 use Illuminate\Http\Request;
+use App\Models\CrudSetting;
 use App\Models\Setting;
 use App\Models\MappingTable;
 use App\Helper\CRM;
@@ -204,5 +205,22 @@ class SettingController extends Controller
             }
         }
         return $result;
+    }
+
+    public function crudSetting($key)
+    {
+        $setting = CrudSetting::where('key',$key)->first();
+        $data = $setting ? json_decode($setting->content ?? '',true) : [];
+
+        return view('admin.setting.crud',get_defined_vars());
+    }
+
+    public function crudSettingSave(Request $request,$key)
+    {
+        $data = $request->data;
+        $data = json_encode($data);
+        $setting = CrudSetting::updateOrCreate(['key' => $key], ['content' => $data]);
+
+        return response()->json(['success' => 'Successfully  Submitted']);
     }
 }

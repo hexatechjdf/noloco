@@ -101,6 +101,13 @@
                                             value="{{ route('inventory.setting') }}?locationId={{ braceParser('[[location.id]]') }}&vin={{ braceParser('[[inventory.vin]]') }}">
                                     </div>
                                 </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">New Lead Form</label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('lead.form.setting') }}?locationId={{ braceParser('[[location.id]]') }}">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                 </div>

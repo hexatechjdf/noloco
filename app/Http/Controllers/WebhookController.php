@@ -48,7 +48,7 @@ class WebhookController extends Controller
     {
         $deal = $request->all();
         $customerMapping = json_decode(supersetting('customerMapping'), true) ?? [];
-        $cob = json_decode(supersetting('customerMapping'), true) ?? [];
+        $cob = json_decode(supersetting('coborrowerMapping'), true) ?? [];
         $newArray = [];
         $newData = [];
         foreach ($customerMapping as $key => $value) {

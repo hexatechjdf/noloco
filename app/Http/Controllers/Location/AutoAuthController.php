@@ -51,7 +51,6 @@ class AutoAuthController extends Controller
                 $res->token = $user->ghl_api_key;
                 $token = $user->crmauth;
                 $res->crm_connected = false;
-
                 if ($token) {
                     // request()->code = $token;
                     list($tokenx, $token) = CRM::go_and_get_token($token->refresh_token, 'refresh', $user->id, $token);

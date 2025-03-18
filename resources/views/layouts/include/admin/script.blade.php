@@ -26,6 +26,8 @@
 
 <script type="text/javascript"
     src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
 <script>
     function dispMessage(isError, message, timeout = 10000) {
         try {
@@ -64,3 +66,87 @@
         })
     }
 </script>
+<script src="https://unpkg.com/imask"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var ssnInput = document.getElementById('social_security_number');
+    var toggleButton = document.getElementById('toggle-ssn');
+    var originalValue = ""; // Store the real SSN
+    var isMasked = true; // Track visibility state
+
+    if (ssnInput) {
+        // Initialize IMask
+        var maskInstance = IMask(ssnInput, {
+            mask: 'XXX XX 0000',
+            definitions: {
+                X: {
+                    mask: '0',
+                    displayChar: 'X',
+                    placeholderChar: '#',
+                },
+            },
+            lazy: false,
+            overwrite: 'shift',
+        });
+
+        toggleButton.addEventListener('click', function() {
+            if (isMasked) {
+                // Show the real SSN
+                originalValue = maskInstance.unmaskedValue; // Store unmasked value
+                maskInstance.destroy(); // Remove the mask
+                ssnInput.value = originalValue; // Show real value
+                toggleButton.innerHTML = '<i class="bi bi-eye"></i>'; // Change icon
+            } else {
+                // Hide SSN - Reapply Mask
+                maskInstance = IMask(ssnInput, {
+                    mask: 'XXX XX 0000',
+                    definitions: {
+                        X: {
+                            mask: '0',
+                            displayChar: 'X',
+                            placeholderChar: '#',
+                        },
+                    },
+                    lazy: false,
+                    overwrite: 'shift',
+                });
+                maskInstance.value = originalValue; // Restore masked value
+                toggleButton.innerHTML = '<i class="bi bi-eye-slash"></i>'; // Change icon
+            }
+            isMasked = !isMasked; // Toggle state
+        });
+    }
+});
+
+$(document).ready(function() {
+        $('.sources').select2({
+            tags: true,
+            placeholder: "Select or type new",
+            allowClear: true
+        });
+    });
+</script>
+
+
+
+{{-- <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var ssnInput = document.getElementById('social_security_number');
+        if (ssnInput) {
+            IMask(ssnInput, {
+                mask: 'XXX-XX-XX00',
+                definitions: {
+                    X: {
+                        mask: '0',
+                        displayChar: 'X',
+                        placeholderChar: '#',
+                    },
+                },
+                lazy: false,
+                overwrite: 'shift',
+            });
+        }
+    });
+
+    </script> --}}
+

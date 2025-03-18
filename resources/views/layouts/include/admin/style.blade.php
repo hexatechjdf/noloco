@@ -78,6 +78,50 @@
     border-radius: 10px;
 }
 
-
+.form-control{
+    display: block;
+  width: 100%;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  background-color: #fff !important;
+  background-clip: padding-box;
+  border: 1px solid #ced4da !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: .375rem !important;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+label {
+    color: #6c757d !important; /* Light gray color */
+    margin-bottom:1px;
+}
+.card-title h5{
+    font-size: 1.5rem; /* Adjust size as needed */
+    font-weight: bold; /* Make it bold */
+    color: #343a40;
+}
+.form-head{
+    font-size: 1rem; /* Adjust size as needed */
+    font-weight: bold; /* Make it bold */
+    color: #343a40;
+    margin-bottom:5px;
+}
+.select2-selection.select2-selection--single {
+  height: 37px !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  line-height: 34px !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  top: 6px !important;
+}
+.select2-container--default .select2-selection--single {
+  border: 1px solid #ced4da !important;
+  border-radius: .375rem !important;
+}
 
 </style>

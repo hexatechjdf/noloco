@@ -296,8 +296,16 @@ class DealService
 
     public function createContact($locationId,$data)
     {
-      $detail = CRM::crmV2Loc('1', $locationId, 'contacts/', 'post',$data);
-      dd($detail);
+      $id = null;
+      try {
+        $detail = CRM::crmV2Loc('1', $locationId, 'contacts/', 'post',$data);
+        if ($detail && property_exists($detail, 'contact')) {
+          $id = @$detail->contact->id;
+        }
+      }catch(\Exception $e){
+        $id = null;
+      }
+      return $id;
     }
     public function getContact($locationId,$contact_id)
     {
@@ -306,7 +314,6 @@ class DealService
         $array = [];
         try {
             $response = CRM::crmV2Loc('1', $locationId, 'contacts/' . $contact_id, 'get');
-            // dd($response);
             foreach($response->contact as $key => $c)
             {
                 if($key == 'customFields')

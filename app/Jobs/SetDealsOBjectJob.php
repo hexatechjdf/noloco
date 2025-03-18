@@ -36,21 +36,22 @@ class SetDealsOBjectJob implements ShouldQueue
     public function handle(InventoryService $inventoryService, DealService $dealService)
     {
         $variables = $this->payload ?? setDealQueryData($this->contact,[],$this->type);
-        // $variables['graphqlPayload'][0]['id'] = $this->dealId;
+         Log::info($variables);
+        $variables['graphqlPayload'][0]['id'] = $this->dealId;
 
-        $variables = $this->payload ?? [
-            'graphqlPayload' => [
-                [
-                    "coBorrowerFullName" => ["first" => 2324,'last' => 'honolulu'],
-                    "coBorrowerAddress" => ["country" => "US"],
-                    "coBorrowerPhone" => ["number" => 235435],
-                    "coBorrowerEmail" => "dfgfg",
-                    "coBorrowerHighlevelClientId" => "Y13wCs9djV5O0pb4mR14",
-                    "coBorrower" => true,
-                    "id" => "75"
-                ]
-            ]
-        ];
+        // $variables = $this->payload ?? [
+        //     'graphqlPayload' => [
+        //         [
+        //             "coBorrowerFullName" => ["first" => 2324,'last' => 'honolulu'],
+        //             "coBorrowerAddress" => ["country" => "US"],
+        //             "coBorrowerPhone" => ["number" => 235435],
+        //             "coBorrowerEmail" => "dfgfg",
+        //             "coBorrowerHighlevelClientId" => "Y13wCs9djV5O0pb4mR14",
+        //             "coBorrower" => true,
+        //             "id" => "75"
+        //         ]
+        //     ]
+        // ];
         try {
             $query = $dealService->updateDealQuery($variables);
 

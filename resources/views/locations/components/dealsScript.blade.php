@@ -169,7 +169,7 @@
             let fieldName = $(this).attr("name");
             let fieldValue = $(this).val().trim();
 
-            if (fieldValue === "") {
+            if (fieldValue == "") {
                 isValid = false;
                 $(this).addClass("is-invalid"); // Highlight empty fields
             } else {
@@ -225,4 +225,33 @@
         var offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvasForm'));
         offcanvas.show(); // Open the sidebar
     });
+
+    $(document).on('click','.contact_field_form',function(){
+        $("#loader-overlay").css("display", "flex").hide().fadeIn(); // Ensures hidden first, then fades in
+        validateContact();
+        let is_tag = $(this).closest('form').data('tag');
+        $.ajax({
+            type: 'GET',
+            data: {
+                contactId: contactId,
+                locationId: locationId,
+                formData:formData,
+                is_tag:is_tag,
+            },
+            url: '{{ route('manage.conatct.fields') }}',
+            success: function(response) {
+                $("#loader-overlay").fadeOut();
+                if(response.success)
+                {
+                   toastr.success('Updated Successfully');
+                }
+                if(response.error)
+                {
+                   toastr.error('there is something wrong');
+                }
+            }
+        })
+    })
 </script>
+
+

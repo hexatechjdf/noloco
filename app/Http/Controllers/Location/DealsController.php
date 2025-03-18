@@ -36,7 +36,7 @@ class DealsController extends Controller
         $res = [];
         if ($request->term || $request->vin) {
             $column = $request->vin ? 'vin' : 'name';
-            $term = '3C4PDCABXKT8591858' ?? $request->vin ?? $request->term;
+            $term = $request->vin ?? $request->term;
             $filters = [
                 "filters" => [
                     "column" => $column,
@@ -104,11 +104,8 @@ class DealsController extends Controller
         return response()->json(['view' => $view, 'customer_name' => $customer_name]);
     }
 
-
-
     public function create(Request $request)
     {
-
         if(!$request->contactId)
         {
             $req = $request->formData;
@@ -116,46 +113,47 @@ class DealsController extends Controller
             {
                 return response()->json(['error' => 'Something wrong']);
             }
-
             try{
-              $req = convertKeysToCamelCase($req);
-              $res =  $this->dealService->createContact($request->locationId,$req);
-              dd($res);
+              $req = setCotactFieldsPayload($req);
+              $cont_id =  $this->dealService->createContact($request->locationId,$req);
+              $request->merge(['contactId' => $cont_id]);
             }catch(\Exception $e){
 
             }
         }
-        $availableObjects = [];
-        $deal_id = null;
-        try {
-            list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->locationId);
-            $availableObjects['dealership'] = $dealership;
-            $availableObjects['contact'] = $this->dealService->getContact($request->locationId,$request->contactId);
-
-            $availableObjects['vehicle'] = $this->getVehicle($request);
-            $variables = updateDealQueryData(null,$dealer_id,@$availableObjects['vehicle']['id'] ?? null);
-            $query = $this->dealService->createDealQuery($variables);
-
-            // $data = $this->inventoryService->submitRequest($query, 1);
-            // $deal_id = @$data['data']['createDeals']['id'] ?? null;
-
-            $deal_id = 132;
-        }
-        catch(\Exception $e){
+        if($request->contactId)
+        {
+            $availableObjects = [];
             $deal_id = null;
-            throw $e;
-        }
+            try {
+                list($dealer_id,$dealership) =  $this->dealService->getDealership($request,$request->locationId);
+                $availableObjects['dealership'] = $dealership;
+                $availableObjects['contact'] = $this->dealService->getContact($request->locationId,$request->contactId);
 
-        if($deal_id && count($availableObjects) > 0)
-        {
-            dispatch((new UpdateDealJob($availableObjects, $deal_id)));
-        }
-        if($deal_id && $availableObjects['contact'])
-        {
-            $contact = (object) $availableObjects['contact'];
-            dispatch((new SetDealsOBjectJob($contact, $deal_id)));
-        }
+                $availableObjects['vehicle'] = $this->getVehicle($request);
+                $variables = updateDealQueryData(null,$dealer_id,@$availableObjects['vehicle']['id'] ?? null);
+                $query = $this->dealService->createDealQuery($variables);
 
+                $data = $this->inventoryService->submitRequest($query, 1);
+                $deal_id = @$data['data']['createDeals']['id'] ?? null;
+
+                // $deal_id = 144;
+            }
+            catch(\Exception $e){
+                $deal_id = null;
+                // throw $e;
+            }
+
+            if($deal_id && count($availableObjects) > 0)
+            {
+                dispatch((new UpdateDealJob($availableObjects, $deal_id)));
+            }
+            if($deal_id && $availableObjects['contact'])
+            {
+                $contact = (object) $availableObjects['contact'];
+                dispatch((new SetDealsOBjectJob($contact, $deal_id)));
+            }
+        }
         return response()->json(['success' => 'Succeffully created']);
     }
 
@@ -207,6 +205,14 @@ class DealsController extends Controller
 
 
         return view('locations.deals.form.contact', get_defined_vars());
+    }
+
+    public function leadForm(Request $request)
+    {
+        $contact_id = $request->contactId ?? null;
+        $location_id = $request->locationId;
+
+        return view('locations.deals.form.lead', get_defined_vars());
     }
 
 }

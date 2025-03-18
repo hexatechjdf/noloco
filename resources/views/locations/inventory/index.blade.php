@@ -21,9 +21,9 @@
         <div class="row">
             <div class="col-md-12 ">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between">
+                    {{-- <div class="card-header d-flex justify-content-between">
                         <h4 class="h4">Inventory List -  <span class="inv">Vin: {{$vin}}</span></h4>
-                    </div>
+                    </div> --}}
                     <div class="card-body">
                         <div class="appendData">
 

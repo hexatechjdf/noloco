@@ -4,6 +4,7 @@ use App\Models\Setting;
 use App\Helper\gCache;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\CrudSetting;
 use App\Models\MappingTable;
 use Illuminate\Support\Str;
 use Nwidart\Modules\Facades\Module;
@@ -200,7 +201,7 @@ function transformGraphQLData($data,$parent=false)
             {
                 continue;
             }
-            if(!in_array($value,['createdBy', 'deals', 'vendorAddress']) && !in_array($key,['createdBy', 'deals', 'vendorAddress']))
+            if(!in_array($value,['createdBy', 'deals', 'vendorAddress','recon']) && !in_array($key,['createdBy', 'deals', 'vendorAddress']))
             {
 
                 if (is_numeric($key)) {
@@ -742,12 +743,16 @@ function getDealsObjectData($string,$availableObjects)
 }
 
 
-function ghlRedurect($locationId, $contactId, $type = 'contact')
+function ghlRedurect($locationId, $Id, $type = 'contact')
 {
     $base = "https://app.gohighlevel.com/v2/";
     if($type =='contact')
     {
-        $url = $base.'location/'.$locationId.'/contacts/detail/'.$contactId;
+        $url = $base.'location/'.$locationId.'/contacts/detail/'.$Id;
+    }
+    if($type =='oppertunity')
+    {
+        $url = $base.'location/'.$locationId.'/opportunities/list/'.$Id.'?tab=Opportunity%20Details';
     }
 
     return $url;
@@ -762,17 +767,18 @@ function contactForm()
         "last_name"              => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
         "email"                  => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
         "phone"                  => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "address1"               => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "city"                   => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "state"                  => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "postal_code"            => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "source"                 => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "date_of_birth"          => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
-        "social_security_number" => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
-        "id_type"                => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
-        "id_number"              => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
-        "state_id"               => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra'],
-        "id_expiration"          => ['is_required' => true,'input_type' => 'text', 'field_type' => 'extra']
+        "address"                => ['is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "address1"               => ['is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "city"                   => ['is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "state"                  => ['is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "postal_code"            => ['is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        // "source"                 => ['is_required' => true,'input_type' => 'select', 'field_type' => 'simple','model' => 'SourceList'],
+        "date_of_birth"          => ['is_required' => true,'input_type' => 'date', 'field_type' => 'vs'],
+        "social_security_number" => ['is_required' => true,'input_type' => 'text', 'field_type' => 'vs','is_secure' => true],
+        "id_type"                => ['is_required' => true,'input_type' => 'select', 'field_type' => 'vs','model' => 'id_type'],
+        "id_number"              => ['is_required' => true,'input_type' => 'text', 'field_type' => 'vs'],
+        "state_id"               => ['is_required' => true,'input_type' => 'select', 'field_type' => 'vs','model' => 'state_id'],
+        "id_expiration"          => ['is_required' => true,'input_type' => 'date', 'field_type' => 'vs']
     ];
 
 }
@@ -780,15 +786,15 @@ function contactForm()
 function vehicleForm()
 {
     return [
-        "stock_"             => ['sub_key' => 'stock','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "vin_"               => ['sub_key' => 'vin','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "year"               => ['sub_key' => 'year','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "make"               => ['sub_key' => 'make','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "model"              => ['sub_key' => 'model','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "trim"               => ['sub_key' => 'trim','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "mileage"            => ['sub_key' => 'miles','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "listed_price"       => ['sub_key' => 'listedPrice','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
-        "vehicle_cost"       => ['sub_key' => 'vehicleCost','is_required' => true,'input_type' => 'text', 'field_type' => 'simple'],
+        "stock_"             => ['sub_key' => 'stock','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "vin_"               => ['sub_key' => 'vin','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "year"               => ['sub_key' => 'year','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "make"               => ['sub_key' => 'make','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "model"              => ['sub_key' => 'model','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "trim"               => ['sub_key' => 'trim','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "mileage"            => ['sub_key' => 'miles','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "listed_price"       => ['sub_key' => 'listedPrice','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple','type' => 'int'],
+        "vehicle_cost"       => ['sub_key' => 'vehicleCost','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple','type' => 'int'],
     ];
 
 }
@@ -796,9 +802,9 @@ function vehicleForm()
 function creditAppForm()
 {
     return [
-        "residence_type"            => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
-        "years_at_residence"        => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
-        "months_at_residence"       => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "residence_type"            => ['is_required' => true,'input_type' => 'select', 'field_type' => 'simple','model' => 'residence_type'],
+        "years_at_residence"        => ['is_required' => true, 'input_type' => 'number', 'field_type' => 'simple'],
+        "months_at_residence"       => ['is_required' => true, 'input_type' => 'number', 'field_type' => 'simple'],
         "residence_payment"         => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "previous_address"          => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "previous_city"             => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
@@ -806,18 +812,18 @@ function creditAppForm()
         "previous_postal_code"      => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "previous_residence_years"  => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "previous_residence_months" => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
-        "previous_residence_type"   => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_residence_type"   => ['is_required' => true,'input_type' => 'select', 'field_type' => 'simple','model' => 'previous_residence_type'],
         "previous_residence_payment"=> ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "previous_country"          => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
-        "employment_status"         => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "employment_status"         => ['is_required' => true,'input_type' => 'select', 'field_type' => 'simple','model' => 'employment_status'],
         "employer_name"             => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "job_position"              => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "job_years"                 => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "job_months"                => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "employer_phone_number"     => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
-        "income_frequency"          => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "income_frequency"          => ['is_required' => true,'input_type' => 'select', 'field_type' => 'simple','model' => 'income_frequency'],
         "gross_income"              => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
-        "previous_employment_status"=> ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
+        "previous_employment_status"=> ['is_required' => true,'input_type' => 'select', 'field_type' => 'simple','model' => 'previous_employment_status'],
         "previous_employer"         => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "previous_job_position"     => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
         "previous_employer_phone"   => ['is_required' => true, 'input_type' => 'text', 'field_type' => 'simple'],
@@ -843,10 +849,49 @@ function tradeForm()
 }
 
 
-function convertKeysToCamelCase(array $array): array {
-    $converted = [];
-    foreach ($array as $key => $value) {
-        $converted[Str::camel($key)] = $value;
+// function convertKeysToCamelCase(array $array): array {
+//     $converted = [];
+//     $arrays = [contactForm(), vehicleForm(),creditAppForm(),tradeForm()];
+//     $mergedArray = array_merge(...$arrays);
+
+//     foreach ($array as $key => $value) {
+//         $t = @$mergedArray[$key]['type'] ?? 'string';
+//         if($t == 'string')
+//         {
+//             $converted[Str::camel($key)] = $value;
+//         }
+//         if($t=='int')
+//         {
+//             $converted[Str::camel($key)] = (int)$value;
+//         }
+//     }
+//     return $converted;
+// }
+
+
+function setCotactFieldsPayload($data) {
+
+    $payload = [];
+    $arr = array_keys(defaultContactFields());
+    foreach ($data as $key => $d) {
+        $re = Str::camel($key);
+        if (in_array($re, $arr) ) {
+            $payload[$re] = $d;
+        } else {
+
+            $payload['customFields'][] = [
+                'key' => $key,  // Using $key as 'id', change if needed
+                'value' => $d
+            ];
+        }
     }
-    return $converted;
+
+    return $payload;
+}
+
+function getOptionsByModel($key)
+{
+    $setting = CrudSetting::where('key',$key)->first();
+    $data = $setting ? json_decode($setting->content ?? '',true) : [];
+    return $data;
 }

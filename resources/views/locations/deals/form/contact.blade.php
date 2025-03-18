@@ -22,29 +22,59 @@
 @section('content')
     <div class="container ">
         <div class="row">
-            <div class="col-md-12 mt-2">
+            <div class="col-md-8 m-auto mt-2">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between">
+                    {{-- <div class="card-header d-flex justify-content-between">
                         <h4 class="h4">Update Contact Form -  <span class="cus_name"></span></h4>
-                    </div>
+                    </div> --}}
                     <div class="card-body">
-                        <div class="mb-3" id="inventoriesProcessArea">
-                            <div class="py-2 ">
-                                <label>Vehicles</label>
-                                <select class="form-select custom_select_vehicle select2 vehicle_field form-control" name="vehicle">
-                                </select>
-                            </div>
-                        </div>
-
+                       @include('locations.components.vehicleFields',['is_source' => true])
                         <hr>
 
                         <div class="appendData mt-3">
-                            <form id="submForm">
-                                @include('forms.internals.contactform',['heading' => 'Vehicle','cols' => 'col-md-4','allowed_types' => ['simple'],'form' => vehicleForm()])
-                                @include('forms.internals.contactform',['heading' => 'Contact','cols' => 'col-md-4','allowed_types' => ['simple'],'form' => contactForm(),'obj' => $contact])
-                                @include('forms.internals.contactform',['heading' => 'Credit App','cols' => 'col-md-4','allowed_types' => ['simple'],'form' => creditAppForm(),'obj' => $contact])
-                                @include('forms.internals.contactform',['heading' => 'Trade','cols' => 'col-md-4','allowed_types' => ['simple'],'form' => tradeForm(),'obj' => $contact])
-                            </form>
+                            <div class="form-boxx" >
+
+                                <form id="submForm" class="mt-3">
+                                    @include('forms.internals.contactForm',['heading' => 'Vehicle','cols' => 'col-md-4','allowed_types' => ['simple'],'form' => vehicleForm()])
+                                    <div class="card  radius-10 ">
+                                        <div class="card-body">
+                                            <div class="card-title">
+                                                <h5 class="">Contact Fields</h5>
+                                            </div>
+                                            <hr>
+                                            @include('forms.internals.contactForm',['heading' => 'Contact','cols' => 'col-md-4','allowed_types' => ['simple','extra','vs'],'form' => contactForm(),'obj' => $contact])
+                                            <div class="form-check">
+                                                <input class="form-check-input" checked type="checkbox" value="" id="flexCheckDefault">
+                                                <label class="form-check-label" for="flexCheckDefault">
+                                                  Credit fields should be hidden
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="credit-fields hidden">
+                                    <div class="card   radius-10 mt-3 ">
+                                        <div class="card-body">
+                                            <div class="card-title">
+                                                <h5 class="">Credit App Fields</h5>
+                                            </div>
+                                            <hr>
+                                            @include('forms.internals.contactForm',['heading' => 'Credit App','cols' => 'col-md-4','allowed_types' => ['simple'],'form' => creditAppForm(),'obj' => $contact])
+                                        </div>
+                                    </div>
+                                    <div class="card  radius-10  mt-3">
+                                        <div class="card-body">
+                                            <div class="card-title">
+                                                <h5 class="">Trade Fields</h5>
+                                            </div>
+                                            <hr>
+                                            @include('forms.internals.contactForm',['heading' => 'Trade','cols' => 'col-md-4','allowed_types' => ['simple'],'form' => tradeForm(),'obj' => $contact])
+                                        </div>
+                                    </div>
+                                    </div>
+                                    <button class="btn btn-primary mt-3 contact_field_form" type="button">Submit</button>
+                                </form>
+
+                            </div>
                         </div>
 
                         @include('components.loader')
@@ -58,7 +88,7 @@
     @push('script')
         @include('components.submitForm')
         @include('locations.components.dealsScript',['script_type' => 'form'])
-
+        @include('locations.components.googleaddress')
         <script>
                $(document).ready(function(){
                     @if($vin)
@@ -85,5 +115,19 @@
                         });
                     @endif
                })
+
+               $(document).ready(function () {
+                    function toggleDiv() {
+                        if ($("#flexCheckDefault").is(":checked")) {
+                            $(".credit-fields").hide();
+                        } else {
+                            $(".credit-fields").show();
+                        }
+                    }
+                    toggleDiv();
+                    $("#flexCheckDefault").on("change", function () {
+                        toggleDiv();
+                    });
+            });
         </script>
     @endpush

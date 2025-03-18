@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 use App\Helper\CRM;
+use Illuminate\Support\Str;
 
 class GhlService
 {
@@ -80,4 +81,59 @@ class GhlService
         }
         return $contacts;
     }
+
+    public function oppertunityList($locationId, $contactId)
+    {
+        $opps = [];
+        try{
+           $url = 'opportunities/search?location_id='.$locationId.'&contact_id='.$contactId;
+
+           $detail = CRM::crmV2Loc(1, $locationId, $url, 'get');
+
+           if ($detail && property_exists($detail, 'opportunities')) {
+                foreach ($detail->opportunities as $con) {
+                    $opps[] = ['id' => $con->id, 'name' => $con->name,'locationId' =>  $locationId];
+                }
+           }
+        }catch(\Exception $e){
+
+        }
+
+        return $opps;
+    }
+
+
+
+    public function addTag($locationId, $contactId)
+    {
+        $opps = [];
+        try{
+           $url = 'contacts/'.$contactId.'/tags';
+           $body = [
+            'tags' => ['new manual lead'],
+           ];
+
+           $detail = CRM::crmV2Loc(1, $locationId, $url, 'post',$body);
+
+           if ($detail && property_exists($detail, 'tags')) {
+                return true;
+           }
+        }catch(\Exception $e){
+
+        }
+
+        return false;
+    }
+
+    public function updateContact($locationId, $contactId,$data)
+    {
+        $payload = setCotactFieldsPayload($data);
+        $query = 'contacts/'.$contactId;
+        $detail = CRM::crmV2Loc(1, $locationId, $query, 'put',$payload);
+        if ($detail && property_exists($detail, 'contact')) {
+            return true;
+       }
+       return false;
+    }
+
 }

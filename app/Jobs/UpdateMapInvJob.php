@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Services\Api\InventoryService;
 use App\Services\Api\DealService;
 use App\Models\ErrorLog;
+use Illuminate\Support\Facades\Log;
 use App\Jobs\UpdateMapInvJob;
 
 class UpdateMapInvJob implements ShouldQueue
@@ -44,7 +45,7 @@ class UpdateMapInvJob implements ShouldQueue
 
             if($this->log_table_id)
             {
-                // ErrorLog::where('table_id',$this->log_table_id)->delete();
+                ErrorLog::where('table_id',$this->log_table_id)->delete();
             }
 
             if(isset($data['errors']) && $this->retry <=2)

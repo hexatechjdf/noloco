@@ -22,23 +22,17 @@
 @section('content')
     <div class="container ">
         <div class="row">
-            <div class="col-md-12 mt-2">
+            <div class="col-md-8 m-auto mt-2">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between">
+                    {{-- <div class="card-header d-flex justify-content-between">
                         <h4 class="h4">Deals Management -  <span class="cus_name"></span></h4>
-                    </div>
+                    </div> --}}
                     <div class="card-body">
 
-                        <div class="" id="inventoriesProcessArea">
-                            <div class="py-2 ">
-                                <label>Vehicles</label>
-                                <select class="form-select custom_select_vehicle select2 vehicle_field form-control" name="vehicle">
-                                </select>
-                            </div>
-                        </div>
+                        @include('locations.components.vehicleFields',['is_source' => true])
                         <div class="" id="processArea">
                             <div class="py-2 ">
-                                <label>Contacts
+                                <label>Search Existing Contacts
                                     <button class="btn btn-success btn-sm contact_createe rounded-pill" data-bs-toggle="collapse" data-bs-target="#form-box"  title="Create New">
                                         <i class="bi bi-plus"></i>
                                     </button>
@@ -50,9 +44,12 @@
                         <div class="form-box" >
                             <div class="collapse mt-2" id="form-box">
                                 <div class="card card-body shadow-sm">
-                                    <h5 class="card-title">Add New Contact</h5>
+                                    <div class="card-title">
+                                        <h5 class="">Add New Contact</h5>
+                                    </div>
+                                    <hr>
                                     <form id="submForm">
-                                        @include('forms.internals.contactform',['cols'=> 'col-md-4','allowed_types' => ['simple']])
+                                        @include('forms.internals.contactForm',['cols'=> 'col-md-4','allowed_types' => ['simple']])
                                     </form>
                                 </div>
                             </div>
@@ -66,21 +63,11 @@
             </div>
         </div>
     </div>
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasForm">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Add New</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-        </div>
-        <div class="offcanvas-body">
-            <!-- Form Inside Sidebar -->
-            <form id="submForm">
-                 @include('forms.internals.contactform',['allowed_types' => ['simple']])
-            </form>
-        </div>
-    </div>
 @endsection
 
     @push('script')
         @include('components.submitForm')
         @include('locations.components.dealsScript',['script_type' => 'form'])
+        @include('locations.components.googleaddress')
+
     @endpush

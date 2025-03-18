@@ -10,7 +10,7 @@
 @endforeach --}}
 
 
-<table id="userTable" class="table">
+<table id="userTablee" class="table">
     <thead>
         <tr>
             <th>First Name</th>
@@ -28,16 +28,9 @@
             <td>{{ @$con['email'] }}</td>
             <td>{{ @$con['phone'] }}</td>
             <td>
-                <div class="dropdown">
-                    <button class="btn btn-light p-0 border-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        @php($url = ghlRedurect($con['locationId'], $con['id']))
-                        <li><a class="dropdown-item" target="_blank" href="{{$url}}">Open in new tab</a></li>
-                        <li><a class="dropdown-item open_in_same_window" href="{{$url}}">Open in same window</a></li>
-                    </ul>
-                </div>
+                @php($url = ghlRedurect($con['locationId'], $con['id']))
+                <a class="btn btn-warning btn-sm" target="_blank" href="{{$url}}">Open in new tab</a>
+                <a class="btn btn-primary btn-sm open_in_same_window" href="{{$url}}">Open in same window</a>
             </td>
         </tr>
         @endforeach
