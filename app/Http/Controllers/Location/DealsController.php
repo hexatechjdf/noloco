@@ -30,26 +30,38 @@ class DealsController extends Controller
         return view('locations.deals.index', get_defined_vars());
     }
 
-    public function searchInventory(Request $request)
+    public function setFilters($locationId, $vin = null, $term = null)
     {
-        // dd($request->all());
-        $res = [];
-        if ($request->term || $request->vin) {
-            $column = $request->vin ? 'vin' : 'name';
-            $term = $request->vin ?? $request->term;
-            $filters = [
-                "filters" => [
-                    "column" => $column,
-                    "value" => $term,
-                    "order" => "contains",
-                ],
-            ];
-            $request->merge(['filters' => $filters]);
+        $filters = [];
+
+        // Always include dealershipSubAccountId filter
+        if (!empty($locationId)) {
+            $filters[] = 'dealershipSubAccountId: { equals: "' . $locationId . '" }';
         }
 
+        // Add vin or term filter
+        if (!empty($vin) || !empty($term)) {
+            $column = $vin ? 'vin' : 'name';
+            $value = $vin ?? $term;
+            $filters[] = $column . ': { contains: "' . $value . '" }';
+        }
+
+        // Return the final GraphQL `where` condition
+        return '{ ' . implode(', ', $filters) . ' }';
+    }
+
+    public function searchInventory(Request $request)
+    {
+        // dealershipSubAccountId
+        // dd($request->all());
+        $res = [];
+
+        $filters = $this->setFilters($request->locationId, $request->vin, $request->term);
         try {
-            $query = $this->inventoryService->setQuery($request);
+            $query = $this->inventoryService->setQuery($request,null, $filters);
+            // dd($query);
             $data = $this->inventoryService->submitRequest($query);
+            // dd($data);
 
             if (isset($data['data']['inventoryCollection']['edges'])) {
                 foreach ($data['data']['inventoryCollection']['edges'] as $item) {

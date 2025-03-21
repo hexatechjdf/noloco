@@ -63,6 +63,15 @@ class SettingController extends Controller
         return view('admin.setting.mapping', get_defined_vars());
     }
 
+    public function fetchDealFields(Request $request)
+    {
+        $this->nolocoCustomColumnsWithType();
+
+        return response()->json(['success' => 'Successfully Updated']);
+    }
+
+
+
     public function nolocoCustomColumnsWithType($tableName = 'dealsCollection')
     {
         $final = [];

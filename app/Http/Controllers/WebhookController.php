@@ -12,9 +12,10 @@ use App\Jobs\GetDealsJob;
 
 class WebhookController extends Controller
 {
-
     protected $inventoryService;
     protected $dealService;
+    //0295f15a-a2ae-42f3-b17c-a25b0aa4e3cb client id
+    // Client Secret: 6oN8Q~Z-AyzlRfVbb.OJMd90A30VrooMF-Pbbb1o
 
     public function __construct(InventoryService $inventoryService, DealService $dealService)
     {
@@ -44,11 +45,19 @@ class WebhookController extends Controller
         }
     }
 
-    public function nolocoToGhl(Request $request,$type)
+    public function nolocoToGhl(Request $request)
     {
         $deal = $request->all();
-        $customerMapping = json_decode(supersetting('customerMapping'), true) ?? [];
+
+        dispatch((new UpdateContactJob($deal,'customerMapping')))->delay(5);
+        dispatch((new UpdateContactJob($deal,'coborrowerMapping')))->delay(5);
+
+        return true;
+
+        $customerMapping =  json_decode(supersetting('customerMapping'), true) ?? [];
         $cob = json_decode(supersetting('coborrowerMapping'), true) ?? [];
+
+
         $newArray = [];
         $newData = [];
         foreach ($customerMapping as $key => $value) {

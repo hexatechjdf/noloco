@@ -43,6 +43,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
     Route::any('setting', [SettingController::class, 'index'])->name('setting.index');
     Route::any('setting/noloco', [SettingController::class, 'noloco'])->name('setting.noloco');
     Route::any('setting/mapping/{type?}', [SettingController::class, 'mapping'])->name('setting.mapping');
+    Route::any('setting/fetch/fields', [SettingController::class, 'fetchDealFields'])->name('setting.fetch.fields');
     Route::post('/setting/save', [SettingController::class, 'save'])->name('setting.save');
 
     Route::get('/setting/crud/{key}', [SettingController::class, 'crudSetting'])->name('setting.crud');

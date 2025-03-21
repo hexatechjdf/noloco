@@ -18,6 +18,7 @@ class InventoryService
         // return $query;
         $whereClause = ($filters ? $filters : $this->setFilters($request, $id)) ?: '{}';
 
+
         $sortingClause = $table_name == 'inventoryCollection' ? $this->getSorting($request) : "";
         // return $whereClause;
 
