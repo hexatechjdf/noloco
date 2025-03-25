@@ -27,7 +27,6 @@ class GhlService
                         $idd = $det->id;
                         break;
                     }
-
                 }
             }
         }catch(\Exception $e){
@@ -89,7 +88,6 @@ class GhlService
            $url = 'opportunities/search?location_id='.$locationId.'&contact_id='.$contactId;
 
            $detail = CRM::crmV2Loc(1, $locationId, $url, 'get');
-
            if ($detail && property_exists($detail, 'opportunities')) {
                 foreach ($detail->opportunities as $con) {
                     $opps[] = ['id' => $con->id, 'name' => $con->name,'locationId' =>  $locationId];

@@ -130,32 +130,32 @@ class MappingExtentionController extends Controller
     public function setIdsFilter($ids=null,$keyword=null)
     {
         $column = 'uuid';
-$order = 'in';
+        $order = 'in';
 
-$whereConditions = [];
+        $whereConditions = [];
 
-// Handle IDs filter
-if (!empty($ids)) {
-    $quotedIds = array_map(fn($id) => '"' . $id . '"', $ids);
-    $idFilter = "{$column}: { {$order}: [" . implode(', ', $quotedIds) . "] }";
-    $whereConditions[] = $idFilter;
-}
+        // Handle IDs filter
+        if (!empty($ids)) {
+            $quotedIds = array_map(fn($id) => '"' . $id . '"', $ids);
+            $idFilter = "{$column}: { {$order}: [" . implode(', ', $quotedIds) . "] }";
+            $whereConditions[] = $idFilter;
+        }
 
-// Handle keyword filter
-if (!empty($keyword)) {
-    $keywordFilter = 'OR: [
-        { coBorrowerFullName: { first: { equals: "' . $keyword . '" } } },
-        { coBorrowerFullName: { last: { equals: "' . $keyword . '" } } },
-        { fullName: { first: { equals: "' . $keyword . '" } } },
-        { fullName: { last: { equals: "' . $keyword . '" } } },
-        { vehicle: { equals: "' . $keyword . '" } }
-    ]';
-    $whereConditions[] = $keywordFilter;
-}
+        // Handle keyword filter
+        if (!empty($keyword)) {
+            $keywordFilter = 'OR: [
+                { coBorrowerFullName: { first: { contains: "' . $keyword . '" } } },
+                { coBorrowerFullName: { last: { contains: "' . $keyword . '" } } },
+                { fullName: { first: { contains: "' . $keyword . '" } } },
+                { fullName: { last: { contains: "' . $keyword . '" } } },
+                { vehicle: { contains: "' . $keyword . '" } }
+            ]';
+            $whereConditions[] = $keywordFilter;
+        }
 
-// Construct the final where clause
-$whereClause = !empty($whereConditions) ? "{ " . implode(', ', $whereConditions) . " }" : "{}";
-return $whereClause;
+        // Construct the final where clause
+        $whereClause = !empty($whereConditions) ? "{ " . implode(', ', $whereConditions) . " }" : "{}";
+        return $whereClause;
         $column = 'uuid';
 $order = 'in';
 
