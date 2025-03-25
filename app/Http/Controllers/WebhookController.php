@@ -14,8 +14,6 @@ class WebhookController extends Controller
 {
     protected $inventoryService;
     protected $dealService;
-    //0295f15a-a2ae-42f3-b17c-a25b0aa4e3cb client id
-    // Client Secret: 6oN8Q~Z-AyzlRfVbb.OJMd90A30VrooMF-Pbbb1o
 
     public function __construct(InventoryService $inventoryService, DealService $dealService)
     {
