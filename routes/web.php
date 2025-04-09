@@ -94,6 +94,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
         Route::group(['as' => 'csv.', 'prefix' => 'csv'], function () {
             Route::get('/', [CsvMappingController::class, 'index'])->name('index');
             Route::get('/create/{id?}', [CsvMappingController::class, 'create'])->name('create');
+            Route::get('/run', [CsvMappingController::class, 'testRun'])->name('run');
             Route::post('/store/{id?}', [CsvMappingController::class, 'store'])->name('store');
             Route::get('/manage/{id}', [CsvMappingController::class, 'manage'])->name('manage');
             Route::post('/ftp', [CsvMappingController::class, 'ftp'])->name('ftp');

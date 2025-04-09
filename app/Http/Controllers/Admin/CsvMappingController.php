@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\Api\DealService;
 use App\Jobs\GetFoldersJob;
 
+
 class CsvMappingController extends Controller
 {
     protected $ftpService;
@@ -390,6 +391,13 @@ class CsvMappingController extends Controller
         }
 
         return $data;
+    }
+
+    public function testRun(Request $request)
+    {
+        dispatch((new GetFoldersJob()))->delay(5);
+
+        return response()->json(['success' => true],200);
     }
 
 }

@@ -23,8 +23,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::post('webhook/ghl/customer', [WebhookController::class, 'ghlContactToNoloco'])->name('ghl.to.noloco')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
-Route::post('webhook/noloco/to/ghl', [WebhookController::class, 'nolocoToGhl'])->name('noloco.to.ghl')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('webhook/update/customer', [WebhookController::class, 'ghlContactToNoloco'])->name('ghl.to.noloco')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('webhook/deal/to/crm', [WebhookController::class, 'nolocoToGhl'])->name('noloco.to.ghl')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::prefix('inventory')->name('inventory.')->group(function () {
     Route::post('/list', [InventoryController::class, 'index']);

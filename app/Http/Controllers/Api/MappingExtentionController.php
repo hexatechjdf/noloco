@@ -114,7 +114,6 @@ class MappingExtentionController extends Controller
 
         $whereClause =  $this->setIdsFilter(@$filter['ids'], @$filter['keyword']) ?? null;
 
-
         try {
             $query = $inventoryService->setQuery($request, null, $whereClause, 'dealsCollection' ,true);
             // return $query;
@@ -140,7 +139,6 @@ class MappingExtentionController extends Controller
             $idFilter = "{$column}: { {$order}: [" . implode(', ', $quotedIds) . "] }";
             $whereConditions[] = $idFilter;
         }
-
         // Handle keyword filter
         if (!empty($keyword)) {
             $keywordFilter = 'OR: [
