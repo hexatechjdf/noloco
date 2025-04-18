@@ -31,6 +31,11 @@
                             </ul>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ Route::is('admin.dropdown.matchables.index') ? 'active' : '' }}"
+                                href="{{ route('admin.dropdown.matchables.index') }}">Matchables</a>
+                        </li>
+
+                        <li class="nav-item">
                             <a class="nav-link {{ Route::is('admin.scripts.index') ? 'active' : '' }}"
                                 href="{{ route('admin.scripts.index') }}">Scripts</a>
                         </li>
@@ -109,9 +114,20 @@
                                         href="{{ route('admin.mappings.coborrower.form') }}">Coborrower</a></li>
                                 <li><a class="dropdown-item {{ Route::is('admin.mappings.ghl.form') ? 'active' : '' }}"
                                         href="{{ route('admin.mappings.deals.form') }}">Deals</a></li>
-                                <li><a class="dropdown-item {{ Route::is('admin.mappings.csv.index') ? 'active' : '' }}"
-                                        href="{{ route('admin.mappings.csv.index') }}">CSV</a></li>
 
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ Route::is('admin.mappings.csv.index') ? 'active' : '' }}"
+                                href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                CSV Setting
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item {{ Route::is('admin.mappings.csv.index') ? 'active' : '' }}"
+                                        href="{{ route('admin.mappings.csv.index') }}">Inbounding</a></li>
+                                <li><a class="dropdown-item {{ Route::is('admin.mappings.csv.outbound.index') ? 'active' : '' }}"
+                                        href="{{ route('admin.mappings.csv.outbound.index') }}">Outbonding</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">

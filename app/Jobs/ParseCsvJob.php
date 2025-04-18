@@ -8,10 +8,16 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Jobs\MapInvJob;
+use App\Services\Api\InventoryService;
+use App\Services\Api\DealService;
+use Illuminate\Support\Facades\Log;
+use App\Jobs\UpdateMapInvJob;
 
 class ParseCsvJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $timeout = 300;
 
     public $data;
     /**
@@ -25,17 +31,48 @@ class ParseCsvJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(InventoryService $inventoryService,DealService $dealService): void
     {
         $files = $this->data['files'];
         $unique = $this->data['unique'];
         $mapping = $this->data['mapping'];
         $locationId = $this->data['locationId'];
+ 
+
 
         foreach ($files as $csvFile) {
             $rows = $this->parseCsvFile($csvFile);
+            $key = @$mapping[$unique];
+            $existInventoryIds = $this->inventoryIds($locationId,$inventoryService,$dealService,strtolower($unique));
+            $arr = $existInventoryIds;
+            $rowStocks = [];
+            
             foreach ($rows as $fields) {
-                dispatch((new MapInvJob($fields,$mapping,$locationId,$unique)))->delay(5);
+                 
+                dispatch((new MapInvJob($fields,$mapping,$locationId,$unique,$existInventoryIds)))->delay(5);
+                
+                $rowStocks[] = @$fields[$unique] ?? null;
+            }
+
+
+Log::info($arr, $rowStocks);
+            if(count($existInventoryIds) > 0)
+            {
+                $result = array_filter($existInventoryIds, function($value) use ($rowStocks) {
+                    return !in_array($value, $rowStocks);
+                });
+                
+                Log::info($result);
+                
+                foreach($result as $ke => $exitt)
+                {
+                    $pl = [
+                        'id' => $ke.'__Int',
+                        'status' => 'SOLD__ENUM',
+                    ];
+                    $variables = ['graphqlPayload' => [arrayToGraphQL1($pl,'inventoryCollection')]];
+                    dispatch((new UpdateMapInvJob($variables,'updateInventory', $ke)));
+                }
             }
         }
     }
@@ -73,4 +110,36 @@ class ParseCsvJob implements ShouldQueue
 
         return $data;
     }
+
+
+
+    public function inventoryIds($locationId,$inventoryService,$dealService,$key)
+    {
+        $request = request();
+        $stockids = [];
+        $id = null;
+        try {
+            $query = $inventoryService->setQueryInventoryIds($request,$locationId);
+            $data = $inventoryService->submitRequest($query);
+            Log::info($data );
+            $stocks = @$data['data']['inventoryCollection']['edges'];
+            if($stocks)
+            {
+                foreach($stocks as $stock)
+                {
+                    $s = $stock['node'];
+                    if(@$s[$key] && @$s['id'])
+                    {
+                        $stockids[@$s['id']] = @$s[$key];
+                    }
+                }
+            }
+
+        } catch (\Exception $e) {
+            Log::info($e);
+        }
+        return $stockids;
+    }
+
+
 }

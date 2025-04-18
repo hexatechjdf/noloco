@@ -58,17 +58,18 @@ class GetFoldersJob implements ShouldQueue
 
                 $files = File::files($folder); // Get all files in the folder
                 $csvFiles = [];
-                $path = 'app/csvfiles/';
+                $path = 'app/csvfiles/'.$folderName.'/';
                 $storagePath = public_path($path.$folderName);
                 if (!File::exists($storagePath)) {
                     File::makeDirectory($storagePath, 0755, true);
                 }
 
                 foreach ($files as $file) {
-                    if ($file->getExtension() === 'csv') {
-                        $newFileName = $locationId . '_' . now()->format('YmdHis') . '_' . $file->getFilename();
+                    $file_name = $file->getFilename();
+                    if ($file->getExtension() === 'csv' && !str_contains($file_name, 'export')) {
+                        $newFileName = $locationId . '_' . now()->format('YmdHis') . '_' . $file_name;
                         $newFilePath = $storagePath . '/' . $newFileName;
-                        File::move($file->getPathname(), $newFilePath);
+                        File::copy($file->getPathname(), $newFilePath);
                         $csvFiles[] = $path. $folderName.'/' . $newFileName;
                     }
                 }

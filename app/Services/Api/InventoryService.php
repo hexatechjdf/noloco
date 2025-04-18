@@ -17,8 +17,6 @@ class InventoryService
         $query = $this->getQuery($table_name,'title','ASC', $isAll);
         // return $query;
         $whereClause = ($filters ? $filters : $this->setFilters($request, $id)) ?: '{}';
-
-
         $sortingClause = $table_name == 'inventoryCollection' ? $this->getSorting($request) : "";
         // return $whereClause;
 
@@ -28,6 +26,39 @@ class InventoryService
         $query = str_replace(
             ['%a', '%b', '%s', '%t'],
             [$afterParam, $beforeParam, $whereClause, $sortingClause],
+            $query
+        );
+
+        return $query;
+    }
+
+    public function setQueryInventoryIds($request,$locationId = null,$isAll= null)
+    {
+        $table_name = 'inventoryCollection';
+
+        $query = <<<GRAPHQL
+        query {
+          inventoryCollection( where: {dealershipSubAccountId: {equals: %s}, OR: [{status: {equals: "INACTIVE"}}, {status: {equals: "ACTIVE"}}]}) {
+            edges {
+              node {
+                id
+                stock
+                vin
+                status
+              }
+            }
+            pageInfo {
+               startCursor
+               endCursor
+               hasNextPage
+               hasPreviousPage
+            }
+          }
+        }
+        GRAPHQL;
+        $query = str_replace(
+            ['%s'],
+            ["\"$locationId\""],
             $query
         );
 
@@ -51,12 +82,8 @@ class InventoryService
         return ", orderBy: { field :  \"$sortColumn\", direction: $sortDirection }";
     }
 
-
-
-
     public function getQuery($tableName = null, $sortColumn = 'title', $sortDirection = 'ASC',$isAll = false)
     {
-
         $tableName = $tableName ?? 'inventoryCollection';
         $fields = fields($tableName,$isAll); // Get the array of fields from the helper function
 
@@ -73,11 +100,9 @@ class InventoryService
             }
         }
 
-
-
         $query = <<<GRAPHQL
         query {
-          $tableName(first: 10  %a %b %t , where: %s) {
+          $tableName(first: 5  %a %b %t , where: %s) {
             edges {
               node {
                 $fieldsString
@@ -95,6 +120,7 @@ class InventoryService
 
         return $query;
     }
+
 
     public function setTableQuery($tables)
     {
@@ -220,23 +246,18 @@ class InventoryService
         if ($request->filters) {
             try {
                 $filters = $request->filters;
-
                 if (!empty($filters)) {
                     foreach ($filters as $key => $filter) {
                         if (is_array($filter) && array_keys($filter) === range(0, count($filter) - 1)) {
-                            // Handle array-based filters like 'price'
                             $filterGroupParts = [];
                             $name = "";
-                            // Collect conditions under the same column (e.g., listedPrice)
                             foreach ($filter as $f) {
-                                // Modify this line to group operators inside a single field
                                 $filterGroupParts[$f['order']] = $f['value'];
                                 $name = $f['column'];
                             }
 
                             $filterParts[] = ' OR: [{' . $name . ': {' . implode(', ', array_map(fn($key, $value) => "$key: $value", array_keys($filterGroupParts), $filterGroupParts)) . '}}]';
                         } else {
-                            // Handle single filters like 'name'
                             $filterParts[] = $this->filterField($filter);
                             if (isset($filter['column'])) {
                                 $filterFields[] = $filter['column'];
@@ -264,6 +285,7 @@ class InventoryService
         if ($is_optional) {
             return [$whereClause, $filterFields];
         }
+
         return $whereClause;
     }
 
@@ -305,8 +327,9 @@ class InventoryService
                             'query' => $query,
                             'variables' => $values
                         ]);
+                        
+                
                 if ($response->successful()) {
-
                     $data = $response->json();
                     return $data;
                 }else{
@@ -317,7 +340,7 @@ class InventoryService
                     }
                 }
             } catch (\Exception $e) {
-                dd($e);
+                // dd($e);
                 throw $e;
             }
         }

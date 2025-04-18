@@ -17,7 +17,6 @@ class InventoryController extends Controller
     {
         try {
             $query = $inventoryService->setQuery($request);
-            // return $query;
             $data = $inventoryService->submitRequest($query,1);
 
             return $data;
@@ -37,6 +36,7 @@ class InventoryController extends Controller
 
         return response()->json(['settings' => $settings, 'scripts' => $scripts], 200);
     }
+
     public function getSpecificInv(Request $request, $id, InventoryService $inventoryService)
     {
         if (!$id) {

@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\ScriptController;
 use App\Http\Controllers\Admin\SourceController;
 use App\Http\Controllers\Admin\MapingController;
 use App\Http\Controllers\Admin\CsvMappingController;
+use App\Http\Controllers\Admin\CsvOutbondController;
+use App\Http\Controllers\Admin\DropdownMatchableController;
 use App\Http\Controllers\Location\CoborrowerController;
 use App\Http\Controllers\Location\InventoryController;
 use App\Http\Controllers\Form\ImageController;
@@ -55,12 +57,20 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
     Route::get('/logs/history/form/setting', [LogsController::class, 'historyForm'])->name('logs.history.form');
     Route::post('/logs/history/manage/{id}', [LogsController::class, 'historyManage'])->name('logs.history.manage');
 
+    Route::group(['as' => 'dropdown.matchables.', 'prefix' => 'dropdown/matchables'], function () {
+        Route::get('/', [DropdownMatchableController::class, 'index'])->name('index');
+        Route::get('/get/form', [DropdownMatchableController::class, 'getForm'])->name('get.form');
+        Route::post('/store/{id?}', [DropdownMatchableController::class, 'store'])->name('store');
+        Route::get('/delete/{id}', [DropdownMatchableController::class, 'delete'])->name('delete');
+    });
+
     Route::group(['as' => 'scripts.', 'prefix' => 'scripts'], function () {
         Route::get('/', [ScriptController::class, 'index'])->name('index');
         Route::get('/get/form', [ScriptController::class, 'getForm'])->name('get.form');
         Route::post('/store/{id?}', [ScriptController::class, 'store'])->name('store');
         Route::get('/delete/{id}', [ScriptController::class, 'delete'])->name('delete');
     });
+
     Route::group(['as' => 'sources.', 'prefix' => 'sources'], function () {
         Route::get('/', [SourceController::class, 'index'])->name('index');
         Route::get('/get/form', [SourceController::class, 'getForm'])->name('get.form');
@@ -101,13 +111,17 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
             Route::get('/ftp/form', [CsvMappingController::class, 'ftpForm'])->name('ftp.form');
             Route::get('/ftp/delete', [CsvMappingController::class, 'ftpDelete'])->name('ftp.delete');
             Route::get('/delete', [CsvMappingController::class, 'delete'])->name('delete');
-
-
             Route::get('/location/form', [CsvMappingController::class, 'locationForm'])->name('location.form');
             Route::post('/location/store', [CsvMappingController::class, 'locationStore'])->name('location.store');
-
-
             Route::get('/test/csvs/data', [CsvMappingController::class, 'setCvsFiles']);
+
+            Route::group(['as' => 'outbound.', 'prefix' => 'outbound'], function () {
+                Route::get('/', [CsvOutbondController::class, 'index'])->name('index');
+                Route::get('/create/{id?}', [CsvOutbondController::class, 'create'])->name('create');
+                Route::get('/run', [CsvOutbondController::class, 'testRun'])->name('run');
+                Route::post('/store/{id?}', [CsvOutbondController::class, 'store'])->name('store');
+                Route::get('/manage/{id}', [CsvOutbondController::class, 'manage'])->name('manage');
+            });
         });
     });
 
@@ -226,6 +240,8 @@ use App\Jobs\GetFoldersJob;
 Route::get('/cron-jobs/process/csv/files', function () {
     dispatch((new GetFoldersJob()))->delay(5);
 });
+
+Route::get('data/csv/export/inv', [CsvOutbondController::class, 'exportInv']);
 
 
 

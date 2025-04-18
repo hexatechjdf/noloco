@@ -17,6 +17,7 @@ class UpdateMapInvJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $timeout = 300;
     public $variables;
     public $invType;
     public $inv_id;
@@ -51,11 +52,11 @@ class UpdateMapInvJob implements ShouldQueue
             if(isset($data['errors']) && $this->retry <=2)
             {
                 $this->retry++;
-                $res = createErrorLogs($data['errors'],$variables,'update', $this->inv_id,'Inventory','csv');
+                $res = createErrorLogs($data['errors'],$this->variables,'update', $this->inv_id,'Inventory','csv');
                 dispatch((new UpdateMapInvJob($res,$this->invType, $this->inv_id,$this->retry)));
             }
         } catch (\Exception $e) {
-            Log::error('error file:'.$this->locationId.'=>' .$e);
+            Log::error('error file:=>' .$e);
         }
     }
 }

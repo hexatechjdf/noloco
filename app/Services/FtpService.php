@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\FtpAccount;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class FtpService
 {
@@ -142,4 +143,28 @@ class FtpService
         return json_decode($resp, true);
      }
 
+    public function uploadToDynamicFtp($ftpDetails, $localFilePath, $remoteFilePath)
+    {
+        // Build dynamic FTP disk
+        $ftpDisk = Storage::build([
+            'driver'   => 'ftp',
+            'host'     => $ftpDetails['host'],
+            'username' => $ftpDetails['username'],
+            'password' => $ftpDetails['password'],
+            'port'     => $ftpDetails['port'] ?? 21,
+            'root'     => $ftpDetails['root'] ?? '',
+            'passive'  => true,
+            'ssl'      => false,
+            'timeout'  => 30,
+        ]);
+
+        // Upload CSV
+        $success = $ftpDisk->put($remoteFilePath, fopen($localFilePath, 'r+'));
+
+        if ($success) {
+            echo "✅ File uploaded to FTP: {$ftpDetails['host']}";
+        } else {
+            echo "❌ Failed to upload file to FTP: {$ftpDetails['host']}";
+        }
+    }
 }

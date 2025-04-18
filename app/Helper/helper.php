@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\CrudSetting;
 use App\Models\MappingTable;
+use App\Models\DropdownMatchable;
 use Illuminate\Support\Str;
 use Nwidart\Modules\Facades\Module;
 use libphonenumber\PhoneNumberUtil;
@@ -13,6 +14,7 @@ use libphonenumber\PhoneNumberFormat;
 use Illuminate\Support\Facades\Log;
 use libphonenumber\PhoneNumberToCarrierMapper;
 use App\Models\ErrorLog;
+use Illuminate\Support\Facades\Cache;
 
 
 function supersetting($key, $default = '', $keys_contain = null)
@@ -179,15 +181,15 @@ function getNonObjectFields($input, $table = null)
 {
     $fields = [];
     foreach ($input as $key => $value) {
-        if (!is_array($value) && $value != 'featuredPhoto' && $value!='vendorAddress') {
+        if (!is_array($value)  && $value!='vendorAddress') {
             $fields[] = $value;
         }
     }
 
-    if ($table == 'inventoryCollection') {
-        $additionalData = ['featuredPhoto' => ['url']];
-        $fields[] = ['featuredPhoto' => $additionalData['featuredPhoto']];
-    }
+    // if ($table == 'inventoryCollection') {
+    //     $additionalData = ['featuredPhoto' => ['url']];
+    //     $fields[] = ['featuredPhoto' => $additionalData['featuredPhoto']];
+    // }
 
     return $fields;
 }
@@ -523,7 +525,7 @@ function setDealQueryData($contact,$result,$map_type = 'customerMapping')
     return  arrayToGraphQL($result);
 }
 
-function arrayToGraphQL1($data)
+function arrayToGraphQL1($data,$table = null)
 {
     $result = [];
 
@@ -533,14 +535,14 @@ function arrayToGraphQL1($data)
             $result[$key] = arrayToGraphQL1($value);
         } else {
             list($type, $value) = convertStringToArray('__', $value);
-            $result[$key] = formatValueByType1($type, $value);
+            $result[$key] = formatValueByType1($type, $value,$key,$table);
         }
     }
 
     return $result;
 }
 
-function formatValueByType1($type, $value)
+function formatValueByType1($type, $value,$key = null,$table =null)
 {
     if ($type === 'Int' || $type === 'int') {
         return (int) ltrim($value, '0'); // Remove leading zeros for integers
@@ -549,12 +551,39 @@ function formatValueByType1($type, $value)
     } elseif ($type === 'Boolean' || $type === 'bool') {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     } elseif ($type === 'ENUM' || $type === 'enum') {
+        $value = checkMatchableValue($key,$table,$value);
         return transformStateString(strtoupper($value));
     } elseif ($type === 'DateTime' || $type === 'Date') {
         return customDate($value, 'm/d/Y', 'time');
     }
 
     return (string) $value;
+}
+
+function checkMatchableValue($key,$table,$value)
+{
+    if($key && $table)
+    {
+        $data = Cache::remember($key.$table, 60 * 5, function () use ($key, $table) {
+            $d = DropdownMatchable::where('table', $table)->where('column', $key)->first();
+            $ar = [];
+            if ($d) {
+                $options = json_decode(@$d->content ?? '') ?? [];
+                foreach ($options as $op) {
+                    $values = explode(',', $op->value ?? '');
+
+                    foreach ($values as $v) {
+                        $v = trim($v);
+                        $ar[$v] = $op->key;
+                    }
+                }
+            }
+            return $ar;
+        });
+        return isset($data[$value]) ? $data[$value] : $value;
+    }
+
+    return $value;
 }
 
 function getCountryForPhoneNumber($phoneNumber, $defaultRegion = 'PK')
@@ -895,3 +924,5 @@ function getOptionsByModel($key)
     $data = $setting ? json_decode($setting->content ?? '',true) : [];
     return $data;
 }
+
+

@@ -12,7 +12,7 @@ use App\Services\Api\InventoryService;
 class ProcessCsvDataJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
+    public $timeout = 300;
     public $fields;
     public $mapping;
     public $unique;
@@ -51,7 +51,7 @@ class ProcessCsvDataJob implements ShouldQueue
         }
         $data = arrayToGraphQL($data);
         try {
-            $query = $this->inventoryService->setInventoryDataByCsv($invType,$data);
+            $query = $this->inventoryService->setInventoryDataByCsv($data,$invType);
             $data = $this->inventoryService->submitRequest($query);
         } catch (\Exception $e) {
 

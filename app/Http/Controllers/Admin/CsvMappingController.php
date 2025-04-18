@@ -34,9 +34,8 @@ class CsvMappingController extends Controller
 
     public function index()
     {
-        $items = CsvMapping::withCount(['locations','accounts'])->paginate(10);
+        $items = CsvMapping::withCount(['locations','accounts'])->whereNull('type')->paginate(10);
         $setting = supersetting('ftp_setting', '', 'ftp_%');
-
 
         return view('admin.mapings.csv.index', get_defined_vars());
     }
@@ -212,99 +211,190 @@ class CsvMappingController extends Controller
 
     public function setCvsFiles()
     {
-        // dispatch((new GetFoldersJob()))->delay(5);
-        // dd(!23);
-        // // $folders = $this->getFolders();
-        // // dd($folders);
+        // $folders = $this->getFolders();
+        // dd($folders);
         $folders  = [
-            "noloco002" => [
-                "unique" => "VIN",
+            "mapping1" => [
+                "unique" => "ID",
                 "mapping" => [
-                    "VIN" => ["column" => "vin__String"],
-                    "Stock" => ["column" => "stock__Int"],
-                    "Year" => ["column" => "year__Int"],
-                    "Make" => ["column" => "make__String"],
-                    "Model" => ["column" => "model__String"],
-                    "Trim" => ["column" => "trim__String"],
-                    "BodyStyle" => ["column" => "bodyStyle__String"],
-                    "ListPrice" => ["column" => "listedPrice__Float"],
-                    "CostPrice" => ["column" => "vehicleCost__Float"],
-                    "Mileage" => ["column" => "miles__Int"],
-                    "FuelType" => ["column" => "fuelType__String"],
-                    "PhotoURL" => ["column" => "photosUrls__String"],
-                    "City" => ["column" => "mpgCity__String"],
+                    "ID" => [
+                        "column" => "id__NON_NULL"
+                    ],
+                    "VIN_Number" => [
+                        "column" => "vin__String"
+                    ],
+                    "Year_Made" => [
+                        "column" => "year__Int"
+                    ],
+                    "Car_Brand" => [
+                        "column" => "make__String"
+                    ],
+                    "Car_Model" => [
+                        "column" => "model__String"
+                    ],
+                    "Model_Type" => [
+                        "column" => "fuelType__String"
+                    ],
+                    "Status" => [
+                        "column" => "status__ENUM"
+                    ],
+                    "Type" => [
+                        "column" => "fuelType__String"
+                    ],
+                    "Selling_Price" => [
+                        "column" => "vehicleCost__Float"
+                    ],
+                    "Cost_Price" => [
+                        "column" => "listedPrice__Float"
+                    ],
+                    "Final_Price" => [
+                        "column" => "vehicleCost__Float"
+                    ],
+                    "Stock_Availability" => [
+                        "column" => "stock__Int"
+                    ],
                 ],
                 "files" => [
-                    "app/csvfiles/noloco002/geAOl3NEW1iIKIWheJcj_20250211132604_Inventory 1.csv"
+                    "app/csvfiles/mapping1/geAOl3NEW1iIKIWheJcj_20250410111613_csv1.csv",
+                    "app/csvfiles/mapping1/geAOl3NEW1iIKIWheJcj_20250410111613_csv12.csv"
                 ],
-                "locationId" => "geAOl3NEW1iIKIWheJcj",
+                "locationId" => "geAOl3NEW1iIKIWheJcj"
             ]
         ];
 
+
         foreach($folders as $folder => $data)
         {
-               $files = $data['files'];
-               $unique = $data['unique'];
-               $mapping = $data['mapping'];
-               $locationId = $data['locationId'];
-
-                foreach ($files as $csvFile) {
-                    $rows = $this->parseCsvFile($csvFile);
-
-                    foreach ($rows as $fields) {
-                        $val = $fields[$unique];
-                        $key = $mapping[$unique];
-
-                        // dd($key,$mapping);
-
-                        $invType = 'createInventory';
-                        $filters = $this->setFilter($val,$key['column']);
-                        // list($dealer_id,$dealership) =  $this->dealService->getDealership(request(),$locationId);
-                        $dealer_id = 9;
-
-                        $id = 83 ?? $this->isExist($key,$val,$filters,$locationId);
-
-                        $data = [];
-
-                        foreach($mapping as $k => $map)
-                        {
-                            list($type,$value) = convertStringToArray('__', $map['column']);
-                            if (isset($fields[$k]) && $fields[$k] != '') {
-                                $data[$value] = $fields[$k].'__'.$type;
-                            }elseif(!isset($fields[$k])){
-                                $data[$value] = $k.'__'.$type;
-                            }
-                        }
-
-                        if($id)
-                        {
-                            $data['id'] = $id.'__Int';
-                            $invType = 'updateInventory';
-                            try{
-                                $dId = supersetting('deal_dealership_col') ?? '';
-                                $data[$dId] = $dealer_id.'__Int';
-                            }catch(\Exception $e){
-                            }
-                            $variables = ['graphqlPayload' => [arrayToGraphQL1($data)]];
-
-                            try {
-                                $query = $this->inventoryService->setInventoryDataByCsv($variables,$invType);
-                                $data = $this->inventoryService->submitRequest($query,1,$variables);
-
-                                dd($data);
-
-                            } catch (\Exception $e) {
-                               dd($e);
-                            }
-                        }
+            $files = $data['files'];
+            $unique = $data['unique'];
+            $mapping = $data['mapping'];
+            $locationId = $data['locationId'];
 
 
+            foreach ($files as $csvFile) {
+                $rows = $this->parseCsvFile($csvFile);
+                $existInventoryIds = $this->inventoryIds($locationId);
+                // foreach ($rows as $fields) {
+                //         $val = @$fields[$unique];
+                //         $key = @$mapping[$unique];
+
+                //         // if($key && $val)
+                //         // {
+
+                //         // }
+                //         $invType = 'createInventory';
+                //         $filters = $this->setFilter($val,$key['column']);
+                //         // list($dealer_id,$dealership) =  $this->dealService->getDealership(request(),$locationId);
+                //         // $dealer_id = 9;
+
+                //         list($id, $existInventoryIds) = $this->isExist($key,$val,$filters,$locationId,$existInventoryIds);
+
+                //         $data = [];
+
+                //         foreach($mapping as $k => $map)
+                //         {
+                //             list($type,$value) = convertStringToArray('__', $map['column']);
+                //             if (isset($fields[$k]) && $fields[$k] != '') {
+                //                 $data[$value] = $fields[$k].'__'.$type;
+                //             }elseif(!isset($fields[$k])){
+                //                 $data[$value] = $k.'__'.$type;
+                //             }
+                //         }
+
+                //         if($id)
+                //         {
+                //             $data['id'] = $id.'__Int';
+                //             $invType = 'updateInventory';
+                //             try{
+                //                 $dId = supersetting('deal_dealership_col') ?? '';
+                //                 $data[$dId] = $dealer_id.'__Int';
+                //             }catch(\Exception $e){
+                //             }
+                //             $variables = ['graphqlPayload' => [arrayToGraphQL1($data,'inventoryCollection')]];
+
+                //             dd($variables);
+
+                //             try {
+                //                 $query = $this->inventoryService->setInventoryDataByCsv($variables,$invType);
+                //                 $data = $this->inventoryService->submitRequest($query,1,$variables);
+
+                //                 dd($data);
+
+                //             } catch (\Exception $e) {
+                //                dd($e);
+                //             }
+                //         }
+
+
+                // }
+
+                $invType = 'updateInventory';
+                if(count($existInventoryIds) > 0)
+                {
+                    foreach($existInventoryIds as $ke => $exitt)
+                    {
+                        $pl = [
+                            'id' => $ke.'__Int',
+                            'status' => 'SOLD__ENUM',
+                        ];
+                        $variables = ['graphqlPayload' => [arrayToGraphQL1($pl,'inventoryCollection')]];
+                        $query = $this->inventoryService->setInventoryDataByCsv($variables,$invType);
+                        $data = $this->inventoryService->submitRequest($query,1,$variables);
                     }
+                }
             }
         }
 
         dd(!23);
 
+    }
+
+    public function getFolders()
+    {
+        $basePath = base_path('../csvfiles'); // Parent folder containing multiple folders
+        $folders = File::directories($basePath);
+
+        $csvFolders = [];
+
+        foreach ($folders as $folder) {
+            $folderName = basename($folder); // Get folder name
+
+            $acc = FtpAccount::with('mapping')
+            ->where('location_id','!=',null)
+            ->where('username',$folderName)
+            ->select('username', 'mapping_id', 'id','location_id')
+            ->first();
+
+            if($acc)
+            {
+                $mapping = json_decode(@$acc->mapping->content, true) ?? [];
+                $locationId =  $acc->location_id;
+                $unique = $acc->mapping->unique_field;
+
+                $files = File::files($folder); // Get all files in the folder
+                $csvFiles = [];
+                $path = 'app/csvfiles/';
+                $storagePath = public_path($path.$folderName);
+                if (!File::exists($storagePath)) {
+                    File::makeDirectory($storagePath, 0755, true);
+                }
+
+                foreach ($files as $file) {
+                    $file_name = $file->getFilename();
+                    if ($file->getExtension() === 'csv' && !str_contains($file_name, 'export')) {
+                        $newFileName = $locationId . '_' . now()->format('YmdHis') . '_' . $file_name;
+                        $newFilePath = $storagePath . '/' . $newFileName;
+                        File::copy($file->getPathname(), $newFilePath);
+                        $csvFiles[] = $path. $folderName.'/' . $newFileName;
+                    }
+                }
+
+                if (!empty($csvFiles)) {
+                    $csvFolders[$folderName] = ['unique' => $unique,'mapping' => $mapping, 'files' => $csvFiles,'locationId' => $locationId];
+                }
+            }
+        }
+        return  $csvFolders;
     }
 
     public function setFilter($value,$key)
@@ -326,8 +416,69 @@ class CsvMappingController extends Controller
         return $filters;
     }
 
-    public function isExist($key,$value,$filters,$locationId)
+    public function inventoryIds($locationId)
     {
+        $stockids = [];
+        $filters = [
+            "filters" => [
+                "column" => 'dealershipSubAccountId',
+                "value" => $locationId,
+                "order" => "equals",
+            ],
+        ];
+        $request = request();
+        $request->merge(['filters' => $filters]);
+        $id = null;
+        try {
+            $query = $this->inventoryService->setQueryInventoryIds($request,$locationId);
+            $data = $this->inventoryService->submitRequest($query);
+            $stocks = @$data['data']['inventoryCollection']['edges'];
+            if($stocks)
+            {
+                foreach($stocks as $stock)
+                {
+                    $s = $stock['node'];
+                    if(@$s['stock'] && @$s['id'])
+                    {
+                        $stockids[@$s['id']] = @$s['stock'];
+                    }
+                }
+            }
+
+        } catch (\Exception $e) {
+        }
+        return $stockids;
+    }
+
+
+    public function isExist($key,$value,$filters,$locationId,$existInventoryIds)
+    {
+        $id = null;
+        if(in_array($value, $existInventoryIds))
+        {
+            $id = array_search($value, $existInventoryIds);
+            unset($existInventoryIds[$id]);
+        }
+        else{
+            $id =  rand(1,100);
+            // try{
+            //     list($dealer_id,$dealership) =  $this->dealService->getDealership(request(),$locationId);
+            //     $dId = supersetting('deal_dealership_col') ?? '';
+            //     $ar[$dId] = $dealer_id.'__Int';
+            // }catch(\Exception $e){
+            // }
+            // $graph = arrayToGraphQL($ar);
+
+            // try {
+            //     $query = $this->inventoryService->setInventoryDataByCsv($graph,'createInventory');
+
+            //     $inv = $this->inventoryService->submitRequest($query);
+            //     $id = @$inv['data']['createInventory']['id'];
+            // } catch (\Exception $e) {
+            // }
+        }
+
+        return [$id, $existInventoryIds];
         $request = request();
         $request->merge(['filters' => $filters]);
         $id = null;
@@ -360,6 +511,7 @@ class CsvMappingController extends Controller
         return $id;
     }
 
+
      /**
      * Parse the CSV file and map data to headers.
      *
@@ -389,13 +541,13 @@ class CsvMappingController extends Controller
 
             fclose($handle);
         }
-
         return $data;
     }
 
     public function testRun(Request $request)
     {
         dispatch((new GetFoldersJob()))->delay(5);
+        // $this->setCvsFiles();
 
         return response()->json(['success' => true],200);
     }
