@@ -56,8 +56,7 @@ class CsvMappingController extends Controller
             $title = $item->title;
         }
 
-        return view('admin.mapings.csv.create', get_defined_vars());
-    }
+     }
 
     public function nolocoCustomColumnsWithType($tableName = 'dealsCollection',$key = 'dealsCustomTypeColumns')
     {

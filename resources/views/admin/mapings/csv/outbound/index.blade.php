@@ -27,9 +27,9 @@
                                 <a class="btn btn-warning" href="{{ route('admin.mappings.csv.outbound.create') }}">
                                     <i class="bi bi-plus"></i>Create Mapping
                                 </a>
-                                {{-- <button class="btn btn-primary run_task">
+                                <button class="btn btn-primary run_task">
                                     <i class="bi bi-setting"></i>Run Task
-                                </button> --}}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -46,7 +46,6 @@
                                     <th scope="col">#</th>
                                     <th scope="col">Title</th>
                                     <th scope="col">Account Title</th>
-                                    <th scope="col">Total Locations</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -55,8 +54,7 @@
                                     <tr>
                                         <td scope="row">{{ $loop->iteration }}</td>
                                         <td scope="row">{{ $item->title }}</td>
-                                        <td scope="row"></td>
-                                        <td scope="row">{{ $item->locations_count }}</td>
+                                        <td scope="row">{{@$item->outboundAccount->username}}</td>
                                         <td>
                                             @include('admin.mapings.csv.outbound.action')
                                         </td>
@@ -89,94 +87,12 @@
                 $("#loader-overlay").css("display", "flex").hide();
                 $.ajax({
                     type: 'GET',
-                    url: '{{ route('admin.mappings.csv.run') }}',
+                    url: '{{ route('csv.export.file') }}',
                     success: function(response) {
                         $("#loader-overlay").fadeOut();
                         toastr.success('Successfully');
                     }
                 });
-            })
-        </script>
-        <script>
-            $(document).on('click', '.manage_accounts', function() {
-                let csvId = $(this).data('id');
-                $('.csv_id').val(csvId);
-
-                $.ajax({
-                    type: 'GET',
-                    url: '{{ route('admin.mappings.csv.ftp.form') }}',
-                    data: {
-                        csv_id: csvId
-                    },
-                    success: function(response) {
-                        $('.append-data').html(response.html)
-                        $('.csv_id').val(csvId);
-                        $('#ftpModal').modal('show')
-                    }
-                });
-
-            })
-
-            $(document).on('click', '.add_account', function() {
-
-                $(this).closest('.modal').modal('hide')
-                let id = $(this).data('id');
-                let csvId = $(this).data('csvid');
-                let username = $(this).data('username');
-                let location = $(this).data('location');
-                $('.username').val(username);
-                $('.location').val(location);
-                $('.csv_id').val(csvId);
-                $('.id').val(id);
-                if (id) {
-                    $('.password_area').addClass('hidden');
-                } else {
-                    $('.password_area').removeClass('hidden');
-                }
-                $('#ftpModal1').modal('show')
-            })
-
-            $(document).on('click', '.remove_ftp', function() {
-                let id = $(this).data('id');
-                let that = $(this);
-                swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'No, cancel!',
-                    reverseButtons: true
-                }).then(function(result) {
-                    $.ajax({
-                        type: 'GET',
-                        url: '{{ route('admin.mappings.csv.ftp.delete') }}',
-                        data: {
-                            id: id
-                        },
-                        success: function(response) {
-                            $(that).closest('tr').remove();
-                        }
-                    });
-                })
-            })
-
-
-            $(document).on('click', '.set_location', function() {
-                let csvId = $(this).data('id');
-                $.ajax({
-                    type: 'GET',
-                    url: '{{ route('admin.mappings.csv.location.form') }}',
-                    data: {
-                        csv_id: csvId
-                    },
-                    success: function(response) {
-                        $('.append_body').html(response.html)
-                        $('.csv_id').val(csvId);
-                        $('#locationModal').modal('show')
-                    }
-                });
-
             })
         </script>
     @endpush

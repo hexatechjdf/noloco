@@ -8,6 +8,7 @@ use App\Services\FtpService;
 use App\Models\CsvMapping;
 use App\Services\Api\InventoryService;
 use App\Services\Api\DealService;
+use Illuminate\Support\Facades\DB;
 
 class CsvOutbondController extends Controller
 {
@@ -49,50 +50,87 @@ class CsvOutbondController extends Controller
 
     public function store(Request $request,$id = null)
     {
-        dd($request->all());
-        DB::transaction(function () use(&$result) {
-            // logic here
-            $result = someGetResult();
-        });
-        $mapping = json_encode($request->maps);
-        $item = CsvMapping::updateOrCreate(['id'=>$id],
+        DB::transaction(function () use($request,$id) {
+            $mapping = json_encode($request->maps);
+            $item = CsvMapping::updateOrCreate(['id'=>$id],
                 [
                     'content' => $mapping,
                     'type' => 'export',
                     'title' => $request->title,
                 ]);
+            $request->merge(['csv_id' => $item->id]);
+            $ftp = $this->ftpService->createAccount($request, 'outbond');
+            $ftp->password = $request->password;
+            $ftp->save();
+        });
+
 
         return response()->json(['success' => true, 'route' => route('admin.mappings.csv.outbound.index')]);
     }
 
     public function exportInv()
     {
-        $locationId = 'geAOl3NEW1iIKIWheJcj';
-        $allEdges = $this->getList($locationId);
-        $mapping = CsvMapping::where('type', 'export')->first();
+        $maps = CsvMapping::get();
+        foreach($maps as $map)
+        {
+            $ac = $map->outboundAccount;
+            $locations = explode(',', $ac->location_id);
+            $fields = json_decode($map->content, true) ?? [];
 
-        $fields = json_decode($mapping->content, true) ?? [];
-        $filename = 'inventory_export_' . now()->format('Ymd_His') . '.csv';
-        $filePath = storage_path('app/public/export/' . $filename);
+            foreach($locations as $loc)
+            {
+                $allEdges = $this->getList($loc);
+                $filename = 'inventory_export_' . now()->format('Ymd_His') . '.csv';
+                $filePath = storage_path('app/public/export/' . $filename);
 
-        // Create directory if not exists
-        if (!file_exists(storage_path('app/public/export'))) {
-            mkdir(storage_path('app/public/export'), 0755, true);
-        }
+                // Create directory if not exists
+                if (!file_exists(storage_path('app/public/export'))) {
+                    mkdir(storage_path('app/public/export'), 0755, true);
+                }
 
-        $file = fopen($filePath, 'w');
+                $file = fopen($filePath, 'w');
 
-        fputcsv($file, array_values($fields));
-        foreach ($allEdges as $item) {
-            $node = $item['node'];
-            $row = [];
+                fputcsv($file, array_values($fields));
+                foreach ($allEdges as $item)
+                {
+                    $node = $item['node'];
+                    $row = [];
 
-            foreach ($fields as $key => $header) {
-                $row[] = $node[$key] ?? '';
+                    foreach ($fields as $key => $header) {
+                        $row[] = $node[$key] ?? '';
+                    }
+                    fputcsv($file, $row);
+                }
+                fclose($file);
+
+                $this->uploadFtpFile($localPath,$remotePath,$ac);
             }
-            fputcsv($file, $row);
         }
-        fclose($file);
+    }
+
+    public function uploadFtpFile($localPath,$remotePath,$ftp)
+    {
+        $ftpHost = $ftp->domain;
+        $ftpUser = $ftp->username;
+        $ftpPass = $ftp->password;
+        $ftpPort = 21;
+
+        $connId = ftp_connect($ftpHost, $ftpPort, 30);
+        if (!$connId) {
+            throw new \Exception("Could not connect to FTP server.");
+        }
+        $loginResult = ftp_login($connId, $ftpUser, $ftpPass);
+        if (!$loginResult) {
+            ftp_close($connId);
+            throw new \Exception("FTP login failed.");
+        }
+        ftp_pasv($connId, true);
+        $upload = ftp_put($connId, $remotePath, $localPath, FTP_BINARY);
+        if (!$upload) {
+            ftp_close($connId);
+            throw new \Exception("FTP upload failed.");
+        }
+        ftp_close($connId);
     }
 
     public function getList($locationId)

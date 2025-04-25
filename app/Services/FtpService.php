@@ -11,55 +11,68 @@ use Illuminate\Support\Facades\Storage;
 class FtpService
 {
 
-     public function createAccount($request)
+     public function createAccount($request, $typee= 'inbond')
      {
         try{
             $errors = null;
             $acc= null;
-            $domain = supersetting('ftp_domain');
-            // $url = 'https://'.rawurlencode($user).':'.rawurlencode($pass).'@'.$ip.':2003/index.php?api=json&act=ftp_account';
-            if($request->id)
-            {
-                $acc = FtpAccount::where('id',$request->id)->first();
-                if(!$acc)
-                {
-                    return [null,'Account doest not exist'];
-                }
-                if($acc->username == $request->username)
-                {
-                    $acc->location_id = $request->location_id;
-                    $acc->save();
-                    return ['successfully updated',null];
-                }
-            }
 
-            $post = $this->getFtpArray($request,$domain,$acc);
-            $res = $this->sendRequest($post,$acc ? 'ftp' : 'ftp_account');
-            // dd($res);
-            if(!empty($res['done'])){
-                $res = $res['done'];
-                $acc = FtpAccount::updateOrCreate(['id' => $request->id],[
-                    'mapping_id' => $request->csv_id,
-                    'username' => $request->username,
-                    'domain' => $domain,
-                    'directory' => $request->username,
-                    'location_id' => $request->location_id,
-                ]);
-                if(!$request->id)
-                {
-                    $acc->password = $request->password;
-                    $acc->save();
-                }
+            if($typee= 'outbond')
+            {
+                $acc = $this->setupAccount($request,$request->host);
+                return $acc;
             }else{
-                $errors = $res['error'];
-                $res = null;
+                $domain = supersetting('ftp_domain');
+                // $url = 'https://'.rawurlencode($user).':'.rawurlencode($pass).'@'.$ip.':2003/index.php?api=json&act=ftp_account';
+                if($request->id)
+                {
+                    $acc = FtpAccount::where('id',$request->id)->first();
+                    if(!$acc)
+                    {
+                        return [null,'Account doest not exist'];
+                    }
+                    if($acc->username == $request->username)
+                    {
+                        $acc->location_id = $request->location_id;
+                        $acc->save();
+                        return ['successfully updated',null];
+                    }
+                }
+
+                $post = $this->getFtpArray($request,$domain,$acc);
+                $res = $this->sendRequest($post,$acc ? 'ftp' : 'ftp_account');
+                // dd($res);
+                if(!empty($res['done'])){
+                    $res = $res['done'];
+                    $acc = $this->setupAccount($request,$domain);
+                }else{
+                    $errors = $res['error'];
+                    $res = null;
+                }
             }
-         }catch(\Excaption $e){
+        }catch(\Excaption $e){
             $errors = ['There is some issues'];
             $res = null;
         }
         return [$res,$errors];
 
+     }
+
+    public function setupAccount($request,$domain)
+     {
+        $acc = FtpAccount::updateOrCreate(['mapping_id' => $request->csv_id],[
+            'username' => $request->username,
+            'domain' => $domain,
+            'directory' => $request->username,
+            'location_id' => $request->location_id ?? $request->location_ids,
+        ]);
+        if(!$request->id)
+        {
+            $acc->password = $request->password;
+            $acc->save();
+        }
+
+        return $acc;
      }
 
      public function getFtpArray($request,$domain,$acc=null)

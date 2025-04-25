@@ -241,7 +241,13 @@ Route::get('/cron-jobs/process/csv/files', function () {
     dispatch((new GetFoldersJob()))->delay(5);
 });
 
-Route::get('data/csv/export/inv', [CsvOutbondController::class, 'exportInv']);
+use App\Jobs\Export\GetExportMappingJob;
+
+Route::get('/cron-jobs/export/csv/files', function () {
+    dispatch((new GetExportMappingJob()))->delay(5);
+})->name('csv.export.file');
+
+// Route::get('data/csv/export/inv', [CsvOutbondController::class, 'exportInv']);
 
 
 

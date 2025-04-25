@@ -36,11 +36,11 @@
                                     <thead>
                                         <tr><th colspan="3"><label>Enter Title</label><div><input class="form-control title" value="{{ @$item->title }}" name="title"></div></th></tr>
                                         <tr>
-                                            <th><label>Host</label><div><input class="form-control title" value="{{ @$item->title }}" name="host"></div></th>
-                                            <th><label>Username</label><div><input class="form-control title" value="{{ @$item->title }}" name="user_name"></div></th>
-                                            <th><label>Password</label><div><input class="form-control title" value="{{ @$item->title }}" name="password"></div></th>
+                                            <th><label>Host</label><div><input class="form-control title" value="{{ @$item->outboundAccount->domain }}" name="host"></div></th>
+                                            <th><label>Username</label><div><input class="form-control title" value="{{ @$item->outboundAccount->username }}" name="username"></div></th>
+                                            <th><label>Password</label><div><input class="form-control title" value="{{ @$item->outboundAccount->password }}" name="password"></div></th>
                                         </tr>
-                                        <tr><th colspan="3"><label>Enter Locations <code>Comma saperated</code></label><div><input class="form-control " value="" name="location_ids"></div></th></tr>
+                                        <tr><th colspan="3"><label>Enter Locations <code>Comma saperated</code></label><div><input class="form-control " value="{{ @$item->outboundAccount->location_id }}" name="location_ids"></div></th></tr>
                                         <tr>
                                             <th scope="col">Noloco Field</th>
                                             <th scope="col">Displayable Name</th>

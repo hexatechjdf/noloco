@@ -13,6 +13,7 @@ class CsvMapping extends Model
         'title',
         'type',
         'content',
+        'password',
         'unique_field',
     ];
 
@@ -23,5 +24,10 @@ class CsvMapping extends Model
    public function locations()
    {
     return $this->hasMany(CsvMappingLocation::class, 'mapping_id');
+   }
+
+   public function outboundAccount()
+   {
+    return $this->hasOne(FtpAccount::class, 'mapping_id');
    }
 }

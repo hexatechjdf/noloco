@@ -38,7 +38,7 @@ class InventoryService
 
         $query = <<<GRAPHQL
         query {
-          inventoryCollection( where: {dealershipSubAccountId: {equals: %s}, OR: [{status: {equals: "INACTIVE"}}, {status: {equals: "ACTIVE"}}]}) {
+          inventoryCollection( where: {dealershipSubAccountId: {equals: %s}, OR: [{status: {equals: "INACTIVE"}}, {status: {equals: "ACTIVE"}},{status: {equals: "SOLD"}}]}) {
             edges {
               node {
                 id
@@ -327,8 +327,8 @@ class InventoryService
                             'query' => $query,
                             'variables' => $values
                         ]);
-                        
-                
+
+
                 if ($response->successful()) {
                     $data = $response->json();
                     return $data;
