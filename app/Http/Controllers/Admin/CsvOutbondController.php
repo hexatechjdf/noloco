@@ -50,6 +50,15 @@ class CsvOutbondController extends Controller
 
     public function store(Request $request,$id = null)
     {
+        $options = [];
+        foreach ($request['options']['keys'] as $index => $key) {
+            $options[] = [
+                'key' => $key,
+                'value' => $request['options']['values'][$index] ?? null
+            ];
+        }
+        $request['location_ids'] = json_encode($options);
+
         DB::transaction(function () use($request,$id) {
             $mapping = json_encode($request->maps);
             $item = CsvMapping::updateOrCreate(['id'=>$id],

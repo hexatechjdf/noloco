@@ -3,25 +3,22 @@
 
     <div class="d-flex justify-content-between mb-2">
       <h4>List of Accounts</h4>
-      <button class="btn btn-warning add_account" data-csvid={{$idd}}>Add Account</button>
+      <a class="btn btn-warning " href="{{ route('admin.mappings.csv.ftp.form') }}">Add Account</a>
     </div>
     <hr>
     <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Username</th>
-                <th>Location</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody id="ftpAccountsList">
-            <!-- Dynamic accounts will be loaded here -->
             @foreach($accounts as $acc)
             <tr>
                 <td>{{$acc->main_username}}</td>
-                <td>{{@$acc->location_id}}</td>
                 <td>
-                    <button class="btn btn-sm btn-warning add_account" data-username={{$acc->username}} data-location={{$acc->location_id}} data-csvid="{{$idd}}" data-id="{{$acc->id}}">Edit</button>
+                    <a class="btn btn-sm btn-warning " href="{{ route('admin.mappings.csv.ftp.form',$acc->id) }}">Edit</a>
                     <button class="btn btn-sm btn-danger remove_ftp" data-id="{{$acc->id}}">Delete</button>
                 </td>
             </tr>

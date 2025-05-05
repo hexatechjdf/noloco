@@ -18,14 +18,16 @@ class SetExportCsvJob implements ShouldQueue
     public $ftp_account;
     public $location;
     public $fields;
+    public $title;
     /**
      * Create a new job instance.
      */
-    public function __construct($ftp_account,$location,$fields)
+    public function __construct($ftp_account,$location,$title,$fields)
     {
         $this->ftp_account = $ftp_account;
         $this->location = $location;
         $this->fields = $fields;
+        $this->title = $title;
     }
 
     /**
@@ -35,7 +37,7 @@ class SetExportCsvJob implements ShouldQueue
     {
         $loc = $this->location;
         $allEdges = $this->getList($loc,$inventoryService,$dealService);
-        $filename = 'inventory_export_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'inventory_export_'. $this->title .'_' . now()->format('Ymd_His') . '.csv';
         $filePath = storage_path('app/public/export/' . $filename);
 
         // Create directory if not exists

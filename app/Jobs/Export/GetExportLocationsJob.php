@@ -31,12 +31,12 @@ class GetExportLocationsJob implements ShouldQueue
     {
         $ac = $this->ftp_account;
         $map = $this->mapping;
-        $locations = explode(',', $ac->location_id);
+        $locations = json_decode($ac->location_id, true) ?? [];
         $fields = json_decode($map->content, true) ?? [];
 
-        foreach($locations as $loc)
+        foreach($locations as $loc as $title)
         {
-            dispatch((new SetExportCsvJob($ac,$loc,$fields)))->delay(5);
+            dispatch((new SetExportCsvJob($ac,$loc,$title,$fields)))->delay(5);
         }
     }
 }

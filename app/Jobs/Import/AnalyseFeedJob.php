@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Import;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,8 +12,10 @@ use App\Services\Api\DealService;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\UpdateMapInvJob;
 
-class MapInvJob implements ShouldQueue
+class AnalyseFeedJob implements ShouldQueue
 {
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     // 3
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     public $timeout = 300;
@@ -22,16 +24,18 @@ class MapInvJob implements ShouldQueue
     public $locationId;
     public $unique;
     public $existInventoryIdss;
+    public $type;
     /**
      * Create a new job instance.
      */
-    public function __construct($fields,$mapping,$locationId,$unique,$existInventoryIdss)
+    public function __construct($fields,$mapping,$locationId,$unique,$existInventoryIdss,$type)
     {
         $this->fields = $fields;
         $this->mapping = $mapping;
         $this->locationId = $locationId;
         $this->unique = $unique;
         $this->existInventoryIdss = $existInventoryIdss;
+        $this->type = $type;
     }
 
     /**
@@ -63,7 +67,7 @@ class MapInvJob implements ShouldQueue
                 }
             }
 
-            if($id)
+            if($id && $this->type != 'manual')
             {
                 $data['id'] = $id.'__Int';
                 $invType = 'updateInventory';

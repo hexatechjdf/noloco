@@ -107,12 +107,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
             Route::get('/run', [CsvMappingController::class, 'testRun'])->name('run');
             Route::post('/store/{id?}', [CsvMappingController::class, 'store'])->name('store');
             Route::get('/manage/{id}', [CsvMappingController::class, 'manage'])->name('manage');
+            Route::get('/ftp/accounts/list', [CsvMappingController::class, 'ftpAccountsList'])->name('ftp.accounts.list');
+
             Route::post('/ftp', [CsvMappingController::class, 'ftp'])->name('ftp');
-            Route::get('/ftp/form', [CsvMappingController::class, 'ftpForm'])->name('ftp.form');
+            Route::get('/ftp/form/{id?}', [CsvMappingController::class, 'ftpForm'])->name('ftp.form');
             Route::get('/ftp/delete', [CsvMappingController::class, 'ftpDelete'])->name('ftp.delete');
             Route::get('/delete', [CsvMappingController::class, 'delete'])->name('delete');
-            Route::get('/location/form', [CsvMappingController::class, 'locationForm'])->name('location.form');
-            Route::post('/location/store', [CsvMappingController::class, 'locationStore'])->name('location.store');
             Route::get('/test/csvs/data', [CsvMappingController::class, 'setCvsFiles']);
 
             Route::group(['as' => 'outbound.', 'prefix' => 'outbound'], function () {
@@ -247,7 +247,7 @@ Route::get('/cron-jobs/export/csv/files', function () {
     dispatch((new GetExportMappingJob()))->delay(5);
 })->name('csv.export.file');
 
-// Route::get('data/csv/export/inv', [CsvOutbondController::class, 'exportInv']);
+Route::get('data/csv/export/inv', [CsvOutbondController::class, 'exportInv']);
 
 
 

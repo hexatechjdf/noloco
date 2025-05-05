@@ -24,7 +24,7 @@ class FtpAccountRequest extends FormRequest
     {
         return [
             'username' => 'required|string|max:255',
-            'location_id' => 'required',
+            // 'location_id' => 'required',
             // 'domain' => 'required|string',
             // 'password' => ['required', 'string', new StrongPassword()],
             // 'quota' => 'required|in:unlimited,limited',

@@ -15,6 +15,7 @@ use App\Jobs\UpdateMapInvJob;
 
 class ParseCsvJob implements ShouldQueue
 {
+    // 2
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 300;
@@ -37,7 +38,7 @@ class ParseCsvJob implements ShouldQueue
         $unique = $this->data['unique'];
         $mapping = $this->data['mapping'];
         $locationId = $this->data['locationId'];
- 
+
 
 
         foreach ($files as $csvFile) {
@@ -46,11 +47,11 @@ class ParseCsvJob implements ShouldQueue
             $existInventoryIds = $this->inventoryIds($locationId,$inventoryService,$dealService,strtolower($unique));
             $arr = $existInventoryIds;
             $rowStocks = [];
-            
+
             foreach ($rows as $fields) {
-                 
+
                 dispatch((new MapInvJob($fields,$mapping,$locationId,$unique,$existInventoryIds)))->delay(5);
-                
+
                 $rowStocks[] = @$fields[$unique] ?? null;
             }
 
@@ -61,9 +62,9 @@ Log::info($arr, $rowStocks);
                 $result = array_filter($existInventoryIds, function($value) use ($rowStocks) {
                     return !in_array($value, $rowStocks);
                 });
-                
+
                 Log::info($result);
-                
+
                 foreach($result as $ke => $exitt)
                 {
                     $pl = [

@@ -7,28 +7,6 @@
             </div>
             <div class="modal-body append-data">
 
-                <!-- Tabs -->
-                {{-- <ul class="nav nav-tabs" id="ftpTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="accounts-tab" data-bs-toggle="tab" data-bs-target="#accounts" type="button" role="tab">
-                            Accounts List
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
-                            Settings
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab">
-                            Create Account
-                        </button>
-                    </li>
-                </ul> --}}
-{{--
-                <div class="tab-content append-data mt-3">
-
-                </div> --}}
             </div>
         </div>
     </div>

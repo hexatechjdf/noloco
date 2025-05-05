@@ -60,7 +60,7 @@
                                         <td scope="row">{{ $item->accounts_count }}</td>
                                         <td scope="row">{{ $item->locations_count }}</td>
                                         <td>
-                                            @include('admin.mapings.csv.action')
+                                            @include('admin.mapings.csv.inbound.action')
                                         </td>
                                     </tr>
                                 @endforeach
@@ -103,10 +103,9 @@
             $(document).on('click', '.manage_accounts', function() {
                 let csvId = $(this).data('id');
                 $('.csv_id').val(csvId);
-
                 $.ajax({
                     type: 'GET',
-                    url: '{{ route('admin.mappings.csv.ftp.form') }}',
+                    url: '{{ route('admin.mappings.csv.ftp.accounts.list') }}',
                     data: {
                         csv_id: csvId
                     },
@@ -119,24 +118,6 @@
 
             })
 
-            $(document).on('click', '.add_account', function() {
-
-                $(this).closest('.modal').modal('hide')
-                let id = $(this).data('id');
-                let csvId = $(this).data('csvid');
-                let username = $(this).data('username');
-                let location = $(this).data('location');
-                $('.username').val(username);
-                $('.location').val(location);
-                $('.csv_id').val(csvId);
-                $('.id').val(id);
-                if (id) {
-                    $('.password_area').addClass('hidden');
-                } else {
-                    $('.password_area').removeClass('hidden');
-                }
-                $('#ftpModal1').modal('show')
-            })
 
             $(document).on('click', '.remove_ftp', function() {
                 let id = $(this).data('id');
@@ -161,24 +142,6 @@
                         }
                     });
                 })
-            })
-
-
-            $(document).on('click', '.set_location', function() {
-                let csvId = $(this).data('id');
-                $.ajax({
-                    type: 'GET',
-                    url: '{{ route('admin.mappings.csv.location.form') }}',
-                    data: {
-                        csv_id: csvId
-                    },
-                    success: function(response) {
-                        $('.append_body').html(response.html)
-                        $('.csv_id').val(csvId);
-                        $('#locationModal').modal('show')
-                    }
-                });
-
             })
 
 
