@@ -34,7 +34,6 @@ class GetAccountsJob implements ShouldQueue
         ->get();
 
         $folders = $this->getFolders();
-
         foreach($accounts as $acc)
         {
             dispatch((new GetLocationsJob($acc,$folders)))->delay(5);

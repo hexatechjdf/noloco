@@ -43,10 +43,11 @@ class CheckFileJob implements ShouldQueue
     public function handle(): void
     {
         $locationId = $this->locId;
-        $fName = $this->title;
+        $fname = $this->title;
         $type = $this->fileType;
-
-        if(in_array($this->files,$fName))
+        \Log::info($this->files);
+        \Log::info($fname);
+        if(in_array($fname,$this->files))
         {
             $p = $this->username . '/' . $fname;
             $sourcePath = base_path('../csvfiles/' . $p);

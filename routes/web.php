@@ -110,7 +110,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
             Route::get('/ftp/accounts/list', [CsvMappingController::class, 'ftpAccountsList'])->name('ftp.accounts.list');
 
             Route::post('/ftp', [CsvMappingController::class, 'ftp'])->name('ftp');
-            Route::get('/ftp/form/{id?}', [CsvMappingController::class, 'ftpForm'])->name('ftp.form');
+            Route::get('/ftp/form/{csvId}/{id?}', [CsvMappingController::class, 'ftpForm'])->name('ftp.form');
             Route::get('/ftp/delete', [CsvMappingController::class, 'ftpDelete'])->name('ftp.delete');
             Route::get('/delete', [CsvMappingController::class, 'delete'])->name('delete');
             Route::get('/test/csvs/data', [CsvMappingController::class, 'setCvsFiles']);

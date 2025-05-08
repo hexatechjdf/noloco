@@ -45,6 +45,17 @@ class AnalyseFeedJob implements ShouldQueue
     {
         $val = @$this->fields[$this->unique];
         $key = @$this->mapping[$this->unique];
+
+        Log::info('key');
+        Log::info($key);
+        Log::info('Value');
+        Log::info($val);
+        Log::info('mapping');
+        Log::info($this->mapping);
+        Log::info('unique');
+        Log::info($this->unique);
+        Log::info('fields');
+        Log::info($this->fields);
         if($key && $val)
         {
             $invType = 'createInventory';
@@ -54,8 +65,12 @@ class AnalyseFeedJob implements ShouldQueue
             }catch(\Exception $e){
             }
 
-            list($id, $existInventoryIds) = $this->isExist($key,$val,$filters,$inventoryService,$dealService,$dealer_id,$this->existInventoryIdss,$this->unique);
-
+            list($id, $existInventoryIds,$is_new) = $this->isExist($key,$val,$filters,$inventoryService,$dealService,$dealer_id,$this->existInventoryIdss,$this->unique);
+            $t = true;
+            if($this->type == 'manual' && !$is_new)
+            {
+                $t = false;
+            }
             $data = [];
             foreach($this->mapping as $k => $map)
             {
@@ -67,7 +82,12 @@ class AnalyseFeedJob implements ShouldQueue
                 }
             }
 
-            if($id && $this->type != 'manual')
+            \Log::info("id");
+            \Log::info($id);
+            \Log::info("type");
+            \Log::info($this->type);
+
+            if($id && $t)
             {
                 $data['id'] = $id.'__Int';
                 $invType = 'updateInventory';
@@ -82,16 +102,16 @@ class AnalyseFeedJob implements ShouldQueue
                 dispatch((new UpdateMapInvJob($variables,$invType, $id)));
             }
         }
-
-
     }
 
 
     public function isExist($key,$value,$filters,$inventoryService,$dealService,$dealer_id,$existInventoryIds = [],$unique)
     {
         $id = null;
+        $is_new = true;
         if(in_array($value, $existInventoryIds))
         {
+            $is_new = false;
             $id = array_search($value, $existInventoryIds);
             unset($existInventoryIds[$id]);
         }
@@ -111,10 +131,11 @@ class AnalyseFeedJob implements ShouldQueue
                 $id = @$inv['data']['createInventory']['id'];
             } catch (\Exception $e) {
                 $id = null;
+
             }
         }
 
-        return [$id, $existInventoryIds];
+        return [$id, $existInventoryIds,$is_new];
     }
     public function setFilter($value,$key)
     {

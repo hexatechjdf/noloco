@@ -39,7 +39,13 @@ class GetLocationsJob implements ShouldQueue
         $locations = json_decode(@$acc->location_id, true) ?? [];
         $unique = $acc->mapping->unique_field;
         $username = $acc->username;
-        $files = @$folders[$username];
+        $files = @$folders[$username] ?? [];
+        \Log::info('username');
+        \Log::info($username);
+        \Log::info('folders');
+        \Log::info($folders);
+        \Log::info('files');
+        \Log::info($files);
 
         foreach($locations as $loc)
         {

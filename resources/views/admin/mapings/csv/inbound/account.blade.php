@@ -48,28 +48,28 @@
                             <div class="tab-pane fade show active" id="create" role="tabpanel">
                                 <form method="POST" class="submitForm" action="{{ route('admin.mappings.csv.ftp') }}">
                                     @csrf
-                                    <input type="hidden" class="csv_id" name="csv_id" value="{{  @$account->mapping_id }}">
+                                    <input type="hidden" class="csv_id" name="csv_id" value="{{  @$csvId }}">
                                     <input type="hidden" class="id" name="id" value="{{  @$account->id }}">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label class="form-label">Username</label>
-                                                <input type="text" class="form-control " name="username" value="{{ @$account->username }}"
-                                                    placeholder="noloco">
+                                    @if(!@$account)
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Username</label>
+                                                    <input type="text" class="form-control " name="username" value="{{ @$account->username }}"
+                                                        placeholder="noloco">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3 password_area">
+                                                    <label for="password" class="form-label">Password</label>
+                                                    <input type="text" class="form-control" id="password" name="password"
+                                                        placeholder="********">
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            @php($readonly = @$account ? 'readonly' : '')
-                                            <div class="mb-3 password_area">
-                                                <label for="password" class="form-label">Password</label>
-                                                <input type="text" class="form-control" id="password" name="password" {{ $readonly }}
-                                                    placeholder="********">
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @endif
 
                                     <hr>
-
                                     <div class="options-container mt-2">
                                         @php($options = json_decode(@$account->location_id ?? '') ?? [])
                                         @if(count($options) > 0)
@@ -101,7 +101,7 @@
     @include('components.submitForm')
 
     <script>
-           let optionss = `@include('admin.mapings.csv.inbound.components.options', ['index' => 1])`;
+           let optionss = `@include('admin.mapings.csv.inbound.components.options', ['index' => 1, 'option' => null])`;
            $(document).ready(function() {
             $(document).on('click','.add_more_option',function() {
                 $(".options-container").append(optionss);

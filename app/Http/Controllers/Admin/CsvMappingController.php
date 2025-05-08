@@ -16,6 +16,7 @@ use App\Services\Api\InventoryService;
 use Illuminate\Support\Facades\DB;
 use App\Services\Api\DealService;
 use App\Jobs\GetFoldersJob;
+use App\Jobs\Import\GetAccountsJob;
 
 
 class CsvMappingController extends Controller
@@ -127,7 +128,29 @@ class CsvMappingController extends Controller
         return response()->json(['success' => true, 'route' => route('admin.mappings.csv.index')]);
     }
 
-    public function ftp(FtpAccountRequest $request)
+    public function ftpAccountsList(Request $request)
+    {
+        $accounts = FtpAccount::where('mapping_id',$request->csv_id)->get();
+        $idd = $request->csv_id;
+
+        $view = view('admin.mapings.csv.components.ftpSetting', get_defined_vars())->render();
+
+        return response()->json(['success' => true, 'html' => $view]);
+    }
+
+    public function ftpForm(Request $request,$csvId, $id = null)
+    {
+        $account = null;
+        $setting = supersetting('ftp_setting', '', 'ftp_%');
+        if($id)
+        {
+            $account = FtpAccount::findOrFail($id);
+        }
+
+        return view('admin.mapings.csv.inbound.account', get_defined_vars());
+    }
+
+    public function ftp(Request $request)
     {
         $options = [];
         foreach ($request['options']['keys'] as $index => $key) {
@@ -138,17 +161,7 @@ class CsvMappingController extends Controller
             ];
         }
         $request['location_ids'] = json_encode($options);
-        $acc = FtpAccount::when($request->id, function($q)use($request){
-                     $q->where('id','!=',$request->id);
-        })->where('location_id',$request->location_id)->first();
 
-        if($acc)
-        {
-                return response()->json([
-                    'errors' => [['Location already exist']], // Expected format by the front-end
-                    'message' => 'Validation failed',
-                ], 422);
-        }
         list($res,$errors)  = $this->ftpService->createAccount($request);
 
         if($errors)
@@ -177,26 +190,7 @@ class CsvMappingController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function ftpAccountsList(Request $request)
-    {
-        $accounts = FtpAccount::where('mapping_id',$request->csv_id)->get();
-        $idd = $request->csv_id;
 
-        $view = view('admin.mapings.csv.components.ftpSetting', get_defined_vars())->render();
-
-        return response()->json(['success' => true, 'html' => $view]);
-    }
-    public function ftpForm(Request $request, $id = null)
-    {
-        $account = null;
-        $setting = supersetting('ftp_setting', '', 'ftp_%');
-        if($id)
-        {
-            $account = FtpAccount::findOrFail($id);
-        }
-
-        return view('admin.mapings.csv.inbound.account', get_defined_vars());
-    }
 
     public function manage($id)
     {
@@ -466,8 +460,9 @@ class CsvMappingController extends Controller
 
     public function testRun(Request $request)
     {
+        dispatch((new GetAccountsJob()))->delay(5);
         // dispatch((new GetFoldersJob()))->delay(5);
-        $this->setCvsFiles();
+        // $this->setCvsFiles();
 
         return response()->json(['success' => true],200);
     }

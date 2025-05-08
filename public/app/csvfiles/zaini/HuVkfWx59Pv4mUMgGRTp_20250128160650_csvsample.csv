@@ -1,6 +1,0 @@
-DealerID,DealerName,IsNew,VIN,Stock,Year,Make,Model,Trim,BodyStyle,BodyType,FactoryCertified,DealerCertified,ModelCode,ListPrice,SpecialPrice,CostPrice
-17877123456,john.doe@example.com,John,Doe,Example,,,,,,,,,,,,
-17877123457,jane.smith@example.com,Jane,Smith,Jane's Office,,,,,,,,,,,,
-17877123458,bob.johnson@example.com,Bob,Johnson,Example,,,,,,,,,,,,
-17877123459,alice.davis@example.com,Alice,Davis,Davis Corporation,,,,,,,,,,,,
-17877123460,charlie.wilson@example.com,Charlie,Wilson,Wilson Inc,,,,,,,,,,,,

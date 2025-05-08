@@ -57,7 +57,7 @@ class AnalyseFileJob implements ShouldQueue
                 $rowStocks[] = @$fields[$unique] ?? null;
             }
 
-            if(count($existInventoryIds) > 0 && && $this->type != 'manual')
+            if(count($existInventoryIds) > 0 && $this->type != 'manual')
             {
                 dispatch((new SetExtraInvJob($existInventoryIds,$rowStocks)))->delay(5);
             }
@@ -75,10 +75,10 @@ class AnalyseFileJob implements ShouldQueue
 
      private function parseCsvFile($filePath)
      {
-         $filePath = public_path(trim($filePath));
-         if (!file_exists($filePath)) {
-             throw new \Exception("File not found: " . $filePath);
-         }
+        //  $filePath = asset(trim($filePath));
+        //  if (!file_exists($filePath)) {
+        //      throw new \Exception("File not found: " . $filePath);
+        //  }
 
          $data = []; // Initialize data array
 
