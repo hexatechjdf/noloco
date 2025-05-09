@@ -238,7 +238,7 @@ Route::get('/cron-jobs/process_refresh_token', function () {
 use App\Jobs\GetFoldersJob;
 
 Route::get('/cron-jobs/process/csv/files', function () {
-    dispatch((new GetFoldersJob()))->delay(5);
+    
 });
 
 use App\Jobs\Export\GetExportMappingJob;

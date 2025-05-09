@@ -54,7 +54,7 @@ class AnalyseFileJob implements ShouldQueue
             foreach($rows as $fields)
             {
                 dispatch((new AnalyseFeedJob($fields,$this->mapping,$locationId,$this->unique,$existInventoryIds,$this->type)))->delay(5);
-                $rowStocks[] = @$fields[$unique] ?? null;
+                $rowStocks[] = @$fields[$this->unique] ?? null;
             }
 
             if(count($existInventoryIds) > 0 && $this->type != 'manual')

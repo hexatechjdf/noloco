@@ -46,6 +46,8 @@ class GetLocationsJob implements ShouldQueue
         \Log::info($folders);
         \Log::info('files');
         \Log::info($files);
+        \Log::info('locations');
+        \Log::info($locations);
 
         foreach($locations as $loc)
         {

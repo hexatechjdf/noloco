@@ -102,6 +102,8 @@ class AnalyseFeedJob implements ShouldQueue
                 dispatch((new UpdateMapInvJob($variables,$invType, $id)));
             }
         }
+
+
     }
 
 

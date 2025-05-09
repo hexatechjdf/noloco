@@ -15,10 +15,7 @@ class SetExtraInvJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 300;
-    public $fields;
-    public $mapping;
-    public $locationId;
-    public $unique;
+
     public $existInventoryIds;
     public $rowStocks;
     /**
@@ -35,9 +32,10 @@ class SetExtraInvJob implements ShouldQueue
      */
     public function handle(): void
     {
-
-        $result = array_filter($existInventoryIds, function($value) use ($rowStocks) {
-            return !in_array($value, $rowStocks);
+        $rr = $this->rowStocks;
+        Log::info($rr);
+        $result = array_filter($this->existInventoryIds, function($value) use ($rr) {
+            return !in_array($value, $rr);
         });
 
         Log::info($result);
