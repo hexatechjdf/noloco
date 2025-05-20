@@ -134,7 +134,15 @@
                             <a class="nav-link {{ Route::is('admin.logs.history') ? 'active' : '' }}"
                                 href="{{ route('admin.logs.history', 'deals') }}">Logs History</a>
                         </li>
+
+                           <li class="nav-item">
+                            <a class="nav-link {{ Route::is('admin.scriptings.index') ? 'active' : '' }}"
+                                href="{{ route('admin.scriptings.index') }}">Scriptings</a>
+                        </li>
                     </ul>
+
+
+
                     <ul class="navbar-nav ms-auto">
                         @guest
                             @if (Route::has('login'))

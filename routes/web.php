@@ -4,6 +4,7 @@ use App\Http\Controllers\Location\AutoAuthController;
 use App\Http\Controllers\CRMController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ScriptController;
+use App\Http\Controllers\Admin\ScriptingController;
 use App\Http\Controllers\Admin\SourceController;
 use App\Http\Controllers\Admin\MapingController;
 use App\Http\Controllers\Admin\CsvMappingController;
@@ -69,6 +70,10 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
         Route::get('/get/form', [ScriptController::class, 'getForm'])->name('get.form');
         Route::post('/store/{id?}', [ScriptController::class, 'store'])->name('store');
         Route::get('/delete/{id}', [ScriptController::class, 'delete'])->name('delete');
+    });
+
+    Route::group(['as' => 'scriptings.', 'prefix' => 'scriptings'], function () {
+        Route::get('/', [ScriptingController::class, 'index'])->name('index');
     });
 
     Route::group(['as' => 'sources.', 'prefix' => 'sources'], function () {
@@ -238,7 +243,7 @@ Route::get('/cron-jobs/process_refresh_token', function () {
 use App\Jobs\GetFoldersJob;
 
 Route::get('/cron-jobs/process/csv/files', function () {
-    
+
 });
 
 use App\Jobs\Export\GetExportMappingJob;

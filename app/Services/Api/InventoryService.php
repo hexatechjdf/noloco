@@ -370,4 +370,38 @@ class InventoryService
         }
         return $mutation;
     }
+
+
+
+
+    // 700 credit form
+
+    public function getCreditList($locationId,$contactId)
+    {
+        $query = <<<GQL
+        query {
+          creditReportsCollection(
+            where: {
+              highLevelClientId: { equals: "$contactId" },
+              dealershipSubAccountIdVal: { equals: "$locationId" }
+            },
+            first: 50
+          ) {
+            edges {
+              node {
+                uuid
+                id
+                createdAt
+                fullName { first last }
+                creditBureau
+                user
+                score
+              }
+            }
+          }
+        }
+        GQL;
+
+        return $query;
+    }
 }

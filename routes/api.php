@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\MappingExtentionController;
 use App\Http\Controllers\Api\UploaderController;
+use App\Http\Controllers\Api\CreditController;
 use App\Http\Controllers\WebhookController;
 
 /*
@@ -42,4 +43,12 @@ Route::prefix('mapping-extention')->name('mapping-extention.')->group(function (
     Route::post('/store', [MappingExtentionController::class, 'store']);
     Route::get('/fetch/specific', [MappingExtentionController::class, 'getMapUrl']);
     Route::post('/search', [MappingExtentionController::class, 'search']);
+});
+
+
+// 700 app
+
+
+Route::prefix('credit-report')->name('credit-report.')->group(function () {
+    Route::POST('/list', [CreditController::class, 'list']);
 });
