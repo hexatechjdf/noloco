@@ -140,6 +140,7 @@ class CRM
         ]);
 
         $response = curl_exec($curl);
+
         $err = curl_error($curl);
         curl_close($curl);
         if ($err != '') {
@@ -330,6 +331,7 @@ class CRM
         // dd($url1, $method, $data, $headers, $json);
         $cd = self::makeCall($url1, $method, $data, $headers, $json);
         $bd = json_decode($cd);
+
         // \Log::info(['newfetch',$bd]);
         if (self::isExpired($bd) && $retries == 0) {
             list($is_refresh, $token) = self::getRefreshToken($company_id, $company, true);

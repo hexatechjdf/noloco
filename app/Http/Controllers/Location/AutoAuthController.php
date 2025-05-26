@@ -72,7 +72,7 @@ class AutoAuthController extends Controller
                 $res->token_id = encrypt($res->user_id);
 
 
-                $res->route = route('admin.setting.index');
+                $res->route = route('location.credit-app.setting');
                 return response()->json($res);
             }
         }

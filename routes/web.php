@@ -17,6 +17,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\LogsController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\Location\DealsController;
+use App\Http\Controllers\Location\LocationCreditController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -74,6 +75,9 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
 
     Route::group(['as' => 'scriptings.', 'prefix' => 'scriptings'], function () {
         Route::get('/', [ScriptingController::class, 'index'])->name('index');
+        Route::get('/create/{id?}', [ScriptingController::class, 'setting'])->name('create');
+        Route::post('/store/{id?}', [ScriptingController::class, 'store'])->name('store');
+        Route::get('/delete/{id}', [ScriptingController::class, 'delete'])->name('delete');
     });
 
     Route::group(['as' => 'sources.', 'prefix' => 'sources'], function () {
@@ -130,7 +134,15 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
         });
     });
 
+    Route::get('/locations/search', [SettingController::class, 'locationSearch'])->name('locations.search');
 
+});
+
+Route::group(['as' => 'location.', 'prefix' => 'location'], function () {
+    Route::group(['as' => 'credit-app.', 'prefix' => 'credit-app'], function () {
+        Route::get('/setting', [LocationCreditController::class, 'setting'])->name('setting');
+        Route::post('/setting/store', [LocationCreditController::class, 'settingStore'])->name('setting.store');
+    });
 });
 
 Route::group(['as' => 'deals.', 'prefix' => 'deals'], function () {

@@ -925,4 +925,12 @@ function getOptionsByModel($key)
     return $data;
 }
 
+function getBureau()
+{
+    return [
+        'XPN' => 'experian',
+        'TU' => 'transunion',
+        'EFX' => 'equifax',
+    ];
+}
 

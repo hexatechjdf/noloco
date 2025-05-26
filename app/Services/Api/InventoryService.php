@@ -404,4 +404,40 @@ class InventoryService
 
         return $query;
     }
+
+    public function createCreditList($request,$url,$bue = [],$dealer_id)
+    {
+        //  ["EQUIFAX", "TRANS_UNION"]
+        $ssn = (int)$request->social_security_number;
+        $date =  customDate($request->dateOfBirth, 'm/d/Y','time');
+        $query = <<<GQL
+                mutation {
+                  createCreditReports(
+                    highLevelClientId: "$request->contact_id",
+                    fullName: {
+                      first: "$request->firstName",
+                      middle: "$request->middle_name",
+                      last: "$request->lastName"
+                    },
+                    address: {
+                      street: "$request->addess1",
+                      city: "$request->city",
+                      stateRegion: "$request->state",
+                      postalCode: "$request->postalCode"
+                    },
+                    socialSecurityNumber: $ssn,
+                    dateOfBirth: "$date",
+                    creditBureau: $bue,
+                    dealershipId: $dealer_id,
+                    url: "$url") {
+                    id
+                    uuid
+                    createdAt
+                    fullName { first last }
+                  }
+                }
+                GQL;
+
+        return $query;
+    }
 }

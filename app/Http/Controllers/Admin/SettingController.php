@@ -12,6 +12,7 @@ use App\Models\MappingTable;
 use App\Helper\CRM;
 use App\Helper\gCache;
 use Illuminate\Support\Str;
+use App\Models\User;
 class SettingController extends Controller
 {
 
@@ -231,5 +232,38 @@ class SettingController extends Controller
         $setting = CrudSetting::updateOrCreate(['key' => $key], ['content' => $data]);
 
         return response()->json(['success' => 'Successfully  Submitted']);
+    }
+
+    public function locationSearch(Request $request)
+    {
+        $user = User::where('id', 1)->first();
+        $token = $user->crmauth ?? null;
+        $status = false;
+        $message = 'Connect to Agency First';
+        $type = '';
+        $detail = '';
+        $load_more = false;
+        $query = '';
+        $limit = 100;
+        if ($request->term) {
+            $query = '&email=' . $request->term;
+        }
+
+        $query = 'locations/search?companyId=' . $token->company_id . $query.'&limit=100';
+        $detail =  CRM::agencyV2($token->user_id, $query, $method = 'get', '', [], false, $token);
+        $locations = [];
+        if ($detail && property_exists($detail, 'locations')) {
+            $detail = $detail->locations;
+            foreach ($detail as $det) {
+                $locations[] = [
+                    'name' => $det->name. '|'. $det->email,
+                    'id' => $det->id
+                ];
+            }
+        }
+
+        return response()->json($locations);
+
+        return response()->json(['status' => $status, 'message' => $message]);
     }
 }
