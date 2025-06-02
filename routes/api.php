@@ -52,4 +52,5 @@ Route::prefix('mapping-extention')->name('mapping-extention.')->group(function (
 Route::prefix('credit-report')->name('credit-report.')->group(function () {
     Route::POST('/list', [CreditController::class, 'list']);
     Route::POST('/settle', [CreditController::class, 'setReport']);
+    Route::POST('/check/valid/location', [CreditController::class, 'checkValidLocation']);
 });

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\Api\InventoryService;
 use App\Services\Api\DealService;
 use App\Models\CreditSetting;
+use App\Models\Scripting;
 
 class CreditController extends Controller
 {
@@ -33,6 +34,22 @@ class CreditController extends Controller
 
         }
         return response()->json(['credit' => $data, 'contact' => $contact]);
+    }
+
+    public function checkValidLocation(Request $request)
+    {
+        $remainingDigits = substr($request->uid ?? 00, 1);
+        $scripting = Scripting::where('uuid',$remainingDigits)->first();
+        // dd($scripting, $remainingDigits, $request->all());
+        if($scripting)
+        {
+            $locations = json_decode($scripting->locations ?? "" , true) ?? [];
+            if(in_array($request->locationId, $locations))
+            {
+                return response()->json(['status' => true]);
+            }
+        }
+        return response()->json(['status' => false]);
     }
 
 
