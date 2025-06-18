@@ -2,6 +2,23 @@
 @push('style')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
+
+
+    <!-- CodeMirror Core -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
+
+<!-- One Dark Theme -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+
+
+
+<!-- Show Hint (Autocomplete) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/show-hint.css">
+
+
+<!-- Linting -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/lint.css">
+
     <style>
         .select2-container .select2-selection--multiple {
             min-height: 129px;
@@ -35,13 +52,13 @@
                             <!-- CSS Textarea -->
                             <div class="mb-3">
                                 <label for="css" class="form-label">CSS</label>
-                                <textarea id="css" rows="20" name="css" class="form-control" placeholder="Write CSS here...">{{ @$scripting->css }}</textarea>
+                                <textarea  rows="40" id="css-editor" name="css" class="form-control" placeholder="Write CSS here...">{{ @$scripting->css }}</textarea>
                             </div>
 
                             <!-- JS Textarea -->
                             <div class="mb-3">
                                 <label for="js" class="form-label">JavaScript</label>
-                                <textarea id="js" rows="20" name="js" class="form-control" placeholder="Write JS here...">{{ @$scripting->js }}</textarea>
+                                <textarea rows="20" id="js-editor" name="js" class="form-control" placeholder="Write JS here...">{{ @$scripting->js }}</textarea>
                             </div>
 
                             <button type="submit" class="btn btn-primary">Submit</button>
@@ -55,6 +72,33 @@
 
 @push('script')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/csslint@1.0.5/dist/csslint.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jshint@2.13.6/dist/jshint.min.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/show-hint.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/css-hint.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/javascript-hint.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/lint.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/css-lint.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/javascript-lint.min.js"></script>
+
+
+
+<!-- Language Modes -->
+
+
+<!-- Linting Libraries -->
+
+
     @include('components.submitForm')
     <script>
         $(document).ready(function() {
@@ -107,4 +151,25 @@
             });
         });
     </script>
+
+    <script>
+    // CSS Editor
+     var cssEditor = CodeMirror.fromTextArea(document.getElementById("css-editor"), {
+        mode: "css",
+        theme: "dracula",
+        lineNumbers: true,
+        lint: true,
+        gutters: ["CodeMirror-lint-markers"],
+        extraKeys: { "Ctrl-Space": "autocomplete" }
+    });
+
+    var jsEditor = CodeMirror.fromTextArea(document.getElementById("js-editor"), {
+        mode: "javascript",
+        theme: "dracula",
+        lineNumbers: true,
+        lint: true,
+        gutters: ["CodeMirror-lint-markers"],
+        extraKeys: { "Ctrl-Space": "autocomplete" }
+    });
+</script>
 @endpush

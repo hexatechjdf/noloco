@@ -118,6 +118,7 @@ class CreditController extends Controller
     }
     public function setReport(Request $request)
     {
+      
         $dats = [];
         $creditBureau = [];
         foreach(getBureau() as $key => $b)
@@ -129,8 +130,8 @@ class CreditController extends Controller
             }
         }
 
-        $locationId = 'geAOl3NEW1iIKIWheJcj' ?? $request->location_id;
-        $request->merge(['contact_id' => '7SA83zs0ZPRJaphlB77c','location_id' => $locationId]);
+        $locationId =  $request->location_id;
+        // $request->merge(['contact_id' => $request->contact_id,'location_id' => $locationId]);
         $set = CreditSetting::where('location_id',$locationId)->first();
 
         $dataArray = [
@@ -165,9 +166,10 @@ class CreditController extends Controller
 
             // make api call to get auth token for future data iframe request any time
             $response=$this->getIframeFinalSrc($iframeSrc,$set); // this function can be easily called for already saved iframe src
-            return response()->json(['res' => $response, 'status' => true]);
+            return response()->json(['res' => $response, 'status' => true,'src' => $iframeSrc]);
 
         }else{
+            \Log::info($resp);
           return response()->json(["status"=>false,"message"=>$iframeSrc]);
         }
 
@@ -180,7 +182,6 @@ class CreditController extends Controller
             list($dealer_id,$dealership) =  $this->dealService->getDealership(request(),$locationId);
             $query = $this->inventoryService->createCreditList($request, $iframeSrc,$creditBureauFormatted,$dealer_id);
             $data = $this->inventoryService->submitRequest($query);
-            dd($data);
         }catch(\Excption $e){
         }
     }

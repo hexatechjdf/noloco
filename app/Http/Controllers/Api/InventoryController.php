@@ -46,18 +46,6 @@ class InventoryController extends Controller
             return response()->json(['error' => 'location id is invalid']);
         }
         try {
-            //$loc = CrmAuths::where('location_id', $request->locationId)->first();
-            // if (!$loc) {
-            //     $res = CRM::getLocationAccessToken(1, $request->locationId);
-            //     $code = $res->statusCode ?? 200;
-            //     if ($code != 200) {
-            //         return response()->json(['error' => 'location id is invalid']);
-            //     }
-            // }
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'location id is invalid']);
-        }
-        try {
             $query = $inventoryService->setQuery(request(), $id);
             $data = $inventoryService->submitRequest($query);
 
@@ -67,6 +55,7 @@ class InventoryController extends Controller
         }
         return response()->json(['error' => 'Failed to fetch inventory data'], 500);
     }
+
     public function adminExtention(Request $request)
     {
         $url = $request->url;

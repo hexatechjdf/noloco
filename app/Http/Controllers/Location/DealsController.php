@@ -215,8 +215,9 @@ class DealsController extends Controller
         }
         $vin = @$contact['vin_'];
 
+        $r = $request->webb == 'test' ? 'locations.deals.form.contactScriptForm' : 'locations.deals.form.contact';
 
-        return view('locations.deals.form.contact', get_defined_vars());
+        return view($r, get_defined_vars());
     }
 
     public function leadForm(Request $request)

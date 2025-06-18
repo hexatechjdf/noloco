@@ -40,8 +40,8 @@ class ScriptingController extends Controller
         $jsFileName  =  $s->title. '-'.$s->id.$c . '.js';
 
         // Store the files
-        Storage::disk('public')->put('styles/' . $cssFileName, $request['css'] ?? '');
-        Storage::disk('public')->put('scripts/' . $jsFileName, $request['js'] ?? '');
+        storeFiles('styles',$cssFileName,$request['css'] ?? '');
+        storeFiles('scripts',$jsFileName,$request['js'] ?? '');
 
         $s->uuid = $c;
         $s->css_link = asset('styles/' . $cssFileName);

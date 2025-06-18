@@ -396,6 +396,7 @@ class InventoryService
                 creditBureau
                 user
                 score
+                url
               }
             }
           }
