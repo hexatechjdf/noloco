@@ -27,8 +27,9 @@ class WebhookController extends Controller
         $contact =  (object)$contact;
         $locationId = @$contact->location['id'] ?? null;
         $contactId = @$contact->contact_id ?? null;
-        $tags = explode(',', (@$contact->tags ?? '')) ?? [];
-        if(in_array('deals',$tags))
+        $is_deal = @$contact->Deal ?? "";
+        // $tags = explode(',', (@$contact->tags ?? '')) ?? [];
+        if($is_deal && !empty($is_deal) && $is_deal != "")
         {
             if($locationId && $contactId)
             {

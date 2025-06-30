@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\MappingExtentionController;
 use App\Http\Controllers\Api\UploaderController;
 use App\Http\Controllers\Api\CreditController;
 use App\Http\Controllers\WebhookController;
-
+use App\Http\Controllers\IndexController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -54,3 +54,6 @@ Route::prefix('credit-report')->name('credit-report.')->group(function () {
     Route::POST('/settle', [CreditController::class, 'setReport']);
     Route::POST('/check/valid/location', [CreditController::class, 'checkValidLocation']);
 });
+
+
+Route::post('/manage/conatct/fields', [IndexController::class, 'manageContactFields'])->name('manage.conatct.fields')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);

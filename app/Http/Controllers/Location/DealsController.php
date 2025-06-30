@@ -30,33 +30,12 @@ class DealsController extends Controller
         return view('locations.deals.index', get_defined_vars());
     }
 
-    public function setFilters($locationId, $vin = null, $term = null)
-    {
-        $filters = [];
-
-        // Always include dealershipSubAccountId filter
-        if (!empty($locationId)) {
-            $filters[] = 'dealershipSubAccountId: { equals: "' . $locationId . '" }';
-        }
-
-        // Add vin or term filter
-        if (!empty($vin) || !empty($term)) {
-            $column = $vin ? 'vin' : 'name';
-            $value = $vin ?? $term;
-            $filters[] = $column . ': { contains: "' . $value . '" }';
-        }
-
-        // Return the final GraphQL `where` condition
-        return '{ ' . implode(', ', $filters) . ' }';
-    }
-
     public function searchInventory(Request $request)
     {
         // dealershipSubAccountId
         // dd($request->all());
         $res = [];
-
-        $filters = $this->setFilters($request->locationId, $request->vin, $request->term);
+        $filters = setFilters($request->locationId, $request->vin, $request->term,$request->sold);
         try {
             $query = $this->inventoryService->setQuery($request,null, $filters);
             // dd($query);
@@ -76,10 +55,12 @@ class DealsController extends Controller
                         'listedPrice'=> $node['listedPrice'],
                         'vehicleCost'=> $node['vehicleCost'],
                         'name' => $node['name'],
+                        'status' => $node['status'],
                         'image' => explode(',', $node['photosUrls'] ?? '')[0] ?? '',
                         'stock' => $node['stock']
                     ];
                 }
+
                 $res = collect($res)->map(function ($value, $key) {
                     return (object) [
                         'id' => $key,
@@ -92,16 +73,16 @@ class DealsController extends Controller
                         'model'=> $value['model'],
                         'trim'=> $value['trim'],
                         'miles'=> $value['miles'],
+                        'status' => $value['status'],
                         'listedPrice'=> $value['listedPrice'],
                         'vehicleCost'=> $value['vehicleCost'],
                     ];
                 });
             }
         } catch (\Exception $e) {
-            dd($e);
             return $res;
         }
-
+        // dd($res);
         return response()->json($res);
     }
 

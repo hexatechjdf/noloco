@@ -150,9 +150,7 @@ Route::group(['as' => 'deals.', 'prefix' => 'deals'], function () {
     Route::get('/inventories/search', [DealsController::class, 'searchInventory'])->name('inventories.search');
     Route::get('/get/list', [DealsController::class, 'getDeals'])->name('get.list');
     // Route::get('/get/deals', [DealsController::class, 'getDeals'])->name('get.deals');
-    Route::get('/create/setting', [DealsController::class, 'create'])->name('create.setting');
-
-
+    Route::any('/create/setting', [DealsController::class, 'create'])->name('create.setting')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 });
 
 Route::get('start/deal/form/', [DealsController::class, 'startDealForm'])->name('start.deal.form.setting');
@@ -185,7 +183,7 @@ Route::prefix('authorization')->name('crm.')->group(function () {
 
 Route::get('/get/opportunities', [IndexController::class, 'getOpportunities'])->name('get.opportunities');
 Route::get('/create/opportunities', [IndexController::class, 'createOpportunities'])->name('create.opportunities');
-Route::get('/manage/conatct/fields', [IndexController::class, 'manageContactFields'])->name('manage.conatct.fields');
+
 
 /*
 
@@ -263,6 +261,11 @@ use App\Jobs\Export\GetExportMappingJob;
 
 Route::get('/cron-jobs/export/csv/files', function () {
     dispatch((new GetExportMappingJob()))->delay(5);
+})->name('csv.export.file');
+
+Route::get('/update/contact/fields/{loc}', function ($locationId) {
+   $contact_fileds = CRM::getContactFields($locationId);
+   dd($contact_fileds);
 })->name('csv.export.file');
 
 Route::get('data/csv/export/inv', [CsvOutbondController::class, 'exportInv']);

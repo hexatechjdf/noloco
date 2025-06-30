@@ -63,17 +63,45 @@
         .accordion-body {
             padding: 0px;
         }
+
+        .injected-vehicle-card {
+            padding: 5px 0;
+        }
+
+        .vehicle-card-img {
+            border: 1px solid #ddd;
+        }
+
+        .vehicle-card-details {
+            font-size: 13px;
+            color: #333;
+        }
+
+        #qr-block canvas {
+            margin: auto;
+        }
+
+        .input-fil-custom {
+            padding: 7px 6px;
+            font-size: 15px;
+            background: #fafdff;
+        }
+        .h-20p{
+            height:20px;
+        }
+        label{
+justify-content: space-between;
+        }
     </style>
 @endpush
 @section('content')
     <div class="container ">
-        <div class="row">
-            <div class="col-md-8  mt-2">
-                @include('locations.components.vehicleFields',['is_source' => true])
-                <div class="appendData mt-3">
-                    <div class="form-boxx">
 
-                        <form id="submForm" class="mt-3">
+        <form id="submForm" class="mt-3" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="appendData">
+                        <div class="form-boxx">
                             @include('forms.internals.contactForm', [
                                 'heading' => 'Vehicle',
                                 'cols' => 'col-md-4',
@@ -154,16 +182,70 @@
                                     <button class="btn btn-primary mt-3 contact_field_form" type="button">Submit</button>
                                 </div>
                             </div>
-                        </form>
 
+                        </div>
+                    </div>
+                    @include('components.loader')
+                </div>
+                <div class="col-md-4">
+                    <div class="card  radius-10 main-card ">
+                        <div class="card-body">
+                            @include('locations.components.vehicleFields', [
+                                'is_source' => true,
+                                'is_full' => '12',
+                                'is_sold' => 'true',
+                            ])
+
+                            <div class="card-title mt-3">
+                                <h5 class="mb-0">QR Code</h5>
+                            </div>
+
+                            <div id="qr-block" class="text-center mt-3">
+                                <button id="generate-qr-btn" class="btn btn-primary">Generate QR Code to scan
+                                    documents</button>
+                                <div id="qr-timer" class="text-danger mt-2"></div>
+                            </div>
+
+                            <div class="card-title mt-3">
+                                <h5 class="mb-0">Document Uploads</h5>
+                            </div>
+
+                            <div class="">
+                                <label  class="form-label d-flex">Driver's License
+                                    @if(@$contact['drivers_licence'])
+                                    @php($urll = getValueGhlFile($contact['drivers_licence']))
+                                    <a href="{{ $urll }}" target="_blank"><img class="down-image h-20p" src="{{ asset('assets/images/down.png') }}"></a>
+                                    @endif
+                                </label>
+                                <input class="form-control input-fil-custom" type="file" id="drivers_license"
+                                    name="drivers_licence" accept="image/*,application/pdf" required>
+                            </div>
+
+                            <div class="mt-3">
+                                <label  class="form-label d-flex">Insurance Card
+                                @if(@$contact['insurance_card'])
+                                @php($urll = getValueGhlFile($contact['insurance_card']))
+                                <a href="{{ $urll }}" target="_blank"><img class="down-image h-20p" src="{{ asset('assets/images/down.png') }}"></a>
+                                @endif
+                                </label>
+                                <input class="form-control input-fil-custom" type="file" id="insurance_card"
+                                    name="insurance_card" accept="image/*,application/pdf" required>
+                            </div>
+                        </div>
+
+
+                        {{-- <div id="qrArea" class="mt-3" style="display: none;">
+                            <div id="qrCodeContainer" class="mb-2"></div>
+                            <div id="qrExpiredMsg" class="text-danger fw-bold" style="display: none;">
+                                QR Code expired. Please generate again.
+                            </div>
+                        </div> --}}
                     </div>
                 </div>
-                @include('components.loader')
             </div>
-            <div class="col-md-4">
 
-            </div>
-        </div>
+        </form>
+
     </div>
 @endsection
 
@@ -171,6 +253,117 @@
     @include('components.submitForm')
     @include('locations.components.dealsScript', ['script_type' => 'form'])
     @include('locations.components.googleaddress')
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    <script>
+        let qrTimeout = null;
+
+        function clearQRCode() {
+            $('#qr-block canvas').remove();
+            $('#qr-block .qr-note').remove();
+            $('#qr-timer').text('QR Code expired. Please generate again.');
+            $('#generate-qr-btn')
+                .prop('disabled', false)
+                .text('Generate QR Code to scan documents');
+        }
+
+        function injectQRCodeWithTimer() {
+            clearQRCode(); // Remove existing QR if any
+
+            const url = `https://api.premiummotors.com/widget/form/NMWhKX8IskAhSWpBoEGn?contact_id=12345`;
+            const qrCanvas = $('<canvas></canvas>');
+
+            new QRious({
+                element: qrCanvas[0],
+                value: url,
+                size: 140
+            });
+
+            const note = $('<div class="qr-note mt-2">Scan to open/edit this application</div>');
+
+            $('#generate-qr-btn').after(qrCanvas, note);
+            $('#generate-qr-btn')
+                .prop('disabled', true)
+                .text('QR Code Active (expires in 5:00)');
+
+            let secondsLeft = 300;
+
+            function updateTimer() {
+                if (secondsLeft <= 0) {
+                    clearQRCode();
+                    return;
+                }
+                const min = Math.floor(secondsLeft / 60);
+                const sec = String(secondsLeft % 60).padStart(2, '0');
+                $('#qr-timer').text(`QR Code expires in ${min}:${sec}`);
+                secondsLeft--;
+                qrTimeout = setTimeout(updateTimer, 1000);
+            }
+
+            updateTimer();
+        }
+
+        $(document).on('click', '#generate-qr-btn', function() {
+            if (qrTimeout) clearTimeout(qrTimeout);
+            injectQRCodeWithTimer();
+        });
+    </script>
+    {{-- <script>
+        const qrBtn = document.getElementById("generateQRBtn");
+        const qrArea = document.getElementById("qrArea");
+        const qrCodeContainer = document.getElementById("qrCodeContainer");
+        const qrExpiredMsg = document.getElementById("qrExpiredMsg");
+        const originalBtnText = "Generate QR Code";
+
+        let timer = null;
+        let timeLeft = 60; // 5 minutes
+        let qrcode = null;
+        const formURL = "https://chatgpt.com/c/68514086-3208-8010-8501-0b5db13f5cdf"; // Replace with your actual form route
+
+        function formatTime(sec) {
+            const min = String(Math.floor(sec / 60)).padStart(2, '0');
+            const remSec = String(sec % 60).padStart(2, '0');
+            return `${min}:${remSec}`;
+        }
+
+        function updateButtonText() {
+            qrBtn.textContent = `QR Code Active (${formatTime(timeLeft)})`;
+        }
+
+        function startCountdown() {
+            clearInterval(timer);
+            updateButtonText();
+
+            timer = setInterval(() => {
+                timeLeft--;
+                updateButtonText();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    qrCodeContainer.innerHTML = '';
+                    qrExpiredMsg.style.display = 'block';
+                    qrBtn.textContent = originalBtnText;
+                }
+            }, 1000);
+        }
+
+        function generateQRCodeJS() {
+            timeLeft = 300;
+            qrArea.style.display = 'block';
+            qrExpiredMsg.style.display = 'none';
+            qrCodeContainer.innerHTML = '';
+
+            qrcode = new QRCode(qrCodeContainer, {
+                text: formURL,
+                width: 200,
+                height: 200,
+            });
+
+            startCountdown();
+        }
+
+        qrBtn.addEventListener("click", generateQRCodeJS);
+    </script> --}}
     <script>
         $(document).ready(function() {
             @if ($vin)

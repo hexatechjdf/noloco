@@ -16,14 +16,68 @@ class InventoryController extends Controller
     public function index(Request $request, InventoryService $inventoryService)
     {
         try {
-            $query = $inventoryService->setQuery($request);
-            $data = $inventoryService->submitRequest($query,1);
+            list($inventories,$filters) = $this->getInvntoryListing($inventoryService,$request->locationId ?? 'geAOl3NEW1iIKIWheJcj');
 
-            return $data;
+            $data = [
+                'filters' => $filters,
+                'inventories' => $inventories,
+            ];
+
+             return response()->json(['data' => $data], 200);
         } catch (\Exception $e) {
             return $e;
         }
         return response()->json(['error' => 'Failed to fetch inventory data'], 500);
+    }
+
+    public function getInvntoryListing($inventoryService,$locationId)
+    {
+        $allEdges = [];
+        $after = null;
+
+        $request = request();
+        $filterCounts = [
+            'make' => [],
+            'exteriorColor' => [],
+            'bodyStyle' => [],
+        ];
+        $filters = setFilters($locationId);
+        do {
+            $query = $inventoryService->setQuery($request,null,$filters);
+            $data = $inventoryService->submitRequest($query);
+            $data = @$data['data'];
+            $edges = @$data['inventoryCollection']['edges'];
+            if (!empty(@$edges)) {
+                foreach ($edges as $edge) {
+                    $node = $edge['node'] ?? [];
+                    // Count Make
+                    if (!empty($node['make'])) {
+                        $make = $node['make'];
+                        $filterCounts['make'][$make] = ($filterCounts['make'][$make] ?? 0) + 1;
+                    }
+
+                    // Count Exterior Color
+                    if (!empty($node['exteriorColor'])) {
+                        $color = $node['exteriorColor'];
+                        $filterCounts['exteriorColor'][$color] = ($filterCounts['exteriorColor'][$color] ?? 0) + 1;
+                    }
+
+                    // Count Body Style
+                    if (!empty($node['bodyStyle'])) {
+                        $style = $node['bodyStyle'];
+                        $filterCounts['bodyStyle'][$style] = ($filterCounts['bodyStyle'][$style] ?? 0) + 1;
+                    }
+            }
+                $allEdges = array_merge($allEdges, $data['inventoryCollection']['edges']);
+            }
+
+            $pageInfo = $data['inventoryCollection']['pageInfo'] ?? [];
+            $after = $pageInfo['hasNextPage'] ? $pageInfo['endCursor'] : false;
+            $request['after'] = $after;
+        } while ($after);
+
+        return [$allEdges,$filterCounts];
+
     }
 
     public function getSettings(Request $request)
