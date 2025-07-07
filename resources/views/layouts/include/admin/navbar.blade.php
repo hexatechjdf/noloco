@@ -24,8 +24,19 @@
                                     href="{{ route('admin.setting.index') }}">GHL Setting</a></li>
                             <li><a class="dropdown-item {{ Route::is('admin.setting.noloco') ? 'active' : '' }}"
                                     href="{{ route('admin.setting.noloco') }}">Noloco Setting</a></li>
-                            <li><a class="dropdown-item {{ Route::is('admin.setting.mapping') ? 'active' : '' }}"
-                                    href="{{ route('admin.setting.mapping', 'deals') }}">Mapping Setting</a></li>
+                            <li>
+                                <a class="dropdown-item {{ request()->route('type') === 'deals' ? 'active' : '' }}"
+                                    href="{{ route('admin.setting.mapping', 'deals') }}">
+                                    Deals Mapping Setting
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item {{ request()->route('type') === 'creditApps' ? 'active' : '' }}"
+                                    href="{{ route('admin.setting.mapping', 'creditApps') }}">
+                                    Credit App Mapping Setting
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item">
@@ -106,11 +117,35 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item {{ Route::is('admin.mappings.custom.index') ? 'active' : '' }}"
                                     href="{{ route('admin.mappings.custom.index') }}">Extention</a></li>
-                            <li><a class="dropdown-item {{ Route::is('admin.mappings.customer.form') ? 'active' : '' }}"
-                                    href="{{ route('admin.mappings.customer.form') }}">Customer</a></li>
-                            <li><a class="dropdown-item {{ Route::is('admin.mappings.coborrower.form') ? 'active' : '' }}"
-                                    href="{{ route('admin.mappings.coborrower.form') }}">Coborrower</a></li>
-                            <li><a class="dropdown-item {{ Route::is('admin.mappings.ghl.form') ? 'active' : '' }}"
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('admin.mappings.customer.form') && request()->route('prefix') === 'deals' ? 'active' : '' }}"
+                                    href="{{ route('admin.mappings.customer.form', 'deals') }}">
+                                    Customer (Deals)
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('admin.mappings.coborrower.form') && request()->route('prefix') === 'deals' ? 'active' : '' }}"
+                                    href="{{ route('admin.mappings.coborrower.form', 'deals') }}">
+                                    Coborrower (Deals)
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('admin.mappings.customer.form') && request()->route('prefix') === 'creditApps' ? 'active' : '' }}"
+                                    href="{{ route('admin.mappings.customer.form', 'creditApps') }}">
+                                    Customer (Credit Apps)
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('admin.mappings.coborrower.form') && request()->route('prefix') === 'creditApps' ? 'active' : '' }}"
+                                    href="{{ route('admin.mappings.coborrower.form', 'creditApps') }}">
+                                    Coborrower (Credit Apps)
+                                </a>
+                            </li>
+
+                            <li><a class="dropdown-item {{ Route::is('admin.mappings.deals.form') ? 'active' : '' }}"
                                     href="{{ route('admin.mappings.deals.form') }}">Deals</a></li>
 
                         </ul>

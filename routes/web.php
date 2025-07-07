@@ -100,13 +100,18 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
             Route::post('/form/submit', [MapingController::class, 'formSubmit'])->name('form.submit');
         });
 
+        Route::group(['as' => 'credit.app.', 'prefix' => 'credit/app'], function () {
+            Route::get('/form', [MapingController::class, 'creditAppForm'])->name('form');
+            Route::post('/form/submit', [MapingController::class, 'creditFormSubmit'])->name('form.submit');
+        });
+
         Route::group(['as' => 'customer.', 'prefix' => 'customer'], function () {
-            Route::get('/form/{id?}', [MapingController::class, 'customerForm'])->name('form');
+            Route::get('/form/{prefix?}', [MapingController::class, 'customerForm'])->name('form');
             Route::post('/form/submit', [MapingController::class, 'formSubmit'])->name('form.submit');
         });
 
         Route::group(['as' => 'coborrower.', 'prefix' => 'coborrower'], function () {
-            Route::get('/form/{id?}', [MapingController::class, 'coborrowerForm'])->name('form');
+            Route::get('/form/{prefix?}', [MapingController::class, 'coborrowerForm'])->name('form');
             Route::post('/form/submit', [MapingController::class, 'formSubmit'])->name('form.submit');
         });
 

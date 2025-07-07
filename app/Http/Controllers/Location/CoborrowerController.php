@@ -35,7 +35,7 @@ class CoborrowerController extends Controller
         $contact = $this->dealService->getContact($request->locationId,$request->contactId);
         $contact = (object)$contact;
 
-        dispatch((new SetDealsOBjectJob($contact, $request->dealId,'coborrowerMapping')));
+        dispatch((new SetDealsOBjectJob($contact, $request->dealId,'dealscoborrowerMapping')));
 
         return response()->json(['success' => 'Successfully Updated']);
     }

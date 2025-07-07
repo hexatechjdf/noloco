@@ -28,13 +28,14 @@ class IndexController extends Controller
         if($request->type =='both')
         {
           $contactFields = $this->dealService->getContact($request->locationId, $request->contactId);
-          $contactView = view('locations.deals.components.leadContactFields',get_defined_vars())->render();
+        //   dd($contactFields);
+        //   $contactView = view('locations.deals.components.leadContactFields',get_defined_vars())->render();
         }
 
         $data = $this->ghlService->oppertunityList($request->locationId, $request->contactId);
         $view = view('locations.deals.components.oppertunitiesList',get_defined_vars())->render();
 
-        return response()->json(['view' => $view,'contactView' => $contactView]);
+        return response()->json(['view' => $view,'contactView' => $contactView,'contact_fields' => $contactFields]);
     }
 
     public function createOpportunities(Request $request)
@@ -47,11 +48,6 @@ class IndexController extends Controller
         return response()->json(['success' => 'Add Tag Successfully']);
     }
 
-
-
-
-
-
     public function manageContactFields(Request $request)
     {
         $data = true;
@@ -60,18 +56,12 @@ class IndexController extends Controller
             $req = setCotactFieldsPayload($request);
             $cont_id =  $this->dealService->createContact($request->locationId,$req);
             $request->merge(['contactId' => $cont_id]);
+            uploadFileSetup($request);
             $data = $cont_id;
         }
         else{
             $inp = $request->except(['drivers_licence','insurance_card']);
-            if($request->file('drivers_licence'))
-            {
-                $this->uploadFile($request,'drivers_licence');
-            }
-            if($request->file('insurance_card'))
-            {
-                $this->uploadFile($request,'insurance_card');
-            }
+            uploadFileSetup($request);
             $data  = $this->ghlService->updateContact($request->locationId, $request->contactId,$inp);
         }
         if(!$data)
@@ -85,6 +75,17 @@ class IndexController extends Controller
         return response()->json(['success' => 'Successfully Updated']);
     }
 
+    public function uploadFileSetup($request)
+    {
+        if($request->file('drivers_licence'))
+        {
+            $this->uploadFile($request,'drivers_licence');
+        }
+        if($request->file('insurance_card'))
+        {
+            $this->uploadFile($request,'insurance_card');
+        }
+    }
     public function uploadFile($request,$targetFieldKey)
     {
         try{

@@ -16,18 +16,24 @@
     <div class="container ">
         <div class="row">
             <div class="col-md-10 mt-2">
+                @php($activeData = request()->query('data'))
                 <ul class="nav nav-pills">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('admin/setting/mapping/deals') ? 'active' : '' }}"
-                            href="{{ route('admin.setting.mapping', 'deals') }}">Deals</a>
+                        <a class="nav-link {{ !$activeData ? 'active' : '' }}"
+                            href="{{ route('admin.setting.mapping', 'creditApps') }}">Credit Apps</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link  {{ request()->is('admin/setting/mapping/coborrower') ? 'active' : '' }}"
-                            href="{{ route('admin.setting.mapping', 'coborrower') }}">Coborrower</a>
+                        <a class="nav-link {{ $activeData === 'customer' ? 'active' : '' }}"
+                            href="{{ route('admin.setting.mapping', 'creditApps') }}?data=customer">
+                            Borrower
+                        </a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('admin/setting/mapping/customer') ? 'active' : '' }}"
-                            href="{{ route('admin.setting.mapping', 'customer') }}">Customer</a>
+                        <a class="nav-link {{ $activeData === 'coborrower' ? 'active' : '' }}"
+                            href="{{ route('admin.setting.mapping', 'creditApps') }}?data=coborrower">
+                            Co-Borrower
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -39,7 +45,7 @@
             <div class="col-md-12 mt-2">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
-                        <h4 class="h4 text-capitalize">Mapping Setting - {{ $type }}</h4>
+                        <h4 class="h4 text-capitalize">Mapping Setting </h4>
                     </div>
                     <div class="card-body">
                         <form method="POST" class="submitForm" action="{{ route('admin.setting.save') }}">
@@ -77,6 +83,9 @@
 @endsection
 
 @push('script')
+    <script>
+        let tableName = '{{ $prefix }}';
+    </script>
     @include('components.submitForm')
     <script>
         $(document).ready(function() {
@@ -91,16 +100,7 @@
                     }
                 });
             });
-            $('.fetch_fields').on('click', function() {
-                $("#loader-overlay").css("display", "flex").hide().fadeIn();
-                $.ajax({
-                    type: 'GET',
-                    url: '{{ route('admin.setting.fetch.fields') }}',
-                    success: function(response) {
-                          window.location.reload();
-                    }
-                });
-            });
+
         });
     </script>
 @endpush

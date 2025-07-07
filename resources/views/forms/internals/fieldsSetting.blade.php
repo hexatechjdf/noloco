@@ -2,8 +2,9 @@
 @php($form = $form ?? contactForm())
 @php($heading = $heading ?? null)
 @php($object = $obj ?? [])
+@php($is_autocomplete = $is_autocomplete ?? false)
 @php($cols = $cols ?? 'col-md-12')
-<div class="row {{ $heading }} form-rows" >
+<div class="row {{ $heading }} form-rows">
     @foreach ($form as $key => $field)
         @php($k = $object[$key] ?? ($object[\Illuminate\Support\Str::camel($key)] ?? ''))
         @php($colSize = $field['col'] ?? (\Illuminate\Support\Str::after($cols, 'col-') ?? 'md-12'))
@@ -44,6 +45,9 @@
                         <input id="{{ $key }}" type="{{ $field['input_type'] }}" value="{{ $k }}"
                             class="{{ $key }} subkey_{{ $field['sub_key'] ?? '' }} form-control"
                             {{ $required }} name="{{ $key }}">
+                        @if (@$field['autocomplete'] && $is_autocomplete)
+                            <div id="contact_suggestions" class="suggestions-box"></div>
+                        @endif
                     @endif
                 </div>
             @endif

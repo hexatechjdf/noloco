@@ -86,11 +86,64 @@
             font-size: 15px;
             background: #fafdff;
         }
-        .h-20p{
-            height:20px;
+
+        .h-20p {
+            height: 20px;
         }
-        label{
-justify-content: space-between;
+
+        label {
+            justify-content: space-between;
+        }
+
+        .form-header {
+            background: #1a3a68;
+            padding: 10px 0px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+            border-radius: 5px;
+        }
+
+        #creditForm {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .credit-footer-action {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
         }
     </style>
 @endpush
@@ -211,29 +264,35 @@ justify-content: space-between;
                             </div>
 
                             <div class="">
-                                <label  class="form-label d-flex">Driver's License
-                                    @if(@$contact['drivers_licence'])
-                                    @php($urll = getValueGhlFile($contact['drivers_licence']))
-                                    <a href="{{ $urll }}" target="_blank"><img class="down-image h-20p" src="{{ asset('assets/images/down.png') }}"></a>
-                                    @endif
+                                <label class="form-label d-flex">Driver's License
+                                    <div class="drivers_licence_box">
+                                    </div>
                                 </label>
                                 <input class="form-control input-fil-custom" type="file" id="drivers_license"
                                     name="drivers_licence" accept="image/*,application/pdf" required>
                             </div>
 
                             <div class="mt-3">
-                                <label  class="form-label d-flex">Insurance Card
-                                @if(@$contact['insurance_card'])
-                                @php($urll = getValueGhlFile($contact['insurance_card']))
-                                <a href="{{ $urll }}" target="_blank"><img class="down-image h-20p" src="{{ asset('assets/images/down.png') }}"></a>
-                                @endif
+                                <label class="form-label d-flex">Insurance Card
+                                    <div class="insurance_card_box">
+                                    </div>
                                 </label>
                                 <input class="form-control input-fil-custom" type="file" id="insurance_card"
                                     name="insurance_card" accept="image/*,application/pdf" required>
                             </div>
+                            <div class="card-title mt-3">
+                                <h5 class="mb-0">Credit Reports</h5>
+                            </div>
+
+                            <div class="">
+                                <div class="credit-container"></div>
+                            </div>
+                            <div class="">
+                                <button class="btn btn-primary mt-3 open_credit w-100" type="button">Run New Credit
+                                    report</button>
+                            </div>
+
                         </div>
-
-
                         {{-- <div id="qrArea" class="mt-3" style="display: none;">
                             <div id="qrCodeContainer" class="mb-2"></div>
                             <div id="qrExpiredMsg" class="text-danger fw-bold" style="display: none;">
@@ -246,6 +305,98 @@ justify-content: space-between;
 
         </form>
 
+    </div>
+
+    <div class="modal fade" id="creditModal" tabindex="-1" role="dialog" aria-labelledby="creditModalTitle"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="creditForm">
+                    <div class="modal-body">
+                        <div class="form-header">
+                            <h3>Run New Credit Report</h3>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>First Name</label>
+                                <input type="text" class="form-control firstName" name="firstName" required
+                                    value="{{ @$contact['firstName'] }}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Middle Name</label>
+                                <input type="text" class="form-control middle_name" name="middle_name"
+                                    value="{{ @$contact['middle_name'] }}" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Last Name</label>
+                            <input type="text" class="form-control lastName" name="lastName" required
+                                value="{{ @$contact['lastName'] }}" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Address</label>
+                            <input type="text" class="form-control address1" name="address1" required
+                                value="{{ @$contact['address1'] }}" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Bureau Types</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <label><input type="checkbox" name="experian" class="experian" checked />
+                                    Experian</label>
+                                <label><input type="checkbox" name="equifax" class="equifax" checked /> Equifax</label>
+                                <label><input type="checkbox" name="transunion" class="transunion" checked />
+                                    TransUnion</label>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label>City</label>
+                                <input type="text" class="form-control city" name="city" required
+                                    value="{{ @$contact['city'] }}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label>State</label>
+                                <input type="text" class="form-control state" name="state" required
+                                    value="{{ @$contact['state'] }}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label>ZIP</label>
+                                <input type="text" class="form-control postalCode" name="postalCode" required
+                                    value="{{ @$contact['postalCode'] }}" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Date of Birth</label>
+                                <input type="date" class="form-control dateOfBirth" name="dateOfBirth" required
+                                    value="{{ @$contact['dateOfBirth'] }}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label>SSN</label>
+                                <input type="password" class="form-control social_security_number"
+                                    name="social_security_number" value="{{ @$contact['social_security_number'] }}"
+                                    required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class=" credit-footer-action w-100">
+                            <button type="submit" class="btn btn-success w-100">Save changes</button>
+
+                            <button type="button" class="btn btn-danger w-100 close-modal"
+                                data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -378,13 +529,13 @@ justify-content: space-between;
                         let item = null;
                         try {
                             item = Object.values(response)[0];
+                            vehiclesData[item.id] = item;
+                            var option = new Option(item.name, item.id, true, true);
+                            $(".vehicle_field").append(option).trigger('change');
                         } catch (error) {
                             item = null;
                         }
-                        vehiclesData[item.id] = item;
 
-                        var option = new Option(item.name, item.id, true, true);
-                        $(".vehicle_field").append(option).trigger('change');
 
                     }
                 });
@@ -404,5 +555,160 @@ justify-content: space-between;
                 toggleDiv();
             });
         });
+
+        $(document).ready(function() {
+            @if (@$contact)
+                let contact = @json($contact);
+                getImageUrlFromContact(contact, 'insurance_card');
+                getImageUrlFromContact(contact, 'drivers_licence');
+            @endif
+
+            fetchCreditReports(contactId, locationId);
+        });
+
+        async function fetchCreditReports(contactId, locationId) {
+            const res = await fetch("https://gostarauto.com/api/credit-report/list", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    contactId: contactId,
+                    locationId: locationId
+                })
+            });
+
+            const json = await res.json();
+            const reports = json?.credit?.data?.creditReportsCollection?.edges?.map(e => e.node) || [];
+            const contactData = json.contact;
+            console.log(contactData);
+
+            // Sort latest first
+            reports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            let dropdown = $('.credit-container');
+
+            if (!reports.length) {
+                dropdown.html(`<div style="font-size:14px; color:#777;">No credit reports found.</div>`);
+                return dropdown;
+            }
+
+            const bureauIcons = {
+                EQUIFAX: "https://storage.googleapis.com/msgsndr/ZWry4bE66uaqlPng8WjQ/media/67fd3bd70f63bf775e29981b.png",
+                TRANS_UNION: "https://storage.googleapis.com/msgsndr/ZWry4bE66uaqlPng8WjQ/media/67fd3bf7a119410b40c5b672.png",
+                EXPERIAN: "https://storage.googleapis.com/msgsndr/ZWry4bE66uaqlPng8WjQ/media/67fd3bd771384b4077b578d1.png"
+            };
+
+            // Grouping reports
+            const groupedReports = {};
+            reports.forEach(report => {
+                const key = report.createdAt + "_" + report.fullName?.first + report.fullName?.last;
+                if (!groupedReports[key]) groupedReports[key] = [];
+                groupedReports[key].push(report);
+            });
+
+            $.each(groupedReports, function(key, group) {
+                const mainReport = group[0];
+                const name = `${mainReport.fullName?.first || ""} ${mainReport.fullName?.last || ""}`.trim();
+                const date = new Date(mainReport.createdAt);
+                const formattedDate = date.toLocaleString();
+                const isRecent = Date.now() - date.getTime() <= 30 * 86400000;
+                const url = mainReport.url || "#";
+
+                const bureauHTML = mainReport.creditBureau.map(bureau => {
+                    const icon = bureauIcons[bureau];
+                    return icon ? `
+                <span style="display:flex; align-items:center; gap:4px;">
+                    <img src="${icon}" alt="${bureau}" style="width:16px; height:16px;" />
+                </span>
+            ` : '';
+                }).join(`<span style="margin: 0 6px; color: #ccc;">|</span>`);
+
+                const $card = $(`
+            <div class="credit-card mb-2 p-2" style="
+                border: 1px solid #eee;
+                border-radius: 8px;
+                background-color: ${isRecent ? "#e6f7ff" : "#fafafa"};
+                font-size: 12px;
+            ">
+                <div style="display:flex; justify-content:space-between;">
+                    <div>
+                        <div style="display:flex; gap:6px; font-weight:600;">
+                            <span>${name}</span>
+                            ${isRecent ? `<span style="font-size:10px; color:green; background:#e0f5e9; padding:1px 6px; border-radius:4px;">🟢 Recent</span>` : ""}
+                        </div>
+                        <div style="display:flex; gap:8px; margin:4px 0;">${bureauHTML}</div>
+                        <div style="font-size:11px; color:#555;"><strong>Ran at:</strong> ${formattedDate}</div>
+                    </div>
+                    <div class="view-report" style="cursor:pointer;" title="View Report">
+                        <i class="fas fa-eye text-primary"> View</i>
+                    </div>
+                </div>
+            </div>
+        `);
+
+                // Click handler for view
+                $card.find('.view-report').on('click', function() {
+                    openMoparOrPopup(`${url}?id=${mainReport.uuid}`, "View Credit Report");
+                    $dropdown.remove();
+                });
+
+                dropdown.append($card);
+            });
+
+            return dropdown;
+        }
+
+
+        $(document).on('click', '.close-modal', function() {
+            $(this).closest('.modal').modal('hide')
+        });
+        $(document).on('click', '.open_credit', function() {
+            openCreditForm()
+        });
+
+
+        function openCreditForm() {
+            $('#creditModal').modal('show'); // Bootstrap modal show
+
+            // Attach submit handler
+            $('#creditForm').on('submit', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+
+                data.contact_id = contactId;
+                data.location_id = locationId;
+
+                console.log("Submitted data:", data);
+                runCreditReport(data);
+
+                $('#creditModal').modal('hide');
+            });
+        }
+
+        function runCreditReport(data) {
+            fetch('https://gostarauto.com/api/credit-report/settle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(response => {
+                    console.log('Credit report response:', response);
+                    if (response.status && response.src) {
+                        alert("Submitted Successfully")
+                    } else {
+                        alert(response.message)
+                    }
+                    // Optionally show a success message or close modal
+                })
+                .catch(error => {
+                    console.error('Submission error:', error);
+                });
+        }
     </script>
 @endpush

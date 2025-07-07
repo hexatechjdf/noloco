@@ -61,6 +61,19 @@
         });
     });
 
+    $('.fetch_fields').on('click', function() {
+        $("#loader-overlay").css("display", "flex").hide().fadeIn();
+        $.ajax({
+            type: 'GET',
+            data: {
+                key: tableName
+            },
+            url: '{{ route('admin.setting.fetch.fields') }}',
+            success: function(response) {
+                window.location.reload();
+            }
+        });
+    });
 
     // function debounce(func, delay) {
     //     let timer;

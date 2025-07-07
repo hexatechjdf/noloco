@@ -52,38 +52,43 @@ class SettingController extends Controller
         return view('admin.setting.noloco', get_defined_vars());
     }
 
-    public function mapping(Request $request,$type = 'deals')
+    public function mapping(Request $request,$prefix = 'deals')
     {
-        $keyy = $type.'MappingSetting';
+        $data = $request->data ? $prefix.$request->data : $prefix;
+        $keyy = $data.'MappingSetting';
         $mapping = json_decode(supersetting($keyy), true) ?? [];
-        // dd($mapping);
-        $columns = json_decode(supersetting('dealsCustomTypeColumns'), true) ?? $this->nolocoCustomColumnsWithType();
+        $k = $prefix.'CustomTypeColumns';
+        $tableName = $prefix.'Collection';
+        $columns = json_decode(supersetting($k), true) ?? $this->nolocoCustomColumnsWithType($tableName,$k);
 
         // $columns = getColumnsByTable('dealsColumns',[],  null,'dealsCollection');
 
-        return view('admin.setting.mapping', get_defined_vars());
+        return view('admin.setting.'.$prefix.'.mapping', get_defined_vars());
     }
 
     public function fetchDealFields(Request $request)
     {
-        $this->nolocoCustomColumnsWithType();
+        $type = $request->key;
+        $k = $type.'CustomTypeColumns';
+        $tableName = $type.'Collection';
+
+        $this->nolocoCustomColumnsWithType($tableName,$k);
 
         return response()->json(['success' => 'Successfully Updated']);
     }
 
 
 
-    public function nolocoCustomColumnsWithType($tableName = 'dealsCollection')
+    public function nolocoCustomColumnsWithType($tableName = 'dealsCollection',$setting_key = 'dealsCustomTypeColumns')
     {
         $final = [];
         try {
             $query = $this->inventoryService->setTableQuery([$tableName]);
             $data = $this->inventoryService->submitRequest($query,1);
-            $fields = $data['data']['dealsCollection']['fields'];
-            // dd($fields);
+            $fields = $data['data'][$tableName]['fields'];
             $final = $this->fetchNonObjectColumns($fields) ?? [];
 
-            save_settings('dealsCustomTypeColumns', $final);
+            save_settings($setting_key, $final);
             return $final;
         } catch (\Exception $e) {
             return $final;
@@ -167,6 +172,7 @@ class SettingController extends Controller
     {
         $this->updateMappingTables($request);
         $data = [];
+        // dd($request->table_options);
         try {
             $query = $this->inventoryService->setTableQuery($request->table_options);
             $data = $this->inventoryService->submitRequest($query,1);
@@ -189,10 +195,8 @@ class SettingController extends Controller
     }
     public function nolocoTablesSubmit(Request $request)
     {
-
         $data = json_decode($request->data, true);
         $tables = getMappingTables();
-
         foreach ($tables as $table) {
             $collection = $data[$table->title];
 

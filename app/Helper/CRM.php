@@ -450,16 +450,17 @@ class CRM
                 $url = str_replace('-fields', 'Fields', $url);
             }
 
-            if (strpos($url, 'custom-values') !== false) {
+            elseif (strpos($url, 'custom-values') !== false) {
                 $url = str_replace('-values', 'Values', $url);
             }
-            if (strpos($url, 'tags') !== false) {
+            elseif (strpos($url, 'tags') !== false) {
                 $url = $url;
             }
-            if (strpos($url, 'upload-custom-files') !== false) {
+            elseif (strpos($url, 'upload-custom-files') !== false) {
                 $url = $url;
             }
             else{
+
                 $url = 'locations/' . $location_id . '/' . $url;
             }
         } else if ($methodl == 'get') {
@@ -694,10 +695,10 @@ class CRM
 
         $data = Cache::remember($cacheKey, 3 * 3, function () use ($contactFields, $locationId) {
             $customFields = self::getLocationCustomFields($locationId);
+            $dataa = [];
             if(count($customFields) > 0)
             {
                 CustomFields::updateOrCreate(['key' => $locationId],[ 'content' => json_encode($customFields)]);
-                $dataa = [];
                 foreach($customFields as $k => $f)
                 {
                     $dataa[$f['fieldKey']] = $f['name'];

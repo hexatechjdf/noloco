@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+Route::get('webhook/credit/app/handle', [WebhookController::class, 'creditAppHandle'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('webhook/store/dealers/data', [WebhookController::class, 'storeDealer'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::post('webhook/update/customer', [WebhookController::class, 'ghlContactToNoloco'])->name('ghl.to.noloco')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::post('webhook/deal/to/crm', [WebhookController::class, 'nolocoToGhl'])->name('noloco.to.ghl')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 

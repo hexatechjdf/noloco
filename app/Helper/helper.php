@@ -487,7 +487,7 @@ function setDataWithType($array,$result,$dealershipId=null,$vehicleId = null)
     return $result;
 }
 
-function setDealQueryData($contact,$result,$map_type = 'customerMapping')
+function setDealQueryData($contact,$result,$map_type = 'dealscustomerMapping')
 {
     $filteredData = json_decode(supersetting($map_type), true) ?? [];
 
@@ -891,9 +891,9 @@ function contactSourceForm()
 function contact_informationForm()
 {
     return [
-        "first_name" => ['title' => 'First Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "middle_name" => ['title' => 'Middle Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "last_name" => ['title' => 'Last Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "first_name" => ['title' => 'First Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12,'autocomplete' => 'true'],
+        "middle_name" => ['title' => 'Middle Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+        "last_name" => ['title' => 'Last Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
         "phone" => ['title' => 'Phone Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
         "email" => ['title' => 'Email', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
         "address1" => ['title' => 'Street Address', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
@@ -908,7 +908,7 @@ function identificationForm()
 {
     return [
         "date_of_birth" => ['title' => 'Date of Birth', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
-        "social_security_number" => ['title' => 'Social Security Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6,'is_secure' => true],
+        "social_security_number" => ['title' => 'Social Security Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'vs', 'col' => 6,'is_secure' => true],
         "id_type" => ['title' => 'ID Type', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'id_type'],
         "id_number" => ['title' => 'ID Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
         "state_id" => ['title' => 'State ID', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'state_id'],

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Jobs\Noloco;
+namespace App\Jobs\CreditApp;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Jobs\CreditApp\AddTagsJob;
 use App\Helper\CRM;
 
 class UpdateContactJob implements ShouldQueue
@@ -15,13 +16,19 @@ class UpdateContactJob implements ShouldQueue
 
     public $deal;
     public $type;
+    public $locationId;
+    public $conId;
+    public $is_tag;
     /**
      * Create a new job instance.
      */
-    public function __construct($deal, $type='dealscustomerMapping')
+    public function __construct($deal, $type='dealscustomerMapping',$locationId=null,$conId = null,$is_tag = 'false')
     {
         $this->deal = $deal;
         $this->type = $type;
+        $this->conId = $conId;
+        $this->locationId = $locationId;
+        $this->is_tag = $is_tag;
     }
 
     /**
@@ -29,6 +36,14 @@ class UpdateContactJob implements ShouldQueue
      */
     public function handle(): void
     {
+        if($this->conId)
+        {
+            $url = 'contacts/'.$this->conId;
+            $method = 'put';
+        }else{
+            $url = 'contacts';
+            $method = 'post';
+        }
         $mapping =  json_decode(supersetting($this->type), true) ?? [];
 
         $newArray = [];
@@ -44,19 +59,25 @@ class UpdateContactJob implements ShouldQueue
                 return !is_null($value); // Remove null values
             });
 
-            unset($newData['id']);
-            $contactKey = $this->type == 'dealscustomerMapping' ? 'highlevelClientId' : 'coBorrowerHighlevelClientId';
-            $conId = @$this->deal[$contactKey] ?? null;
-            $locationId = @$this->deal['dealershipSubAccountId'] ?? null;
             $payload = $this->setPayload($newData);
-            $query = 'contacts/'.$conId;
-            $detail = CRM::crmV2Loc(1, $locationId, $query, 'put',$payload);
+
+            unset($newData['id']);
+            $detail = CRM::crmV2Loc(1, $this->locationId, $url, $method,$payload);
+            if($this->is_tag == 'true')
+            {
+                if ($detail && property_exists($detail, 'contact')) {
+                    $contactId = @$detail->contact->id ?? null;
+                    if($contactId)
+                    {
+                        AddTagsJob::dispatch($contactId,'New Credit App');
+                    }
+                }
+
+            }
+
         }catch(\Exception $e){
 
         }
-
-
-        return 1;
     }
 
     public function setPayload($data) {

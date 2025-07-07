@@ -1,4 +1,5 @@
 <input type="hidden" name="key" value="{{$keyy}}">
+<input type="hidden" name="prefix" value="{{$prefix}}">
 @php($opt = $opt ?? null)
 @foreach ($columns as $col => $type)
     <div class="row mb-2">

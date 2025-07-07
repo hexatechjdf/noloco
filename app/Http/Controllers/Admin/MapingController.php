@@ -65,17 +65,17 @@ class MapingController extends Controller
         return response()->json(['success' => true, 'route' => route('admin.mappings.custom.index')]);
     }
 
-    public function customerForm()
+    public function customerForm($prefix = 'deals')
     {
         $keyy = 'customer';
-        list($mapping, $columns,$locationId,$contact_fileds) = $this->getFields($keyy);
+        list($mapping, $columns,$locationId,$contact_fileds) = $this->getFields($keyy,$prefix.$keyy);
         return view('admin.mapings.coborrower.form', get_defined_vars());
     }
 
-    public function coborrowerForm()
+    public function coborrowerForm($prefix = 'deals')
     {
         $keyy = 'coborrower';
-        list($mapping, $columns,$locationId,$contact_fileds) = $this->getFields($keyy);
+        list($mapping, $columns,$locationId,$contact_fileds) = $this->getFields($keyy,$prefix.$keyy);
         return view('admin.mapings.coborrower.form', get_defined_vars());
     }
 
@@ -90,10 +90,11 @@ class MapingController extends Controller
     }
 
 
-    public function getFields($key,$exclude = [], $contain = null)
+    public function getFields($key,$setKey = null,$exclude = [], $contain = null)
     {
+        $setKey  = $setKey ?? $key;
         $mapping = json_decode(supersetting($key.'Mapping'), true) ?? [];
-        $columns = json_decode(supersetting($key.'MappingSetting'), true) ?? [];
+        $columns = json_decode(supersetting($setKey.'MappingSetting'), true) ?? [];
 
         $locationId = supersetting('crm_location_id');
         $contact_fileds = CRM::getContactFields($locationId, true);
@@ -117,7 +118,8 @@ class MapingController extends Controller
 
     public function formSubmit(Request $request)
     {
-        $keyy = $request->key . 'Mapping';
+        $prefix = $request->prefix;
+        $keyy = $prefix.$request->key . 'Mapping';
         $mapping = $request->mapping;
         $type = $request->type;
         $filteredData = [];
@@ -136,7 +138,7 @@ class MapingController extends Controller
 
         save_settings($keyy, $filteredData);
 
-        $route = $request->key == 'customer' ? route('admin.mappings.customer.form') : ( $request->key == 'deals' ? route('admin.mappings.deals.form') : route('admin.mappings.coborrower.form'));
+        $route = $request->key == 'customer' ? route('admin.mappings.coborrower.form',$prefix) : ( $request->key == 'deals' ? route('admin.mappings.deals.form') : route('admin.mappings.coborrower.form',$prefix));
 
         return response()->json(['success' => true, 'route' => $route]);
     }

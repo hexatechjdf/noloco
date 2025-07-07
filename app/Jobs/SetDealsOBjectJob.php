@@ -23,7 +23,7 @@ class SetDealsOBjectJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct($contact,$dealId, $type = 'customerMapping',$payload = null)
+    public function __construct($contact,$dealId, $type = 'dealscustomerMapping',$payload = null)
     {
         $this->contact = $contact;
         $this->dealId = $dealId;
@@ -61,7 +61,7 @@ class SetDealsOBjectJob implements ShouldQueue
                 $t = $this->type == 'customerMapping' ? 'customer' : 'coborrower';
 
                 $res = createErrorLogs($data['errors'],$variables,'update', $this->dealId,'Deals',$t);
-                dispatch((new SetDealsOBjectJob($this->contact, $this->dealId,'coborrowerMapping',$res)));
+                dispatch((new SetDealsOBjectJob($this->contact, $this->dealId,'dealscoborrowerMapping',$res)));
             }
             Log::info($data);
             Log::info($query);

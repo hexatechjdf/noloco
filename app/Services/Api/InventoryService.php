@@ -144,14 +144,6 @@ class InventoryService
                     type {
                       name
                       kind
-
-                      fields {
-                        name
-                        type {
-                          name
-                          kind
-                        }
-                      }
                     }
                   }
                 }
@@ -167,6 +159,15 @@ class InventoryService
             GRAPHQL;
     }
 
+
+
+                    //   fields {
+                    //     name
+                    //     type {
+                    //       name
+                    //       kind
+                    //     }
+                    //   }
     public function updateQuery($id, $images, $featuredImageId)
     {
         // return [$images, $id];

@@ -21,7 +21,7 @@ class GetDealsJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct($contact,$contactId,$locationId, $type = 'customerMapping')
+    public function __construct($contact,$contactId,$locationId, $type = 'dealscustomerMapping')
     {
         $this->contact = $contact;
         $this->contactId = $contactId;

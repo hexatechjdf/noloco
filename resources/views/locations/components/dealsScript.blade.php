@@ -295,7 +295,7 @@
         formData.append('contactId', contactId);
         formData.append('locationId', locationId);
         formData.append('is_tag', is_tag);
-
+        alert(123);
         $.ajax({
             type: 'POST',
             data: formData,
@@ -324,4 +324,21 @@
             sold = false;
         }
     });
+
+    function getImageUrlFromContact(contact, key) {
+        let firstUrl = null;
+        let coss = contact[key];
+        if (coss) {
+            let firstKey = Object.keys(coss)[0];
+            if (firstKey && coss[firstKey].url) {
+                firstUrl = coss[firstKey].url;
+                if (firstUrl) {
+                    let htmll = `<a href="${firstUrl}" target="_blank"><img class="down-image h-20p"
+                                                src="{{ asset('assets/images/down.png') }}"></a>`;
+                    $('.' + key + '_box').html(htmll);
+                }
+                console.log(firstUrl);
+            }
+        }
+    }
 </script>

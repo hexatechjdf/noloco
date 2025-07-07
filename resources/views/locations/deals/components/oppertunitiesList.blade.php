@@ -1,5 +1,5 @@
-<div class="mt-3">
-    <div class="card">
+<div class="mb-2">
+     <div class="card  radius-10 main-card">
         <div class="card-body">
             @if(count($data) > 0)
             <div class="card-title">
