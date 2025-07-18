@@ -151,6 +151,7 @@
     <div class="container ">
 
         <form id="submForm" class="mt-3" enctype="multipart/form-data">
+            <input type="hidden" name="is_noloco"  value="{{ $is_noloco }}" >
             <div class="row">
                 <div class="col-md-8">
                     <div class="appendData">
@@ -247,6 +248,7 @@
                                 'is_source' => true,
                                 'is_full' => '12',
                                 'is_sold' => 'true',
+                                'is_noloco' => $is_noloco,
                             ])
 
                             <div class="card-title mt-3">
@@ -269,7 +271,7 @@
                                     </div>
                                 </label>
                                 <input class="form-control input-fil-custom" type="file" id="drivers_license"
-                                    name="drivers_licence" accept="image/*,application/pdf" required>
+                                    name="drivers_licence" accept="image/*,application/pdf" >
                             </div>
 
                             <div class="mt-3">
@@ -278,7 +280,7 @@
                                     </div>
                                 </label>
                                 <input class="form-control input-fil-custom" type="file" id="insurance_card"
-                                    name="insurance_card" accept="image/*,application/pdf" required>
+                                    name="insurance_card" accept="image/*,application/pdf" >
                             </div>
                             <div class="card-title mt-3">
                                 <h5 class="mb-0">Credit Reports</h5>
@@ -527,11 +529,17 @@
                     url: '{{ route('deals.inventories.search') }}?vin={{ $vin }}',
                     success: function(response) {
                         let item = null;
+                        console.log(response);
                         try {
                             item = Object.values(response)[0];
                             vehiclesData[item.id] = item;
-                            var option = new Option(item.name, item.id, true, true);
-                            $(".vehicle_field").append(option).trigger('change');
+                            @if ($is_noloco)
+                                setVehicleFields(item)
+                            @else
+                                var option = new Option(item.name, item.id, true, true);
+                                $(".vehicle_field").append(option).trigger('change');
+                            @endif
+
                         } catch (error) {
                             item = null;
                         }

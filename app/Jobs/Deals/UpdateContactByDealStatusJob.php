@@ -13,12 +13,14 @@ class UpdateContactByDealStatusJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $con_id;
+    public $locationId;
     /**
      * Create a new job instance.
      */
-    public function __construct($con_id)
+    public function __construct($con_id,$locationId)
     {
         $this->con_id = $con_id;
+        $this->locationId = $locationId;
     }
 
     /**
@@ -31,8 +33,8 @@ class UpdateContactByDealStatusJob implements ShouldQueue
                 'value' => ''
             ];
         try{
-            $query = 'contacts/'.$conId;
-            $detail = CRM::crmV2Loc(1, $this->con_id, $query, 'put',$payload);
+            $query = 'contacts/'.$this->con_id;
+            $detail = CRM::crmV2Loc(1, $this->locationId, $query, 'put',$payload);
         }catch(\Exception $e){
 
         }

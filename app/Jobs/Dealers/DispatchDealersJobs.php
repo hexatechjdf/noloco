@@ -27,7 +27,7 @@ class DispatchDealersJobs implements ShouldQueue
      */
     public function handle(): void
     {
-        Dealer::chunk(50, function ($deals) {
+        Dealer::where('status',1)->chunk(50, function ($deals) {
             foreach ($deals as $deal) {
                 ProcessDealersDataJobs::dispatch($deal);
             }

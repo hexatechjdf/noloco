@@ -50,17 +50,16 @@ class WebhookController extends Controller
     public function updateContactByDeal(Request $request)
     {
         $deal = $request->all();
-
         $s = @$deal['dealStatus'] ?? null;
 
         if($s && !empty($s) && $s != 'OPEN')
         {
-            $bor = @$deal['_meta']['user']['dealershipSubAccountId'] ?? null;
-            \Log::info('Contact Id : ');
-            \Log::info($bor);
-            if(@$bor)
+            $conId = @$deal['highlevelClientId'] ?? null;
+            $locationId = @$deal['dealershipSubAccountId'] ?? null;
+
+            if(@$conId && @$locationId)
             {
-                dispatch((new UpdateContactByDealStatusJob($bor)))->delay(5);
+                dispatch((new UpdateContactByDealStatusJob($conId, $locationId )))->delay(5);
             }
         }
 
@@ -175,121 +174,122 @@ class WebhookController extends Controller
 
     public function creditAppHandle(Request $request)
     {
-        // $data = $request->all();
+        $data = $request->all();
 
-        $data = [
-            "uuid" => "recc29uas8m7jw4wkw",
-            "createdAt" => "2025-02-25T02:52:00.183Z",
-            "id" => 3,
-            "updatedAt" => "2025-07-07T10:23:18.657Z",
-            "subscribedNotificationUserIds" => [],
-            "address" => [
-                "street" => "4454 Davidson Road",
-                "suiteAptBldg" => "",
-                "city" => "Hilliard",
-                "stateRegion" => "Ohio",
-                "postalCode" => "43026",
-                "country" => "United States",
-                "latitude" => 40.0515517,
-                "longitude" => -83.1380817,
-                "_root" => "4454 Davidson Road, Hilliard, Ohio, 43026, United States"
-            ],
-            "applicationType" => "JOINT_APPLICATION_CO_BORROWER",
-            "creditAcknowledgment" => true,
-            "dateOfBirth" => "1986-03-18T00:00:00.000Z",
-            "dealerGhlId" => "GOsZwMqjkYVyCJGEufIQ",
-            "dealershipId" => 10,
-            "downPayment" => 1000,
-            "emailAddress" => "kdoskdd@dkosdks.com",
-            "employerName" => "dsds",
-            "employerPhoneNumber" => [
-                "country" => "US",
-                "number" => "(434) 343-4433",
-                "_root" => "+1 (434) 343-4433"
-            ],
-            "employmentStatus" => "EMPLOYED",
-            "fullName" => [
-                "first" => "Sale",
-                "middle" => "Motor",
-                "last" => "Tocak",
-                "_root" => "Sale Motor Tocak"
-            ],
-            "grossIncome" => 2500,
-            "idState" => "AZ_ARIZONA",
-            "idType" => "DRIVERS_LICENSE",
-            "inventoryId" => 26,
-            "jobMonths" => 2,
-            "jobPosition" => "dsads",
-            "jobYears" => 3,
-            "monthsAtResidence" => 4,
-            "phoneNumber" => [
-                "country" => "US",
-                "number" => "(614) 525-3411",
-                "_root" => "+1 (614) 525-5255"
-                // "_root" => "(937) 205-9310"
-            ],
-            "residencePayment" => 1000,
-            "residenceType" => "RENT",
-            "socialSecurityNumber" => "123524568",
-            "trade" => "NO",
-            "yearsAtResidence" => 3,
-            "hiddenSsn" => "***-**-4568",
-            "name" => 3,
-            "reviewed" => true,
-            "coBorrowerEmail" => "fghfghfg@gmail.com",
-            "coBorrowerPhone" => [
-                "country" => "PK",
-                "number" => "324453174",
-                "_root" => "+92 324453174"
-            ],
-            "coBorrowerFullName" => [
-                "first" => "sdf",
-                "middle" => "sdf",
-                "last" => "sdfsdf",
-                "_root" => "sdf sdf sdfsdf"
-            ],
-            "_dataType" => "creditApps",
-            "_meta" => [
-                "user" => [
-                    "uuid" => "rec19g617m490yeid",
-                    "createdAt" => "2024-12-03T22:22:20.148Z",
-                    "id" => 6,
-                    "updatedAt" => "2025-07-07T10:21:30.541Z",
-                    "subscribedNotificationUserIds" => [],
-                    "email" => "saadjdfunnel@gmail.com",
-                    "firstName" => "Saad",
-                    "invitationToken" => "21b6a370-5a73-4ba1-b123-ec21c73a1e0b",
-                    "lastName" => "Mukhtar",
-                    "roleId" => 1,
-                    "dealership" => [10],
-                    "dealershipSubAccountId" => ["GOsZwMqjkYVyCJGEufIQ"],
-                    "dealershipName" => ["Jc Auto"],
-                    "lastActiveAt" => "2025-07-07T10:21:30.541Z",
-                    "testDealership" => ["Jc Auto"],
-                    "dealershipIdVal" => "GOsZwMqjkYVyCJGEufIQ",
-                    "dealershipCount" => 1,
-                    "dealershipCountFilter" => false,
-                    "role" => [
-                        "id" => 1,
-                        "uuid" => "rec19g616m48zezz5",
-                        "createdAt" => "2024-12-03T21:39:15.233Z",
-                        "updatedAt" => "2025-02-18T01:07:27.414Z",
-                        "subscribedNotificationUserIds" => [],
-                        "name" => "Agency Admin",
-                        "referenceId" => "team-admin",
-                        "internal" => true,
-                        "builder" => true,
-                        "dataAdmin" => true
-                    ],
-                    "_dataType" => "user"
-                ]
-            ]
-        ];
+        // $data = [
+        //     "uuid" => "recc29uas8m7jw4wkw",
+        //     "createdAt" => "2025-02-25T02:52:00.183Z",
+        //     "id" => 3,
+        //     "updatedAt" => "2025-07-07T10:23:18.657Z",
+        //     "subscribedNotificationUserIds" => [],
+        //     "address" => [
+        //         "street" => "4454 Davidson Road",
+        //         "suiteAptBldg" => "",
+        //         "city" => "Hilliard",
+        //         "stateRegion" => "Ohio",
+        //         "postalCode" => "43026",
+        //         "country" => "United States",
+        //         "latitude" => 40.0515517,
+        //         "longitude" => -83.1380817,
+        //         "_root" => "4454 Davidson Road, Hilliard, Ohio, 43026, United States"
+        //     ],
+        //     "applicationType" => "JOINT_APPLICATION_CO_BORROWER",
+        //     "creditAcknowledgment" => true,
+        //     "dateOfBirth" => "1986-03-18T00:00:00.000Z",
+        //     "dealerGhlId" => "GOsZwMqjkYVyCJGEufIQ",
+        //     "dealershipId" => 10,
+        //     "downPayment" => 1000,
+        //     "emailAddress" => "kdoskdd@dkosdks.com",
+        //     "employerName" => "dsds",
+        //     "employerPhoneNumber" => [
+        //         "country" => "US",
+        //         "number" => "(434) 343-4433",
+        //         "_root" => "+1 (434) 343-4433"
+        //     ],
+        //     "employmentStatus" => "EMPLOYED",
+        //     "fullName" => [
+        //         "first" => "Sale",
+        //         "middle" => "Motor",
+        //         "last" => "Tocak",
+        //         "_root" => "Sale Motor Tocak"
+        //     ],
+        //     "grossIncome" => 2500,
+        //     "idState" => "AZ_ARIZONA",
+        //     "idType" => "DRIVERS_LICENSE",
+        //     "inventoryId" => 26,
+        //     "jobMonths" => 2,
+        //     "jobPosition" => "dsads",
+        //     "jobYears" => 3,
+        //     "monthsAtResidence" => 4,
+        //     "phoneNumber" => [
+        //         "country" => "US",
+        //         "number" => "(614) 525-3411",
+        //         "_root" => "+1 (614) 525-5255"
+        //         // "_root" => "(937) 205-9310"
+        //     ],
+        //     "residencePayment" => 1000,
+        //     "residenceType" => "RENT",
+        //     "socialSecurityNumber" => "123524568",
+        //     "trade" => "NO",
+        //     "yearsAtResidence" => 3,
+        //     "hiddenSsn" => "***-**-4568",
+        //     "name" => 3,
+        //     "reviewed" => true,
+        //     "coBorrowerEmail" => "fghfghfg@gmail.com",
+        //     "coBorrowerPhone" => [
+        //         "country" => "PK",
+        //         "number" => "324453174",
+        //         "_root" => "+92 324453174"
+        //     ],
+        //     "coBorrowerFullName" => [
+        //         "first" => "sdf",
+        //         "middle" => "sdf",
+        //         "last" => "sdfsdf",
+        //         "_root" => "sdf sdf sdfsdf"
+        //     ],
+        //     "_dataType" => "creditApps",
+        //     "_meta" => [
+        //         "user" => [
+        //             "uuid" => "rec19g617m490yeid",
+        //             "createdAt" => "2024-12-03T22:22:20.148Z",
+        //             "id" => 6,
+        //             "updatedAt" => "2025-07-07T10:21:30.541Z",
+        //             "subscribedNotificationUserIds" => [],
+        //             "email" => "saadjdfunnel@gmail.com",
+        //             "firstName" => "Saad",
+        //             "invitationToken" => "21b6a370-5a73-4ba1-b123-ec21c73a1e0b",
+        //             "lastName" => "Mukhtar",
+        //             "roleId" => 1,
+        //             "dealership" => [10],
+        //             "dealershipSubAccountId" => ["GOsZwMqjkYVyCJGEufIQ"],
+        //             "dealershipName" => ["Jc Auto"],
+        //             "lastActiveAt" => "2025-07-07T10:21:30.541Z",
+        //             "testDealership" => ["Jc Auto"],
+        //             "dealershipIdVal" => "GOsZwMqjkYVyCJGEufIQ",
+        //             "dealershipCount" => 1,
+        //             "dealershipCountFilter" => false,
+        //             "role" => [
+        //                 "id" => 1,
+        //                 "uuid" => "rec19g616m48zezz5",
+        //                 "createdAt" => "2024-12-03T21:39:15.233Z",
+        //                 "updatedAt" => "2025-02-18T01:07:27.414Z",
+        //                 "subscribedNotificationUserIds" => [],
+        //                 "name" => "Agency Admin",
+        //                 "referenceId" => "team-admin",
+        //                 "internal" => true,
+        //                 "builder" => true,
+        //                 "dataAdmin" => true
+        //             ],
+        //             "_dataType" => "user"
+        //         ]
+        //     ]
+        // ];
 
          ProcessApplicationJob::dispatch($data,'creditAppscustomerMapping');
         if (@$data['applicationType'] && $data['applicationType'] !== 'SINGLE_APPLICANT') {
             ProcessApplicationJob::dispatch($data,'creditAppscoborrowerMapping');
         }
+        return 1;
         dd(123);
 
         $type = 'creditAppscustomerMapping';

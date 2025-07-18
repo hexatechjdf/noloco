@@ -815,15 +815,15 @@ function contactForm()
 function vehicleForm()
 {
     return [
-        "stock_"             => ['sub_key' => 'stock','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
-        "vin_"               => ['sub_key' => 'vin','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
-        "year"               => ['sub_key' => 'year','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
-        "make"               => ['sub_key' => 'make','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
-        "model"              => ['sub_key' => 'model','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
-        "trim"               => ['sub_key' => 'trim','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
-        "mileage"            => ['sub_key' => 'miles','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple'],
-        "listed_price"       => ['sub_key' => 'listedPrice','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple','type' => 'int'],
-        "vehicle_cost"       => ['sub_key' => 'vehicleCost','is_required' => true,'input_type' => 'hidden', 'field_type' => 'simple','type' => 'int'],
+        "stock_"             => ['sub_key' => 'stock','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "vin_"               => ['sub_key' => 'vin','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "year"               => ['sub_key' => 'year','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "make"               => ['sub_key' => 'make','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "model"              => ['sub_key' => 'model','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "trim"               => ['sub_key' => 'trim','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "mileage"            => ['sub_key' => 'miles','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple'],
+        "listed_price"       => ['sub_key' => 'listedPrice','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple','type' => 'int'],
+        "vehicle_cost"       => ['sub_key' => 'vehicleCost','is_required' => false,'input_type' => 'hidden', 'field_type' => 'simple','type' => 'int'],
     ];
 
 }
@@ -880,94 +880,191 @@ function tradeForm()
 
 //////////////////////////////////Fisibility/////////////////
 
+// function contactSourceForm()
+// {
+//     return [
+//         "contact_source" => ['title' => 'Contact Source', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "down_payment" => ['title' => 'Down Payment', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//     ];
+// }
+
+// function contact_informationForm()
+// {
+//     return [
+//         "first_name" => ['title' => 'First Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12,'autocomplete' => 'true'],
+//         "middle_name" => ['title' => 'Middle Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "last_name" => ['title' => 'Last Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "phone" => ['title' => 'Phone Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "email" => ['title' => 'Email', 'is_required' => true, 'input_type' => 'email', 'field_type' => 'simple', 'col' => 6],
+//         "address" => ['title' => 'Street Address', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+//         "address1" => ['is_required' => true, 'input_type' => 'hidden', 'field_type' => 'simple', 'col' => 12],
+//         "address_suiteaptbldg" => ['title' => 'Address Suite/Apt/Bldg', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+//         "city" => ['title' => 'City', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "state" => ['title' => 'State', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "postal_code" => ['title' => 'Postal Code', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//     ];
+// }
+
+// function identificationForm()
+// {
+//     return [
+//         "date_of_birth" => ['title' => 'Date of Birth', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
+//         "social_security_number" => ['title' => 'Social Security Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'vs', 'col' => 6,'is_secure' => true],
+//         "id_type" => ['title' => 'ID Type', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'id_type'],
+//         "id_number" => ['title' => 'ID Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "state_id" => ['title' => 'State ID', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'state_id'],
+//         "id_expiration" => ['title' => 'Id Expiration', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
+//     ];
+// }
+
+// function creditApplicationForm()
+// {
+//     return [
+//         "residence_type" => ['title' => 'Residence Type', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'residence_type'],
+//         "residence_payment" => ['title' => 'Residence Payment', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "years_at_residence" => ['title' => 'Years at Residence', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "months_at_residence" => ['title' => 'Months at Residence', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "previous_address" => ['title' => 'Previous Address', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+//         "previous_suiteaptbldg" => ['title' => 'Previous Suite/Apt/Bldg', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+//         "previous_city" => ['title' => 'Previous City', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "previous_state" => ['title' => 'Previous State', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "previous_postal_code" => ['title' => 'Previous Postal Code', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "previous_residence_type" => ['title' => 'Previous Residence Type', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'previous_residence_type'],
+//         "previous_residence_payment" => ['title' => 'Previous Residence Payment', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "previous_residence_years" => ['title' => 'Previous Residence Years', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "previous_residence_months" => ['title' => 'Previous Residence Months', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "employment_status" => ['title' => 'Employment Status', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 12,'model' => 'employment_status'],
+//         "employer_name" => ['title' => 'Employer Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+//         "job_position" => ['title' => 'Job Position', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "employer_phone_number" => ['title' => 'Employer Phone Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "job_years" => ['title' => 'Job Years', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "job_months" => ['title' => 'Job Months', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "income_frequency" => ['title' => 'Income Frequency', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'income_frequency'],
+//         "gross_income" => ['title' => 'Gross Income', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "other_income_source" => ['title' => 'Other Income Source', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "other_income_amount" => ['title' => 'Other Income Amount', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "previous_employment_status" => ['title' => 'Previous Employment Status', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 12,'model' => 'previous_employment_status'],
+//         "previous_employer" => ['title' => 'Previous Employer', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+//         "previous_job_position" => ['title' => 'Previous Job Position', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "previous_employer_phone" => ['title' => 'Previous Employer Phone', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "previous_job_years" => ['title' => 'Previous Job Years', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "previous_job_months" => ['title' => 'Previous Job Months', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//     ];
+// }
+
+// function insuranceInformationForm()
+// {
+//     return [
+//         "insurance_company" => ['title' => 'Insurance Company', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "insurance_agent" => ['title' => 'Insurance Agent', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "insurance_phone_number" => ['title' => 'Insurance Phone Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "insurance_policy_number" => ['title' => 'Insurance Policy Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "insurance_deductible" => ['title' => 'Insurance Deductible', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+//         "insurance_address" => ['title' => 'Insurance Address', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+//         "insurance_suiteaptbldg" => ['title' => 'Insurance Suite/Apt/Bldg', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+//         "insurance_city" => ['title' => 'Insurance City', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "insurance_state" => ['title' => 'Insurance State', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "insurance_postal_code" => ['title' => 'Insurance Postal Code', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+//         "insurance_effective_date" => ['title' => 'Insurance Effective Date', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
+//         "insurance_expiration_date" => ['title' => 'Insurance Expiration Date', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
+//     ];
+// }
+
+
+//////////////////////////////
+
 function contactSourceForm()
 {
     return [
-        "contact_source" => ['title' => 'Contact Source', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "down_payment" => ['title' => 'Down Payment', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+        "contact_source" => ['title' => 'Contact Source', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+        "down_payment" => ['title' => 'Down Payment', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
     ];
 }
+
 
 function contact_informationForm()
 {
     return [
-        "first_name" => ['title' => 'First Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12,'autocomplete' => 'true'],
-        "middle_name" => ['title' => 'Middle Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+        "first_name" => ['title' => 'First Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12, 'autocomplete' => 'true'],
+        "middle_name" => ['title' => 'Middle Name', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
         "last_name" => ['title' => 'Last Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
         "phone" => ['title' => 'Phone Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "email" => ['title' => 'Email', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "address1" => ['title' => 'Street Address', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
-        "address_suiteaptbldg" => ['title' => 'Address Suite/Apt/Bldg', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
-        "city" => ['title' => 'City', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "state" => ['title' => 'State', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "postal_code" => ['title' => 'Postal Code', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "email" => ['title' => 'Email', 'is_required' => false, 'input_type' => 'email', 'field_type' => 'simple', 'col' => 6],
+        "address" => ['title' => 'Street Address', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+        "address1" => ['is_required' => false, 'input_type' => 'hidden', 'field_type' => 'simple', 'col' => 12],
+        "address_suiteaptbldg" => ['title' => 'Address Suite/Apt/Bldg', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+        "city" => ['title' => 'City', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "state" => ['title' => 'State', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "postal_code" => ['title' => 'Postal Code', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
     ];
 }
+
 
 function identificationForm()
 {
     return [
-        "date_of_birth" => ['title' => 'Date of Birth', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
-        "social_security_number" => ['title' => 'Social Security Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'vs', 'col' => 6,'is_secure' => true],
-        "id_type" => ['title' => 'ID Type', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'id_type'],
-        "id_number" => ['title' => 'ID Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "state_id" => ['title' => 'State ID', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'state_id'],
-        "id_expiration" => ['title' => 'Id Expiration', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
+        "date_of_birth"          => ['title' => 'Date of Birth',          'is_required' => false, 'input_type' => 'date',   'field_type' => 'simple', 'col' => 6],
+        "social_security_number" => ['title' => 'Social Security Number', 'is_required' => false, 'input_type' => 'text',   'field_type' => 'vs',     'col' => 6, 'is_secure' => true],
+        "id_type"                => ['title' => 'ID Type',                'is_required' => false, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6, 'model' => 'id_type'],
+        "id_number"              => ['title' => 'ID Number',              'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "state_id"               => ['title' => 'State ID',               'is_required' => false, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6, 'model' => 'state_id'],
+        "id_expiration"          => ['title' => 'Id Expiration',          'is_required' => false, 'input_type' => 'date',   'field_type' => 'simple', 'col' => 6],
     ];
 }
-
 function creditApplicationForm()
 {
     return [
-        "residence_type" => ['title' => 'Residence Type', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'residence_type'],
-        "residence_payment" => ['title' => 'Residence Payment', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "years_at_residence" => ['title' => 'Years at Residence', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "months_at_residence" => ['title' => 'Months at Residence', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "previous_address" => ['title' => 'Previous Address', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
-        "previous_suiteaptbldg" => ['title' => 'Previous Suite/Apt/Bldg', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
-        "previous_city" => ['title' => 'Previous City', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "previous_state" => ['title' => 'Previous State', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "previous_postal_code" => ['title' => 'Previous Postal Code', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "previous_residence_type" => ['title' => 'Previous Residence Type', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'previous_residence_type'],
-        "previous_residence_payment" => ['title' => 'Previous Residence Payment', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "previous_residence_years" => ['title' => 'Previous Residence Years', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "previous_residence_months" => ['title' => 'Previous Residence Months', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "employment_status" => ['title' => 'Employment Status', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 12,'model' => 'employment_status'],
-        "employer_name" => ['title' => 'Employer Name', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
-        "job_position" => ['title' => 'Job Position', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "employer_phone_number" => ['title' => 'Employer Phone Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "job_years" => ['title' => 'Job Years', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "job_months" => ['title' => 'Job Months', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "income_frequency" => ['title' => 'Income Frequency', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,'model' => 'income_frequency'],
-        "gross_income" => ['title' => 'Gross Income', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "other_income_source" => ['title' => 'Other Income Source', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "other_income_amount" => ['title' => 'Other Income Amount', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "previous_employment_status" => ['title' => 'Previous Employment Status', 'is_required' => true, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 12,'model' => 'previous_employment_status'],
-        "previous_employer" => ['title' => 'Previous Employer', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
-        "previous_job_position" => ['title' => 'Previous Job Position', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "previous_employer_phone" => ['title' => 'Previous Employer Phone', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "previous_job_years" => ['title' => 'Previous Job Years', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "previous_job_months" => ['title' => 'Previous Job Months', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+        "residence_type"              => ['title' => 'Residence Type',              'is_required' => false, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,  'model' => 'residence_type'],
+        "residence_payment"           => ['title' => 'Residence Payment',           'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "years_at_residence"          => ['title' => 'Years at Residence',          'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "months_at_residence"         => ['title' => 'Months at Residence',         'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "previous_address"            => ['title' => 'Previous Address',            'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 12],
+        "previous_suiteaptbldg"       => ['title' => 'Previous Suite/Apt/Bldg',     'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 12],
+        "previous_city"               => ['title' => 'Previous City',               'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 4],
+        "previous_state"              => ['title' => 'Previous State',              'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 4],
+        "previous_postal_code"        => ['title' => 'Previous Postal Code',        'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 4],
+        "previous_residence_type"     => ['title' => 'Previous Residence Type',     'is_required' => false, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,  'model' => 'previous_residence_type'],
+        "previous_residence_payment"  => ['title' => 'Previous Residence Payment',  'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "previous_residence_years"    => ['title' => 'Previous Residence Years',    'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "previous_residence_months"   => ['title' => 'Previous Residence Months',   'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "employment_status"           => ['title' => 'Employment Status',           'is_required' => false, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 12, 'model' => 'employment_status'],
+        "employer_name"               => ['title' => 'Employer Name',               'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 12],
+        "job_position"                => ['title' => 'Job Position',                'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "employer_phone_number"       => ['title' => 'Employer Phone Number',       'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "job_years"                   => ['title' => 'Job Years',                   'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "job_months"                  => ['title' => 'Job Months',                  'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "income_frequency"            => ['title' => 'Income Frequency',            'is_required' => false, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 6,  'model' => 'income_frequency'],
+        "gross_income"                => ['title' => 'Gross Income',                'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "other_income_source"         => ['title' => 'Other Income Source',         'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "other_income_amount"         => ['title' => 'Other Income Amount',         'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "previous_employment_status"  => ['title' => 'Previous Employment Status',  'is_required' => false, 'input_type' => 'select', 'field_type' => 'simple', 'col' => 12, 'model' => 'previous_employment_status'],
+        "previous_employer"           => ['title' => 'Previous Employer',           'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 12],
+        "previous_job_position"       => ['title' => 'Previous Job Position',       'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "previous_employer_phone"     => ['title' => 'Previous Employer Phone',     'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "previous_job_years"          => ['title' => 'Previous Job Years',          'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
+        "previous_job_months"         => ['title' => 'Previous Job Months',         'is_required' => false, 'input_type' => 'text',   'field_type' => 'simple', 'col' => 6],
     ];
 }
 
 function insuranceInformationForm()
 {
     return [
-        "insurance_company" => ['title' => 'Insurance Company', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "insurance_agent" => ['title' => 'Insurance Agent', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "insurance_phone_number" => ['title' => 'Insurance Phone Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "insurance_policy_number" => ['title' => 'Insurance Policy Number', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "insurance_deductible" => ['title' => 'Insurance Deductible', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
-        "insurance_address" => ['title' => 'Insurance Address', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
-        "insurance_suiteaptbldg" => ['title' => 'Insurance Suite/Apt/Bldg', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
-        "insurance_city" => ['title' => 'Insurance City', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "insurance_state" => ['title' => 'Insurance State', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "insurance_postal_code" => ['title' => 'Insurance Postal Code', 'is_required' => true, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
-        "insurance_effective_date" => ['title' => 'Insurance Effective Date', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
-        "insurance_expiration_date" => ['title' => 'Insurance Expiration Date', 'is_required' => true, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
+        "insurance_company"        => ['title' => 'Insurance Company',        'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "insurance_agent"          => ['title' => 'Insurance Agent',          'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "insurance_phone_number"   => ['title' => 'Insurance Phone Number',   'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "insurance_policy_number"  => ['title' => 'Insurance Policy Number',  'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+        "insurance_deductible"     => ['title' => 'Insurance Deductible',     'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 6],
+        "insurance_address"        => ['title' => 'Insurance Address',        'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+        "insurance_suiteaptbldg"   => ['title' => 'Insurance Suite/Apt/Bldg', 'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 12],
+        "insurance_city"           => ['title' => 'Insurance City',           'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "insurance_state"          => ['title' => 'Insurance State',          'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "insurance_postal_code"    => ['title' => 'Insurance Postal Code',    'is_required' => false, 'input_type' => 'text', 'field_type' => 'simple', 'col' => 4],
+        "insurance_effective_date" => ['title' => 'Insurance Effective Date', 'is_required' => false, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
+        "insurance_expiration_date"=> ['title' => 'Insurance Expiration Date', 'is_required' => false, 'input_type' => 'date', 'field_type' => 'simple', 'col' => 6],
     ];
 }
+
+
 
 
 // function convertKeysToCamelCase(array $array): array {

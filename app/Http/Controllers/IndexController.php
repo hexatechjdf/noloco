@@ -10,6 +10,7 @@ use App\Helper\CRM;
 use Illuminate\Support\Str;
 use App\Models\CustomFields;
 use App\Jobs\Files\UpdateGhlFile;
+use App\Jobs\GetDealsJob;
 
 class IndexController extends Controller
 {
@@ -50,19 +51,36 @@ class IndexController extends Controller
 
     public function manageContactFields(Request $request)
     {
+        dd($request->all());
+        $locationId = @$request->locationId ?? null;
+        $contactId = @$request->contactId ?? null;
+
         $data = true;
-        if(!$request->contactId)
+        if(!$contactId)
         {
             $req = setCotactFieldsPayload($request);
-            $cont_id =  $this->dealService->createContact($request->locationId,$req);
+            $cont_id =  $this->dealService->createContact($locationId,$req);
             $request->merge(['contactId' => $cont_id]);
-            uploadFileSetup($request);
+            $contactId = $request->contactId;
+            $this->uploadFileSetup($request);
             $data = $cont_id;
         }
         else{
             $inp = $request->except(['drivers_licence','insurance_card']);
-            uploadFileSetup($request);
-            $data  = $this->ghlService->updateContact($request->locationId, $request->contactId,$inp);
+            $this->uploadFileSetup($request);
+            $data  = $this->ghlService->updateContact($locationId, $contactId,$inp);
+        }
+
+        if($request->is_noloco)
+        {
+            if($locationId && $contactId)
+            {
+                $contact =  $this->dealService->getContact($locationId,$contactId);
+                $contact =  (object)$contact;
+                // Log::info($contact);
+                dispatch((new GetDealsJob($contact,$contactId,$locationId,'dealscustomerMapping')))->delay(5);
+                dispatch((new GetDealsJob($contact,$contactId,$locationId,'dealscoborrowerMapping')))->delay(5);
+            }
         }
         if(!$data)
         {
@@ -70,7 +88,7 @@ class IndexController extends Controller
         }
         if($request->is_tag)
         {
-            $this->ghlService->addTag($request->locationId, $request->contactId);
+            $this->ghlService->addTag($locationId, $contactId);
         }
         return response()->json(['success' => 'Successfully Updated']);
     }

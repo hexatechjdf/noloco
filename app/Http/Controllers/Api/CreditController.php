@@ -118,7 +118,7 @@ class CreditController extends Controller
     }
     public function setReport(Request $request)
     {
-      
+
         $dats = [];
         $creditBureau = [];
         foreach(getBureau() as $key => $b)
@@ -153,10 +153,7 @@ class CreditController extends Controller
         }else{
             $dataArray['BUREAU'] =  $dats[0];
         }
-
-
         //incase more bureu BUREAU will change with MULTIBUR=TU:EFX:XPN , after PROCESS rest can be set by $request check
-
         $serializedData = http_build_query($dataArray);
         $resp = $this->makeAPICall('Request',$serializedData,[ "Content-Type: text/plain"]);
         list($status,$iframeSrc) = $this->extractIframeSrcOrErrorMessage($resp);

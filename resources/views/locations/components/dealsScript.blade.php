@@ -199,54 +199,246 @@
     // }
 
 
+    // function validateContact() {
+    //     let isValid = true;
+    //     const fd = new FormData(); // 🔁 renamed from formData to fd
+
+    //     $("#submForm [required]").each(function() {
+    //         const $field = $(this);
+    //         const fieldName = $field.attr("name");
+    //         const type = $field.attr("type");
+
+    //         if (!fieldName) return;
+
+    //         if (type === "file") {
+    //             if (this.files && this.files.length > 0) {
+    //                 const file = this.files[0];
+    //                 if (file) {
+    //                     $field.removeClass("is-invalid").addClass("is-valid");
+    //                     fd.append(fieldName, file, file.name);
+    //                 } else {
+    //                     isValid = false;
+    //                     $field.addClass("is-invalid");
+    //                 }
+    //             } else {
+    //                 isValid = false;
+    //                 $field.addClass("is-invalid");
+    //             }
+    //         } else {
+    //             const value = $field.val().trim();
+    //             if (value === "") {
+    //                 isValid = false;
+    //                 $field.addClass("is-invalid");
+    //             } else {
+    //                 $field.removeClass("is-invalid").addClass("is-valid");
+    //                 fd.append(fieldName, value);
+    //             }
+    //         }
+    //     });
+
+    //     return {
+    //         isValid,
+    //         formData: fd
+    //     };
+    // }
+
+    // function validateContact() {
+    //     let isValid = true;
+    //     const fd = new FormData();
+    //     const errors = []; // 🔁 naya array for messages
+
+    //     // simple regexes ─ zaroorat ke mutabiq customise kar sakte ho
+    //     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //     const PHONE_RE = /^\+?\d{10,15}$/; // 10‑15 digits, optional +
+
+    //     $("#submForm [required]").each(function() {
+    //         const $field = $(this);
+    //         const fieldName = $field.attr("name");
+    //         const type = ($field.attr("type") || "").toLowerCase();
+
+    //         if (!fieldName) return; // skip agar name hi nahī̃
+
+    //         // FILE INPUT
+    //         if (type === "file") {
+    //             const file = this.files?.[0];
+    //             if (file) {
+    //                 $field.removeClass("is-invalid").addClass("is-valid");
+    //                 fd.append(fieldName, file, file.name);
+    //             } else {
+    //                 isValid = false;
+    //                 errors.push({
+    //                     field: fieldName,
+    //                     message: "File is required"
+    //                 });
+    //                 $field.addClass("is-invalid");
+    //             }
+    //             return; // ⬅ file handle ho gaya
+    //         }
+
+    //         // TEXT‑BASED INPUTS
+    //         const value = $.trim($field.val());
+
+    //         // Blank check
+    //         if (value === "") {
+    //             isValid = false;
+    //             errors.push({
+    //                 field: fieldName,
+    //                 message: "This field is required"
+    //             });
+    //             $field.addClass("is-invalid");
+    //             return;
+    //         }
+
+    //         // Type‑specific validation
+    //         let typeError = "";
+    //         if (type === "email" && !EMAIL_RE.test(value)) {
+    //             typeError = "Invalid email address";
+    //         } else if ((type === "tel" || fieldName.toLowerCase().includes("phone")) && !PHONE_RE.test(value)) {
+    //             const phoneInput = document.querySelector('.phone').value;
+    //             try {
+    //                 const phoneNumber = libphonenumber.parsePhoneNumber(phoneInput);
+
+    //                 if (!phoneNumber.isValid()) {
+    //                     isValid = false;
+    //                     errors.push({
+    //                         field: fieldName,
+    //                         message: 'Invalid phone number format'
+    //                     });
+    //                     $field.addClass("is-invalid");
+    //                 }
+    //             } catch (e) {
+    //                 isValid = false;
+    //                 errors.push({
+    //                     field: fieldName,
+    //                     message: 'Invalid phone number format'
+    //                 });
+    //                 $field.addClass("is-invalid");
+    //             }
+    //         }
+
+    //         if (typeError) {
+    //             isValid = false;
+    //             errors.push({
+    //                 field: fieldName,
+    //                 message: typeError
+    //             });
+    //             $field.addClass("is-invalid");
+    //         } else {
+    //             $field.removeClass("is-invalid").addClass("is-valid");
+    //             fd.append(fieldName, value);
+    //         }
+    //     });
+
+    //     return {
+    //         isValid,
+    //         formData: fd,
+    //         errors // ⬅ array of {field, message}
+    //     };
+    // }
+
     function validateContact() {
         let isValid = true;
-        const fd = new FormData(); // 🔁 renamed from formData to fd
+        const fd = new FormData();
+        const errors = []; // Array for error messages
 
-        $("#submForm [required]").each(function() {
+        // Simple regexes for validation
+        const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const PHONE_RE = /^\+?\d{10,15}$/; // 10-15 digits, optional +
+
+        // Read all fields (required or not)
+        $("#submForm :input").each(function() {
             const $field = $(this);
             const fieldName = $field.attr("name");
-            const type = $field.attr("type");
+            const type = ($field.attr("type") || "").toLowerCase();
+            const isRequired = $field.prop("required");
 
-            if (!fieldName) return;
+            if (!fieldName) return; // Skip if no name attribute
 
+            // Handle file inputs
             if (type === "file") {
-                if (this.files && this.files.length > 0) {
-                    const file = this.files[0];
-                    if (file) {
-                        $field.removeClass("is-invalid").addClass("is-valid");
-                        fd.append(fieldName, file, file.name);
-                    } else {
-                        isValid = false;
-                        $field.addClass("is-invalid");
-                    }
-                } else {
+                const file = this.files?.[0];
+                if (file) {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                    fd.append(fieldName, file, file.name);
+                } else if (isRequired) {
                     isValid = false;
+                    errors.push({
+                        field: fieldName,
+                        message: "File is required"
+                    });
                     $field.addClass("is-invalid");
                 }
-            } else {
-                const value = $field.val().trim();
+                return;
+            }
+
+            // Handle text-based inputs
+            const value = $.trim($field.val());
+
+            // Append non-empty values to FormData (required or not)
+            if (value !== "") {
+                fd.append(fieldName, value);
+            }
+
+            // Validation for required fields only
+            if (isRequired) {
+                // Blank check
                 if (value === "") {
                     isValid = false;
+                    errors.push({
+                        field: fieldName,
+                        message: "This field is required"
+                    });
+                    $field.addClass("is-invalid");
+                    return;
+                }
+
+                // Type-specific validation
+                let typeError = "";
+                if (type === "email" && !EMAIL_RE.test(value)) {
+                    typeError = "Invalid email address";
+                } else if ((type === "tel" || fieldName.toLowerCase().includes("phone")) && !PHONE_RE.test(
+                        value)) {
+                    try {
+                        const phoneNumber = libphonenumber.parsePhoneNumber(value);
+                        if (!phoneNumber.isValid()) {
+                            typeError = "Invalid phone number format";
+                        }
+                    } catch (e) {
+                        typeError = "Invalid phone number format";
+                    }
+                }
+
+                if (typeError) {
+                    isValid = false;
+                    errors.push({
+                        field: fieldName,
+                        message: typeError
+                    });
                     $field.addClass("is-invalid");
                 } else {
                     $field.removeClass("is-invalid").addClass("is-valid");
-                    fd.append(fieldName, value);
                 }
+            } else if (value !== "") {
+                // Non-required fields with data get is-valid class
+                $field.removeClass("is-invalid").addClass("is-valid");
             }
         });
 
         return {
             isValid,
-            formData: fd
+            formData: fd,
+            errors
         };
     }
 
 
 
+
     $(document).on('click', '.create_deal_btn', function() {
         let id = $('.vehicle_field').val();
-
+        alert($script_type);
+        alert($script_type);
+        return 123;
         if (!id) {
             toastr.error('Please select vehicle first');
             return;
@@ -285,9 +477,42 @@
         offcanvas.show();
     });
 
+    function buttontoLoader(button) {
+        // Change button to loading state
+        button.html(`
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+        `);
+        button.prop('disabled', true);
+    }
+
+    function loaderToButton(button, originalContent) {
+        button.html(originalContent);
+        button.prop('disabled', false);
+    }
+
     $(document).on('click', '.contact_field_form', function() {
-        $("#loader-overlay").css("display", "flex").hide().fadeIn();
+
+        var button = $(this);
+        var originalContent = button.html();
+
+        buttontoLoader(button);
+        // $("#loader-overlay").css("display", "flex").hide().fadeIn();
         let result = validateContact();
+
+        if (!result.isValid) {
+            toastr.clear();
+            let errors = result.errors;
+            errors.forEach(err => {
+                // Title optional hai — field name ko human‑friendly bana diya
+                const title = err.field.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+                toastr.error(err.message, title); // toastr.error(body, title)
+            });
+
+            loaderToButton(button, originalContent);
+            return; // submit abort
+        }
+
         let formData = result.formData;
 
         let is_tag = $(this).closest('form').data('tag');
@@ -295,7 +520,6 @@
         formData.append('contactId', contactId);
         formData.append('locationId', locationId);
         formData.append('is_tag', is_tag);
-        alert(123);
         $.ajax({
             type: 'POST',
             data: formData,
@@ -310,6 +534,7 @@
                 if (response.error) {
                     toastr.error('there is something wrong');
                 }
+                loaderToButton(button, originalContent);
             }
         })
     })

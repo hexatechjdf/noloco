@@ -32,26 +32,31 @@ class GetLocationsJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $acc = $this->account;
-        $folders = $this->fols;
+        try{
+            $acc = $this->account;
+            $folders = $this->fols;
 
-        $mapping = json_decode(@$acc->mapping->content, true) ?? [];
-        $locations = json_decode(@$acc->location_id, true) ?? [];
-        $unique = $acc->mapping->unique_field;
-        $username = $acc->username;
-        $files = @$folders[$username] ?? [];
-        \Log::info('username');
-        \Log::info($username);
-        \Log::info('folders');
-        \Log::info($folders);
-        \Log::info('files');
-        \Log::info($files);
-        \Log::info('locations');
-        \Log::info($locations);
+            $mapping = json_decode(@$acc->mapping->content, true) ?? [];
+            $locations = json_decode(@$acc->location_id, true) ?? [];
+            $unique = $acc->mapping->unique_field;
+            $username = $acc->username;
+            $files = @$folders[$username] ?? [];
+            \Log::info('username');
+            \Log::info($username);
+            \Log::info('folders');
+            \Log::info($folders);
+            \Log::info('files');
+            \Log::info($files);
+            \Log::info('locations');
+            \Log::info($locations);
 
-        foreach($locations as $loc)
-        {
-            dispatch((new CheckFileJob($loc['key'], $loc['value'] . '.csv', $loc['type'],$files,$username,$mapping,$unique)))->delay(5);
+            foreach($locations as $loc)
+            {
+                dispatch((new CheckFileJob($loc['key'], $loc['value'] . '.csv', @$loc['type'] ?? 'manual',$files,$username,$mapping,$unique)))->delay(5);
+            }
+        }catch(\Exception $e){
+
         }
+
     }
 }

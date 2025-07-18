@@ -38,7 +38,8 @@
             });
 
             // Fill the form fields
-            document.querySelector(".address1").value = place.formatted_address || "";
+            document.querySelector(".address").value = street || "";
+            document.querySelector(".address1").value = street || "";
             // document.querySelector(".street").value = street;
             document.querySelector(".city").value = city;
             document.querySelector(".state").value = state;

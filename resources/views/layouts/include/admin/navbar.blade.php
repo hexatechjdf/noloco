@@ -172,6 +172,10 @@
                         <a class="nav-link {{ Route::is('admin.scriptings.index') ? 'active' : '' }}"
                             href="{{ route('admin.scriptings.index') }}">Scriptings</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Route::is('admin.dealers.index') ? 'active' : '' }}"
+                            href="{{ route('admin.dealers.index') }}">Dealers</a>
+                    </li>
                 </ul>
 
 

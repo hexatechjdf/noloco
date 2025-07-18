@@ -188,13 +188,15 @@ class DealsController extends Controller
     {
         $contact_id = $request->contactId;
         $location_id = $request->locationId;
+        $is_noloco = $request->noloco;
         $contact = [];
         try{
             $contact = $this->dealService->getContact($request->locationId,$request->contactId);
         }catch(\Exception $e){
             $contact = [];
         }
-        $vin = @$contact['vin_'];
+        $vin = $request->vin ?? @$contact['vin_'];
+
 
         $r = $request->webb == 'test' ? 'locations.deals.form.contactScriptForm' : 'locations.deals.form.contact';
 

@@ -89,7 +89,6 @@ class MapingController extends Controller
         return view('admin.mapings.deals.form', get_defined_vars());
     }
 
-
     public function getFields($key,$setKey = null,$exclude = [], $contain = null)
     {
         $setKey  = $setKey ?? $key;
@@ -119,7 +118,7 @@ class MapingController extends Controller
     public function formSubmit(Request $request)
     {
         $prefix = $request->prefix;
-        $keyy = $prefix.$request->key . 'Mapping';
+        $keyy = $prefix ? $prefix.$request->key . 'Mapping' : $request->key . 'Mapping';
         $mapping = $request->mapping;
         $type = $request->type;
         $filteredData = [];
@@ -138,7 +137,7 @@ class MapingController extends Controller
 
         save_settings($keyy, $filteredData);
 
-        $route = $request->key == 'customer' ? route('admin.mappings.coborrower.form',$prefix) : ( $request->key == 'deals' ? route('admin.mappings.deals.form') : route('admin.mappings.coborrower.form',$prefix));
+        $route = $request->key == 'customer' ? route('admin.mappings.customer.form',$prefix) : ( $request->key == 'deals' ? route('admin.mappings.deals.form') : route('admin.mappings.coborrower.form',$prefix));
 
         return response()->json(['success' => true, 'route' => $route]);
     }

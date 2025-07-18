@@ -115,23 +115,49 @@
             <div class="col-md-12 mt-2">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="h4">Ghl contact webhook url for workflow</h4>
+                        <h4 class="h4">Webhook urls for workflow</h4>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-danger">
                             <ul>
-                                <li>Add below url to your webhook url.</li>
+                                <li>Add below urls to your webhook url.</li>
                             </ul>
                         </div>
                         <div class="copy-container">
-                            <input type="text" class="form-control code_url"
-                                value="{{ route('ghl.to.noloco') }}"
-                                readonly>
                             <div class="row my-2">
-                                <div class="col-md-12" style="text-align: left !important">
+
+                                 <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">GHL contact webhook</label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('ghl.to.noloco') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Set Dealers webhook</label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('store.dealers') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Credit App Management</label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('credit.app.management') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Update contact by deal status</label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('update.contact.by.deal.status') }}">
+                                    </div>
+                                </div>
+                                {{-- <div class="col-md-12" style="text-align: left !important">
                                     <button type="button" class="btn btn-primary script_code copy_url" data-message="Link Copied"
                                         id="kt_account_profile_details_submit">Copy URL</button>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>

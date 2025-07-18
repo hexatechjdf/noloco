@@ -175,7 +175,6 @@
                                 'is_full' => '12',
                             ])
 
-
                             <div class="card-title mt-3">
                                 <h5 class="mb-0">Document Uploads</h5>
                             </div>
@@ -186,17 +185,16 @@
                                     </div>
                                 </label>
                                 <input class="form-control input-fil-custom" type="file" id="drivers_license"
-                                    name="drivers_licence" accept="image/*,application/pdf" required>
+                                    name="drivers_licence" accept="image/*,application/pdf" >
                             </div>
 
                             <div class="mt-3">
                                 <label class="form-label d-flex">Insurance Card
                                     <div class="insurance_card_box">
                                     </div>
-
                                 </label>
                                 <input class="form-control input-fil-custom" type="file" id="insurance_card"
-                                    name="insurance_card" accept="image/*,application/pdf" required>
+                                    name="insurance_card" accept="image/*,application/pdf" >
                             </div>
                         </div>
 
@@ -217,8 +215,9 @@
 @endsection
 
 @push('script')
+<script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.25/bundle/libphonenumber-js.min.js"></script>
     @include('components.submitForm')
-    @include('locations.components.dealsScript', ['script_type' => 'form'])
+    @include('locations.components.deals Script', ['script_type' => 'form'])
     @include('locations.components.googleaddress')
 
     <script>
@@ -276,7 +275,7 @@
             if (data.length > 0) {
                 data.forEach(function(item) {
                     contactCache[item.id] = item;
-                    html += `<div class="suggestion-item" data-id="${item.id}">${item.name}</div>`;
+                    html += `<div class="suggestion-item" data-first="${item.first_name}" data-id="${item.id}">${item.name}</div>`;
                 });
             } else {
                 html = '<div class="suggestion-item">No Results</div>';
@@ -286,7 +285,8 @@
 
         // Select item
         $(document).on('click', '.suggestion-item', function() {
-            $('#first_name').val($(this).text());
+            let first_name = $(this).data('first');
+            $('#first_name').val(first_name);
             contactId = $(this).data('id');
             $('#contact_suggestions').hide();
 

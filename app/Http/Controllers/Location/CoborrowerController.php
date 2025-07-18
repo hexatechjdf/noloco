@@ -77,6 +77,7 @@ class CoborrowerController extends Controller
 
                 $contacts[] = [
                     'name' => implode(' / ', $nameParts),
+                    'first_name' => @$det->firstName,
                     'id' => $det->id
                 ];
             }

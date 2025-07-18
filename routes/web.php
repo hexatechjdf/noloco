@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ScriptController;
 use App\Http\Controllers\Admin\ScriptingController;
 use App\Http\Controllers\Admin\SourceController;
+use App\Http\Controllers\Admin\DealersController;
 use App\Http\Controllers\Admin\MapingController;
 use App\Http\Controllers\Admin\CsvMappingController;
 use App\Http\Controllers\Admin\CsvOutbondController;
@@ -85,6 +86,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth']], 
         Route::get('/get/form', [SourceController::class, 'getForm'])->name('get.form');
         Route::post('/store/{id?}', [SourceController::class, 'store'])->name('store');
         Route::get('/delete/{id}', [SourceController::class, 'delete'])->name('delete');
+    });
+
+    Route::group(['as' => 'dealers.', 'prefix' => 'dealers'], function () {
+        Route::get('/', [DealersController::class, 'index'])->name('index');
+        Route::get('toggle/status/', [DealersController::class, 'updateStatus'])->name('toggle.status');
+        Route::get('fetch/records', [DealersController::class, 'fetchDealersRecord'])->name('fetch.records');
     });
 
     Route::group(['as' => 'mappings.', 'prefix' => 'mappings'], function () {
