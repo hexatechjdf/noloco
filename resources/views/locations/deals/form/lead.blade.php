@@ -159,7 +159,9 @@
                                         'allowed_types' => ['simple', 'extra'],
                                         'form' => identificationForm(),
                                     ])
-                                    <button class="btn btn-primary mt-3 contact_field_form" type="button">Submit</button>
+                                    <div class="w-100 text-right">
+                                        <button class="btn btn-primary mt-3 contact_field_form" type="button">Submit</button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -217,7 +219,7 @@
 @push('script')
 <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.25/bundle/libphonenumber-js.min.js"></script>
     @include('components.submitForm')
-    @include('locations.components.deals Script', ['script_type' => 'form'])
+    @include('locations.components.dealsScript', ['script_type' => 'form'])
     @include('locations.components.googleaddress')
 
     <script>

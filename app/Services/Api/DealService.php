@@ -301,8 +301,10 @@ class DealService
         $detail = CRM::crmV2Loc('1', $locationId, 'contacts/', 'post',$data);
         if ($detail && property_exists($detail, 'contact')) {
           $id = @$detail->contact->id;
+     
         }
       }catch(\Exception $e){
+      \Log::error($e);
         $id = null;
       }
       return $id;

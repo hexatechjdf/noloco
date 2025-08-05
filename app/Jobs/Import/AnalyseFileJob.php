@@ -50,6 +50,10 @@ class AnalyseFileJob implements ShouldQueue
             $rows = $this->parseCsvFile($destinationPath);
             $key = @$this->mapping[$this->unique];
             $existInventoryIds = $this->inventoryIds($locationId,$inventoryService,$dealService,strtolower($this->unique));
+            if($existInventoryIds = 'no')
+            {
+                return;
+            }
             $rowStocks = [];
             foreach($rows as $fields)
             {
@@ -117,12 +121,13 @@ class AnalyseFileJob implements ShouldQueue
                      $s = $stock['node'];
                      if(@$s[$key] && @$s['id'])
                      {
-                         $stockids[@$s['id']] = @$s[$key];
+                        $stockids[@$s['id']] = @$s[$key];
                      }
                  }
              }
 
          } catch (\Exception $e) {
+             return 'no';
              Log::info($e);
          }
          return $stockids;

@@ -51,15 +51,16 @@ class IndexController extends Controller
 
     public function manageContactFields(Request $request)
     {
-        dd($request->all());
+        
         $locationId = @$request->locationId ?? null;
         $contactId = @$request->contactId ?? null;
-
         $data = true;
-        if(!$contactId)
+        try{
+            if(!$contactId || $contactId == 'null')
         {
-            $req = setCotactFieldsPayload($request);
+            $req = setCotactFieldsPayload($request->all());
             $cont_id =  $this->dealService->createContact($locationId,$req);
+    
             $request->merge(['contactId' => $cont_id]);
             $contactId = $request->contactId;
             $this->uploadFileSetup($request);
@@ -78,8 +79,8 @@ class IndexController extends Controller
                 $contact =  $this->dealService->getContact($locationId,$contactId);
                 $contact =  (object)$contact;
                 // Log::info($contact);
+                $t = $request->is_noloco == 'borrower' ? 'dealscustomerMapping' : 'dealscoborrowerMapping';
                 dispatch((new GetDealsJob($contact,$contactId,$locationId,'dealscustomerMapping')))->delay(5);
-                dispatch((new GetDealsJob($contact,$contactId,$locationId,'dealscoborrowerMapping')))->delay(5);
             }
         }
         if(!$data)
@@ -90,6 +91,11 @@ class IndexController extends Controller
         {
             $this->ghlService->addTag($locationId, $contactId);
         }
+        }catch(\Exception $e)
+        {
+             \Log::error($e);
+        }
+        
         return response()->json(['success' => 'Successfully Updated']);
     }
 

@@ -233,7 +233,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary mt-3 contact_field_form" type="button">Submit</button>
+                                    <div class="w-100 text-right">
+                                        <button class="btn btn-primary mt-3 contact_field_form" type="button">Submit</button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -409,6 +411,7 @@
     {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <script>
+        let sour = `{{ $source }}`;
         let qrTimeout = null;
 
         function clearQRCode() {
@@ -519,6 +522,7 @@
     </script> --}}
     <script>
         $(document).ready(function() {
+            $('.sources').val(sour).trigger('change');
             @if ($vin)
                 $.ajax({
                     type: 'GET',

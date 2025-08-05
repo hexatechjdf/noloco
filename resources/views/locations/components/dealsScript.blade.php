@@ -388,7 +388,7 @@
                         field: fieldName,
                         message: "This field is required"
                     });
-                    $field.addClass("is-invalid");
+                    // $field.addClass("is-invalid");
                     return;
                 }
 
@@ -414,13 +414,13 @@
                         field: fieldName,
                         message: typeError
                     });
-                    $field.addClass("is-invalid");
+                    // $field.addClass("is-invalid");
                 } else {
-                    $field.removeClass("is-invalid").addClass("is-valid");
+                    // $field.removeClass("is-invalid").addClass("is-valid");
                 }
             } else if (value !== "") {
                 // Non-required fields with data get is-valid class
-                $field.removeClass("is-invalid").addClass("is-valid");
+                // $field.removeClass("is-invalid").addClass("is-valid");
             }
         });
 
@@ -481,7 +481,7 @@
         // Change button to loading state
         button.html(`
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Loading...
+            Processing...
         `);
         button.prop('disabled', true);
     }
@@ -532,6 +532,7 @@
                     toastr.success('Updated Successfully');
                 }
                 if (response.error) {
+
                     toastr.error('there is something wrong');
                 }
                 loaderToButton(button, originalContent);

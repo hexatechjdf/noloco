@@ -195,8 +195,8 @@ class DealsController extends Controller
         }catch(\Exception $e){
             $contact = [];
         }
-        $vin = $request->vin ?? @$contact['vin_'];
-
+        $source = @$contact['source'] ?? null;
+        $vin = $is_noloco ? null : @$contact['vin_'];
 
         $r = $request->webb == 'test' ? 'locations.deals.form.contactScriptForm' : 'locations.deals.form.contact';
 

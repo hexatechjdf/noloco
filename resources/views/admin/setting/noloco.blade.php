@@ -89,9 +89,16 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="mb-3">
-                                        <label class="form-label">Update Contact Form </label>
+                                        <label class="form-label">Update Contact Form  (GHL) </label>
                                         <input type="text" class="form-control " readonly
                                             value="{{ route('update.contact.form.setting') }}?locationId={{ braceParser('[[location.id]]') }}&contactId={{ braceParser('[[user.contact_id]]') }} ">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Update Contact Form  (Noloco) </label>
+                                        <input type="text" class="form-control " readonly
+                                            value="{{ route('update.contact.form.setting') }}?locationId={{ braceParser('[[location.id]]') }}&contactId={{ braceParser('[[user.contact_id]]') }}&noloco=borrower ">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
